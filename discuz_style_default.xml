@@ -6,7 +6,7 @@
 		<item id="templateid"><![CDATA[2]]></item>
 		<item id="tplname"><![CDATA[MDUI 手机版]]></item>
 		<item id="directory"><![CDATA[./template/MDUI]]></item>
-		<item id="copyright"><![CDATA[MDUI]]></item>
+		<item id="copyright"><![CDATA[MCNeko（www.mcneko.com）]]></item>
 		<item id="style">
 			<item id="styleimgdir"><![CDATA[template/MDUI/static]]></item>
 			<item id="imgdir"><![CDATA[template/MDUI/static]]></item>
