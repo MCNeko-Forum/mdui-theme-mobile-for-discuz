@@ -1,0 +1,27 @@
+<!-- 记录表情面板：复用日志 / 家园的 comcom 表情与 [em:N:] 协议 -->
+<mdui-dialog id="mdui_doing_smiley" close-on-esc close-on-overlay-click headline="{lang insert_emoticons}">
+	<div id="mdui_doing_smiley_list" class="mdui-wall-faces"></div>
+</mdui-dialog>
+<script>
+(function () {
+	var target;
+	window.mduiDoingSmile = function (field) {
+		target = typeof field === 'string' ? document.getElementById(field) : field;
+		if (target) document.getElementById('mdui_doing_smiley').open = true;
+	};
+
+	var list = document.getElementById('mdui_doing_smiley_list'), html = '';
+	for (var index = 1; index <= 30; index++) {
+		html += '<mdui-button-icon type="button" data-face="[em:' + index + ':]"><img src="{STATICURL}image/smiley/comcom/' + index + '.gif" alt="[em:' + index + ':]" style="width:28px;height:28px;object-fit:contain"></mdui-button-icon>';
+	}
+	list.innerHTML = html;
+	list.addEventListener('click', function (event) {
+		var item = event.target.closest && event.target.closest('[data-face]');
+		if (!item && event.composedPath) item = event.composedPath().find(function (node) { return node && node.matches && node.matches('[data-face]'); });
+		if (!item || !target) return;
+		target.value += item.dataset.face;
+		target.focus();
+		document.getElementById('mdui_doing_smiley').open = false;
+	});
+})();
+</script>

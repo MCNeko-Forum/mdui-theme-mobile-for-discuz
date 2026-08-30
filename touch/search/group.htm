@@ -1,0 +1,11 @@
+<!--{template common/header}-->
+<mdui-top-app-bar><mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon><mdui-top-app-bar-title>{lang search}</mdui-top-app-bar-title></mdui-top-app-bar>
+<div style="padding:1rem 1rem 5.5rem">
+	<form method="post" autocomplete="off" action="search.php?mod=group"><input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="srchfid" value="$srchfid"><!--{subtemplate search/pubsearch}--></form>
+	<!--{if !empty($searchid) && submitcheck('searchsubmit', 1)}-->
+		<!--{if !$srchfid && $grouplist}--><mdui-list style="margin-top:1rem"><mdui-list-subheader>{$_G['setting']['navs'][3]['navname']}</mdui-list-subheader><!--{loop $grouplist $group}--><mdui-list-item href="forum.php?mod=group&fid=$group[fid]" rounded><mdui-avatar slot="icon" src="$group[icon]"></mdui-avatar>$group[name]<span slot="description">{lang member} $group[membernum] · {lang threads} $group[threads]</span></mdui-list-item><!--{/loop}--></mdui-list><!--{/if}-->
+		<mdui-list style="margin-top:1rem"><mdui-list-subheader>{lang search_result}</mdui-list-subheader><!--{if empty($threadlist) && empty($grouplist)}--><mdui-list-item>{lang search_nomatch}</mdui-list-item><!--{else}--><!--{loop $threadlist $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid=$thread[realtid]" rounded>$thread[subject]<span slot="description">$thread[author] · $thread[dateline] · {lang replies} $thread[replies]</span></mdui-list-item><!--{/loop}--><!--{/if}--></mdui-list>
+		<!--{if $multipage}--><div style="margin-top:1rem">$multipage</div><!--{/if}-->
+	<!--{/if}-->
+</div>
+<!--{template common/footer}-->

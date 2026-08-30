@@ -1,0 +1,92 @@
+<div class="mdui-prose">$post['message']</div>
+
+<!--{if $debate['umpirepoint']}-->
+<mdui-card variant="outlined" style="display:block;margin:.75rem 0;padding:1rem">
+	<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+		<mdui-icon name="gavel" style="color:rgb(var(--mdui-color-primary))"></mdui-icon>
+		<strong>
+			<!--{if $debate['winner'] == 1}-->{lang debate_square}{lang debate_winner}
+			<!--{elseif $debate['winner'] == 2}-->{lang debate_opponent}{lang debate_winner}
+			<!--{elseif $debate['winner']}-->{lang debate_draw}
+			<!--{else}-->{lang debate_umpirepoint}
+			<!--{/if}-->
+		</strong>
+	</div>
+	<div style="font-size:.8125rem;opacity:.7">{lang debate_comment_dateline}: $debate['endtime']</div>
+	<div class="mdui-prose" style="margin-top:.5rem;line-height:1.7">{lang debate_umpirepoint}: $debate['umpirepoint']</div>
+	<!--{if $debate['bestdebater']}-->
+	<div style="font-size:.875rem;margin-top:.5rem">{lang debate_bestdebater}: <a href="home.php?mod=space&uid=$debate['bestdebateruid']" style="color:rgb(var(--mdui-color-primary));text-decoration:none">$debate['bestdebater']</a></div>
+	<!--{/if}-->
+</mdui-card>
+<!--{/if}-->
+
+<!--{eval $dbtotal = $debate['affirmvotes'] + $debate['negavotes'];}-->
+<!--{if $dbtotal}-->
+<div style="display:flex;height:.5rem;border-radius:625rem;overflow:hidden;margin:.75rem 0 .25rem;background:rgb(var(--mdui-color-surface-container-highest))">
+	<div style="width:<!--{eval echo round($debate['affirmvotes'] * 100 / $dbtotal, 2);}-->%;background:rgb(var(--mdui-color-primary))"></div>
+	<div style="flex:1;background:rgb(var(--mdui-color-tertiary))"></div>
+</div>
+<!--{/if}-->
+
+<!--{eval $dbstands = array(
+	1 => array('point' => $debate['affirmpoint'], 'votes' => $debate['affirmvotes'], 'debaters' => $debate['affirmdebaters'], 'avatars' => $debate['affirmavatars'], 'color' => 'primary'),
+	2 => array('point' => $debate['negapoint'], 'votes' => $debate['negavotes'], 'debaters' => $debate['negadebaters'], 'avatars' => $debate['negaavatars'], 'color' => 'tertiary'),
+);}-->
+<!--{loop $dbstands $stand $side}-->
+<mdui-card variant="filled" style="display:block;margin:.75rem 0;padding:1rem">
+	<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
+		<strong style="color:rgb(var(--mdui-color-$side['color']))"><!--{if $stand == 1}-->{lang debate_square_point}<!--{else}-->{lang debate_opponent_point}<!--{/if}--></strong>
+		<mdui-chip style="--mdui-comp-chip-height:24px;font-size:.75rem">$side['votes'] {lang debate_poll}</mdui-chip>
+		<span style="font-size:.75rem;opacity:.7;min-width:0;overflow:hidden;text-overflow:ellipsis">{lang debater}: $side['debaters']</span>
+	</div>
+
+	<div class="mdui-prose" style="line-height:1.7">$side['point']</div>
+
+	<!--{if $side['avatars']}-->
+	<div style="display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.5rem">
+		<!--{loop $side['avatars'] $dbavatar}-->
+		<a href="home.php?mod=space&uid=$dbavatar['authorid']" title="$dbavatar['author']"><mdui-avatar src="<!--{avatar($dbavatar['authorid'], 'small', true)}-->" style="width:1.75rem;height:1.75rem"></mdui-avatar></a>
+		<!--{/loop}-->
+	</div>
+	<!--{/if}-->
+
+	<!--{if !$_G['forum_thread']['is_archived']}-->
+	<div style="display:flex;gap:.5rem;margin-top:.75rem">
+		<mdui-button variant="tonal" style="flex:1" id="debatevote_$stand">{lang debate_support}</mdui-button>
+		<mdui-button variant="outlined" style="flex:1" href="forum.php?mod=post&action=reply&fid=$_G['fid']&tid=$_G['tid']&stand=$stand{if $_GET['from']}&from=$_GET['from']{/if}">{lang debate_join}</mdui-button>
+	</div>
+	<!--{/if}-->
+</mdui-card>
+<!--{/loop}-->
+
+<!--{if $debate['endtime']}-->
+<div style="font-size:.8125rem;opacity:.7;margin:.5rem 0">
+	{lang endtime}: $debate['endtime']
+	<!--{if $debate['umpire']}--> · {lang debate_umpire}: $debate['umpire']<!--{/if}-->
+</div>
+<!--{/if}-->
+
+<!--{if $debate['umpire'] && $_G['username'] && $debate['umpire'] == $_G['member']['username']}-->
+	<!--{if $debate['remaintime'] && !$debate['umpirepoint']}-->
+	<mdui-button variant="tonal" full-width href="forum.php?mod=misc&action=debateumpire&tid=$_G['tid']&pid=$post['pid']{if $_GET['from']}&from=$_GET['from']{/if}&mobile=2">{lang debate_umpire_end}</mdui-button>
+	<!--{elseif TIMESTAMP - $debate['dbendtime'] < 3600}-->
+	<mdui-button variant="tonal" full-width href="forum.php?mod=misc&action=debateumpire&tid=$_G['tid']&pid=$post['pid']{if $_GET['from']}&from=$_GET['from']{/if}&mobile=2">{lang debate_umpirepoint_edit}</mdui-button>
+	<!--{/if}-->
+<!--{/if}-->
+
+<!--{if !$_G['forum_thread']['is_archived']}-->
+<script>
+// 支持走 ajax，投完就地更新票数，不用整页刷新
+(function () {
+	[1, 2].forEach(function (stand) {
+		var btn = document.getElementById('debatevote_' + stand);
+		if (!btn) return;
+		btn.addEventListener('click', function () {
+			mduiGet('forum.php?mod=misc&action=debatevote&tid={$_G['tid']}&stand=' + stand, function () {
+				location.reload();
+			});
+		});
+	});
+})();
+</script>
+<!--{/if}-->

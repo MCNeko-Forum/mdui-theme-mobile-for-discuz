@@ -1,0 +1,938 @@
+/* MDUI 主题补充样式：只处理 Discuz 直出 HTML，组件样式由 mdui.css 负责 */
+
+body {
+	margin: 0;
+	background: rgb(var(--mdui-color-background));
+	color: rgb(var(--mdui-color-on-background));
+	font-family: var(--mdui-typescale-body-medium-font);
+}
+
+/* 帖子正文：Discuz 输出的 HTML 需要限宽和图片自适应 */
+.mdui-prose img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+}
+
+.mdui-prose a {
+	color: rgb(var(--mdui-color-primary));
+}
+
+/* 帖子编辑记录统一使用居中的灰色提示文字。 */
+.mdui-prose i.pstatus {
+	display: block;
+	margin: .25rem 0;
+	text-align: center;
+	font-size: .75rem;
+	font-style: normal;
+	line-height: 1.5;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+
+.mdui-prose blockquote,
+.mdui-prose .quote {
+	margin: .75rem 0;
+	padding: .75rem 1rem;
+	border-left: 4px solid rgb(var(--mdui-color-primary));
+	background: rgb(var(--mdui-color-surface-container-high));
+	border-radius: 4px;
+}
+
+.mdui-prose pre {
+	overflow-x: auto;
+	padding: .75rem;
+	background: rgb(var(--mdui-color-surface-container-high));
+	border-radius: 4px;
+}
+
+/* 分页：Discuz 输出 <div class="pg"><a>...</a></div> */
+.pg a,
+.pg strong {
+	display: inline-block;
+	min-width: 2rem;
+	margin: 0 .125rem;
+	padding: .375rem .5rem;
+	border-radius: 999px;
+	text-align: center;
+	text-decoration: none;
+	color: rgb(var(--mdui-color-on-surface));
+}
+
+.pg strong {
+	background: rgb(var(--mdui-color-primary));
+	color: rgb(var(--mdui-color-on-primary));
+}
+
+/* 验证码等 Discuz 直出表单元素 */
+.px {
+	width: 100%;
+	box-sizing: border-box;
+	padding: .75rem;
+	border: 1px solid rgb(var(--mdui-color-outline));
+	border-radius: 4px;
+	background: transparent;
+	color: rgb(var(--mdui-color-on-surface));
+	font-size: 1rem;
+}
+
+/* 顶部应用栏固定后需要内容让位 */
+mdui-top-app-bar {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+}
+
+/* ---- default 回落兼容层 ----
+   MDUI 里没有的子模板（seccheck、viewthread_poll/trade/reward/activity/debate、
+   showattach 输出等）会回落到 template/default/touch/，带的是 default 的类名。
+   下面只做「可用且不违和」的最小适配，不追求像素级还原。
+   ponytail: 类名硬编码，default 模板改类名时这里会失效；上限是视觉降级，功能不受影响。 */
+
+/* 正文容器等同 .mdui-prose */
+.postmessage img,
+.mtxt img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+}
+
+.postmessage a,
+.poll a,
+.trade_box a,
+.debate a,
+.reward a,
+.activity a {
+	color: rgb(var(--mdui-color-primary));
+}
+
+/* 卡片型区块 */
+.poll,
+.trade_box,
+.debate_box,
+.reward,
+.activity {
+	margin: .75rem 0;
+	padding: 1rem;
+	border-radius: 12px;
+	background: rgb(var(--mdui-color-surface-container));
+}
+
+/* 排版工具类 */
+.cl::after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
+.y {
+	float: right;
+}
+
+.xi1 {
+	color: rgb(var(--mdui-color-error));
+}
+
+.xg1,
+.xg2,
+.xs3 {
+	opacity: .7;
+	font-size: .875rem;
+}
+
+.mtit,
+.mtxt {
+	font-weight: 500;
+}
+
+.mx {
+	color: rgb(var(--mdui-color-error));
+}
+
+.locked,
+.poll_txt {
+	padding: .5rem 0;
+	opacity: .8;
+	font-size: .875rem;
+}
+
+.showhide {
+	display: block !important;
+	box-sizing: border-box;
+	width: 100%;
+	margin: 1rem 0;
+	padding: 1rem !important;
+	border: 2px solid #d97706 !important;
+	border-radius: .75rem;
+	background: #fff7ed !important;
+	color: #7c2d12 !important;
+	box-shadow: 0 2px 8px rgba(124, 45, 18, .16);
+	overflow: hidden;
+}
+
+.showhide h4 {
+	margin: 0 0 .65rem !important;
+	color: #b45309 !important;
+	font-size: .95rem;
+	font-weight: 700;
+}
+
+.showhide a {
+	color: #92400e !important;
+	font-weight: 600;
+}
+
+hr.l {
+	border: none;
+	border-top: 1px solid rgb(var(--mdui-color-outline-variant));
+	margin: .5rem 0;
+}
+
+/* seccheck 的 <li> 没有 <ul> 父级 */
+li.sec_code {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.flex-box {
+	display: flex;
+	align-items: center;
+	gap: .5rem;
+	flex-wrap: wrap;
+}
+
+.flex {
+	flex: 1;
+}
+
+/* 表单元素：Discuz 直出的 input / textarea / button */
+.txt,
+textarea.px {
+	width: 100%;
+	box-sizing: border-box;
+	padding: .75rem;
+	border: 1px solid rgb(var(--mdui-color-outline));
+	border-radius: 4px;
+	background: transparent;
+	color: rgb(var(--mdui-color-on-surface));
+	font: inherit;
+}
+
+.pn,
+.pns,
+.btn_pn,
+.btn_pn_orange,
+.formdialog,
+.button {
+	display: inline-block;
+	padding: .5rem 1.25rem;
+	border: none;
+	border-radius: 999px;
+	background: rgb(var(--mdui-color-primary));
+	color: rgb(var(--mdui-color-on-primary));
+	font: inherit;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.mbox {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.mbox th,
+.mbox td {
+	padding: .5rem;
+	border-bottom: 1px solid rgb(var(--mdui-color-outline-variant));
+	text-align: left;
+	font-size: .875rem;
+}
+
+/* 首页（forum/discuz）：统计条、公告、版块网格 */
+.idx_stat {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: .125rem;
+	border-right: 1px solid rgb(var(--mdui-color-outline-variant));
+}
+
+.idx_stat:last-child {
+	border-right: 0;
+}
+
+.idx_stat mdui-icon {
+	font-size: 1.25rem;
+	color: rgb(var(--mdui-color-primary));
+}
+
+.idx_stat b {
+	font-size: 1rem;
+}
+
+.idx_stat span {
+	font-size: .75rem;
+	opacity: .7;
+}
+
+.idx_announce {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: .875rem;
+}
+
+.idx_announce li {
+	padding: .25rem 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.idx_announce a {
+	color: rgb(var(--mdui-color-on-surface));
+	text-decoration: none;
+}
+
+.idx_forums {
+	display: grid;
+	gap: .25rem;
+	padding: 0 .5rem .25rem;
+}
+
+.idx_forum {
+	display: flex;
+	align-items: center;
+	gap: .625rem;
+	min-width: 0;
+	padding: .5rem;
+	border-radius: .75rem;
+	color: rgb(var(--mdui-color-on-surface));
+	text-decoration: none;
+}
+
+.idx_forum:active {
+	background: rgba(var(--mdui-color-on-surface), .08);
+}
+
+.idx_forum_ico {
+	flex: 0 0 auto;
+	padding: .5rem;
+	border-radius: 50%;
+	background: rgb(var(--mdui-color-primary-container));
+	color: rgb(var(--mdui-color-on-primary-container));
+}
+
+/* $forum['icon'] 是后台配置的 <img>，尺寸不可控，统一裁进圆形 */
+.idx_forum_pic,
+.idx_forum_pic img {
+	display: block;
+	width: 2.5rem !important;
+	height: 2.5rem !important;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+/* ahome_horn 小喇叭：插件输出保留原字段，主题统一成 MDUI 卡片内容 */
+#hornbox {
+	margin: .75rem 1rem;
+	padding: 0;
+	border: 1px solid rgb(var(--mdui-color-outline-variant));
+	border-radius: .75rem;
+	background: rgb(var(--mdui-color-surface-container));
+	overflow: hidden;
+}
+#hornbox .bm_h,
+#hornbox .subforumshow > div:first-child {
+	padding: .75rem 1rem;
+	background: rgb(var(--mdui-color-surface-container-high));
+}
+#hornbox h2 { margin: 0; font-size: 1rem; font-weight: 600; }
+#hornbox #boxmain,
+#hornbox .sub-forum {
+	box-sizing: border-box;
+	padding: .5rem 1rem !important;
+	background: transparent;
+}
+#hornbox .tsmini_horn_content { width: 100%; border-collapse: collapse; }
+#hornbox .tsmini_horn_content tr { border-bottom: 1px solid rgb(var(--mdui-color-outline-variant)); }
+#hornbox .tsmini_horn_content tr:last-child { border-bottom: 0; }
+#hornbox .tsmini_horn_content td { padding: .625rem .25rem; vertical-align: top; }
+#hornbox .tsmini_horn_avatar,
+#hornbox .tsmini_horn_avatar img { width: 2rem; height: 2rem; border-radius: 50%; object-fit: cover; }
+#hornbox .tsmini_horn_content a { color: rgb(var(--mdui-color-primary)); text-decoration: none; }
+#hornbox #hornaddbtn { color: rgb(var(--mdui-color-primary)); cursor: pointer; }
+
+
+
+.idx_forum_txt {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.idx_forum_name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: .9375rem;
+}
+
+.idx_forum_name em {
+	margin-left: .25rem;
+	font-style: normal;
+	font-size: .75rem;
+	color: rgb(var(--mdui-color-error));
+}
+
+.idx_forum_desc {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: .75rem;
+	opacity: .6;
+}
+
+.idx_forum_num {
+	display: flex;
+	align-items: center;
+	gap: .1875rem;
+	font-size: .75rem;
+	opacity: .6;
+}
+
+.idx_forum_num mdui-icon {
+	font-size: .875rem;
+}
+
+.idx_forum_num mdui-icon:nth-of-type(2) {
+	margin-left: .375rem;
+}
+
+/* 横向滚动的选项卡：文字不换行，收窄屏幕靠左右滑动而不是挤压换行。
+   mdui-tabs 容器自带 overflow-x:auto，只需阻止 tab 收缩并让 label 单行 */
+mdui-tab {
+	flex-shrink: 0;
+}
+
+mdui-tab::part(label) {
+	white-space: nowrap;
+}
+
+mdui-tab[data-href] {
+	cursor: pointer;
+}
+
+/* spacecp 编辑资料的字段行（htmls[] 由 profile_setting() 直出，只能包外壳） */
+.spacecp_row {
+	padding: .75rem 0;
+	border-bottom: 1px solid rgb(var(--mdui-color-outline-variant));
+}
+
+.spacecp_label {
+	margin-bottom: .375rem;
+	font-size: .875rem;
+	opacity: .7;
+}
+
+.spacecp_label.rq,
+.rq {
+	color: rgb(var(--mdui-color-error));
+	opacity: 1;
+}
+
+.spacecp_field {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem;
+	align-items: center;
+}
+
+.spacecp_privacy {
+	margin-top: .5rem;
+}
+
+/* profile_setting() 输出的表单控件类名：px pt ps pc pr pf lb */
+.ps,
+.pf,
+input[type=text].px,
+input[type=password].px,
+textarea.pt {
+	box-sizing: border-box;
+	padding: .625rem .75rem;
+	border: 1px solid rgb(var(--mdui-color-outline));
+	border-radius: 4px;
+	background: rgb(var(--mdui-color-surface));
+	color: rgb(var(--mdui-color-on-surface));
+	font: inherit;
+}
+
+input[type=text].px,
+input[type=password].px,
+textarea.pt {
+	width: 100%;
+}
+
+.pc,
+.pr {
+	accent-color: rgb(var(--mdui-color-primary));
+}
+
+.lb,
+.pcl label {
+	display: inline-flex;
+	align-items: center;
+	gap: .25rem;
+	margin-right: .75rem;
+	font-size: .9375rem;
+}
+
+/* 回落的 default spacecp 表单表格（privacy / credit / usergroup 等） */
+.tfm {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.tfm th {
+	display: block;
+	padding: .75rem 0 .375rem;
+	font-size: .875rem;
+	font-weight: 400;
+	text-align: left;
+	opacity: .7;
+}
+
+.tfm td {
+	display: block;
+	padding: 0 0 .75rem;
+	border-bottom: 1px solid rgb(var(--mdui-color-outline-variant));
+}
+
+.tfm caption {
+	text-align: left;
+}
+
+.tbmu,
+.tbms,
+p.d {
+	font-size: .875rem;
+	opacity: .75;
+}
+
+/* 门户首页（portal/index）：快捷导航、幻灯片、头条、榜单序号、信息流 */
+.pt_nav {
+	display: flex;
+	gap: .5rem;
+	overflow-x: auto;
+	padding: .75rem 1rem;
+	white-space: nowrap;
+	scrollbar-width: none;
+}
+
+.pt_nav::-webkit-scrollbar {
+	display: none;
+}
+
+.pt_nav ul,
+.pt_nav ol {
+	display: flex;
+	gap: .5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pt_nav li {
+	flex: 0 0 auto;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pt_nav a {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	min-height: 2rem;
+	padding: 0 .875rem;
+	border-radius: 999px;
+	background: rgb(var(--mdui-color-secondary-container));
+	color: rgb(var(--mdui-color-on-secondary-container));
+	font-size: .875rem;
+	text-decoration: none;
+}
+
+/* 宫格入口：DIY 自定义 HTML 的链接按数量平分，不受标题长短影响。 */
+.pt_entry {
+	display: flex;
+	gap: .5rem;
+	margin: .75rem 1rem;
+}
+
+.pt_entry a {
+	display: block;
+	min-width: 0;
+	flex: 1 1 0;
+	padding: .75rem .625rem;
+	border-radius: .75rem;
+	background: rgb(var(--mdui-color-secondary-container));
+	color: rgb(var(--mdui-color-on-secondary-container));
+	text-align: center;
+	text-decoration: none;
+}
+
+.pt_entry h2,
+.pt_entry span {
+	display: block;
+	margin: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.pt_entry h2 {
+	font-size: .9375rem;
+	font-weight: 600;
+	line-height: 1.5;
+}
+
+.pt_entry span {
+	margin-top: .125rem;
+	color: rgb(var(--mdui-color-on-secondary-container));
+	font-size: .75rem;
+	opacity: .75;
+}
+
+/* 幻灯片用 scroll-snap 做吸附翻页，不引 Swiper */
+.pt_slide {
+	display: flex;
+	gap: .625rem;
+	padding: .75rem 1rem;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scrollbar-width: none;
+}
+
+.pt_slide::-webkit-scrollbar {
+	display: none;
+}
+
+.pt_slide_item {
+	position: relative;
+	flex: 0 0 100%;
+	height: 10.5rem;
+	scroll-snap-align: center;
+	border-radius: 1rem;
+	background: rgb(var(--mdui-color-surface-variant)) center/cover no-repeat;
+	overflow: hidden;
+}
+
+.pt_slide_tit {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 1.5rem .875rem .625rem;
+	background: linear-gradient(transparent, rgba(0, 0, 0, .65));
+	color: #fff;
+	font-size: .9375rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.pt_headline {
+	align-items: center;
+	gap: .5rem;
+}
+
+/* 头条多条时纵向裁成一行高度，只露第一条（无 JS 轮播，避免抖动） */
+.pt_headline_box {
+	flex: 1;
+	min-width: 0;
+	max-height: 1.375rem;
+	overflow: hidden;
+}
+
+.pt_headline_box a {
+	display: block;
+	line-height: 1.375rem;
+	color: rgb(var(--mdui-color-on-surface));
+	text-decoration: none;
+	font-size: .875rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.pt_rank {
+	width: 1.25rem;
+	line-height: 1.25rem;
+	border-radius: .375rem;
+	background: rgba(var(--mdui-color-on-surface), .08);
+	color: rgb(var(--mdui-color-on-surface-variant));
+	font-size: .75rem;
+	text-align: center;
+}
+
+.pt_rank_top {
+	background: rgb(var(--mdui-color-error));
+	color: rgb(var(--mdui-color-on-error));
+}
+
+.pt_feed_title {
+	display: block;
+	color: rgb(var(--mdui-color-on-surface));
+	text-decoration: none;
+	font-size: .9375rem;
+	line-height: 1.45;
+}
+
+.pt_feed_pic1 {
+	display: block;
+	height: 9rem;
+	margin-top: .5rem;
+	border-radius: .75rem;
+	background: rgb(var(--mdui-color-surface-variant)) center/cover no-repeat;
+}
+
+.pt_feed_pics {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: .25rem;
+	margin-top: .5rem;
+}
+
+.pt_feed_pics > div {
+	height: 6rem;
+	border-radius: .5rem;
+	background: rgb(var(--mdui-color-surface-variant)) center/cover no-repeat;
+}
+
+.pt_feed_num {
+	display: flex;
+	align-items: center;
+	gap: .1875rem;
+	margin-top: .5rem;
+	font-size: .75rem;
+	opacity: .6;
+}
+
+.pt_feed_num mdui-icon {
+	font-size: .875rem;
+}
+
+.pt_feed_num mdui-icon:nth-of-type(2) {
+	margin-left: .625rem;
+}
+
+/* 日志详情沿用帖子卡片的留白和排版，避免组件在窄屏被挤压。 */
+.mdui-blog-view { padding: 1rem 1rem 5.5rem; }
+.mdui-blog-headline { margin: 0 0 .75rem; }
+.mdui-blog-headline h1 { margin: 0; color: rgb(var(--mdui-color-on-surface)); font-size: 1.375rem; font-weight: 500; line-height: 1.4; overflow-wrap: anywhere; }
+.mdui-blog-post, .mdui-blog-comment { display: block; box-sizing: border-box; margin: 0; padding: 1rem; }
+.mdui-blog-author { display: flex; align-items: center; gap: .75rem; min-width: 0; margin-bottom: .75rem; }
+.mdui-blog-author a { color: rgb(var(--mdui-color-on-surface)); font-weight: 500; text-decoration: none; }
+.mdui-blog-author div div { color: rgb(var(--mdui-color-on-surface-variant)); font-size: .8125rem; margin-top: .125rem; }
+.mdui-blog-stats { color: rgb(var(--mdui-color-on-surface-variant)); font-size: .75rem; text-align: right; white-space: nowrap; }
+.mdui-blog-message, .mdui-blog-comment-message { color: rgb(var(--mdui-color-on-surface)); line-height: 1.7; overflow-wrap: anywhere; }
+.mdui-blog-actions { display: flex; flex-wrap: wrap; gap: .25rem; margin: .5rem 0 1.25rem; }
+.mdui-blog-comments { display: grid; gap: .75rem; }
+.mdui-blog-comment-heading { color: rgb(var(--mdui-color-on-surface)); font-size: 1.125rem; font-weight: 500; margin-top: .25rem; }
+.mdui-blog-comment-form { margin-top: 1rem; }
+.mdui-blog-pages,
+.mdui-space-pages,
+.mdui-thread-pages {
+	margin-top: 1rem;
+	text-align: center;
+}
+
+.mdui-thread-pages a,
+.mdui-thread-pages strong {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.5rem;
+	min-height: 2.5rem;
+	box-sizing: border-box;
+	margin: 0 .125rem;
+	padding: .375rem .625rem;
+	border-radius: 999px;
+	color: rgb(var(--mdui-color-on-surface));
+	background: rgb(var(--mdui-color-surface-container));
+	text-decoration: none;
+	font-weight: 400;
+}
+
+.mdui-thread-pages strong {
+	color: rgb(var(--mdui-color-on-primary));
+	background: rgb(var(--mdui-color-primary));
+}
+
+.mdui-thread-pages mdui-select {
+	display: inline-block;
+	width: 8rem;
+	max-width: 100%;
+	vertical-align: middle;
+}
+
+.mdui-thread-pages #select_a > span {
+	display: none !important;
+}
+
+.mdui-thread-pages mdui-menu {
+	max-height: 18rem;
+	overflow-y: auto;
+}
+
+/* Discuz 异步返回原生验证码输入框，按 MDUI 文本框视觉统一。 */
+.mdui-seccheck { margin-top: 1rem; }
+.mdui-seccheck-content { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-height: 2.5rem; }
+.mdui-seccheck input[id^="seccodeverify_"], .mdui-seccheck input[id^="secqaaverify_"] {
+	appearance: none;
+	background: rgb(var(--mdui-color-surface-container-high)) !important;
+	border: 1px solid rgb(var(--mdui-color-outline));
+	border-radius: .25rem;
+	box-sizing: border-box;
+	color: rgb(var(--mdui-color-on-surface));
+	font: inherit;
+	min-height: 2.5rem;
+	outline: none;
+	padding: 0 .75rem;
+}
+.mdui-seccheck input[id^="seccodeverify_"]:focus, .mdui-seccheck input[id^="secqaaverify_"]:focus { border: 2px solid rgb(var(--mdui-color-primary)); padding: 0 calc(.75rem - 1px); }
+.mdui-seccheck .seccodeimg { border: 1px solid rgb(var(--mdui-color-outline)); border-radius: .25rem; cursor: pointer; max-width: 100%; }
+.mdui-seccheck .xi2 { color: rgb(var(--mdui-color-primary)); }
+
+/* 日志列表使用独立卡片流，不能依赖 MDUI 自定义元素的默认内联布局。 */
+.mdui-blog-chips { display: flex; gap: .5rem; overflow-x: auto; padding: .75rem 1rem; white-space: nowrap; }
+.mdui-blog-chips mdui-chip { flex: 0 0 auto; }
+.mdui-blog-list { display: grid; gap: .75rem; padding: 0 1rem 1rem; }
+.mdui-blog-card { display: block; box-sizing: border-box; min-width: 0; padding: 1rem; }
+.mdui-blog-head { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.mdui-blog-user { flex: 1; min-width: 0; line-height: 1.4; }
+.mdui-blog-user a { color: rgb(var(--mdui-color-primary)); font-weight: 600; text-decoration: none; }
+.mdui-blog-user div { color: rgb(var(--mdui-color-on-surface-variant)); font-size: .8125rem; }
+.mdui-blog-content { display: block; color: inherit; margin-top: .875rem; min-width: 0; text-decoration: none; }
+.mdui-blog-labels { display: flex; flex-wrap: wrap; gap: .375rem; margin-bottom: .5rem; }
+.mdui-blog-labels:empty { display: none; }
+.mdui-blog-labels mdui-chip { --mdui-comp-assist-chip-container-height: 1.5rem; font-size: .75rem; }
+.mdui-blog-title { color: rgb(var(--mdui-color-on-surface)); font-size: 1rem; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.mdui-blog-summary { color: rgb(var(--mdui-color-on-surface-variant)); display: -webkit-box; font-size: .875rem; line-height: 1.55; margin-top: .375rem; overflow: hidden; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.mdui-blog-empty { display: block; margin: 0; padding: 1rem; text-align: center; color: rgb(var(--mdui-color-on-surface-variant)); }
+
+/* 短消息气泡 */
+.mdui-pm-messages { display: grid; gap: .875rem; }
+.mdui-pm-message { display: flex; align-items: flex-start; gap: .5rem; }
+.mdui-pm-message-self { justify-content: flex-end; }
+.mdui-pm-message > div { max-width: calc(100% - 3rem); }
+.mdui-pm-bubble { display: block; padding: .625rem .875rem; overflow-wrap: anywhere; }
+.mdui-pm-message-self .mdui-pm-bubble { background: rgb(var(--mdui-color-primary-container)); color: rgb(var(--mdui-color-on-primary-container)); }
+.mdui-pm-time { margin-top: .25rem; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .75rem; }
+.mdui-pm-message-self .mdui-pm-time { text-align: right; }
+.mdui-notice-list {
+	display: grid;
+	gap: .75rem;
+	padding: 0;
+}
+
+.mdui-notice-item {
+	background: rgb(var(--mdui-color-surface-container-high));
+	border-radius: .75rem;
+	padding: .25rem;
+}
+
+.mdui-notice-content { overflow-wrap: anywhere; }
+.mdui-notice-content a { color: inherit; text-decoration: none; }
+
+/* 个人空间资料页：统一承载空间菜单、资料主体和统计卡片。 */
+.mdui-space-profile { padding: 0 1rem 1rem; }
+.mdui-space-hero { display: flex; align-items: center; gap: .875rem; padding: 1.25rem 0; }
+.mdui-space-hero mdui-avatar { width: 4rem; height: 4rem; flex: 0 0 auto; }
+.mdui-space-identity { min-width: 0; }
+.mdui-space-name { font-size: 1.25rem; font-weight: 600; overflow-wrap: anywhere; }
+.mdui-space-meta { margin-top: .25rem; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .8125rem; }
+.mdui-space-shortcuts, .mdui-space-nav { padding: 0; margin-bottom: .75rem; }
+.mdui-space-card { display: block; box-sizing: border-box; margin-bottom: .75rem; padding: 1rem; }
+.mdui-space-credits { margin-bottom: .75rem; padding: .875rem 1rem; border-radius: .75rem; background: rgb(var(--mdui-color-surface-container)); }
+.mdui-space-stats { display: flex; gap: .5rem; overflow-x: auto; }
+.mdui-space-stats > div { flex: 1; min-width: 4.5rem; text-align: center; }
+.mdui-space-credits [data-href] { cursor: pointer; }
+.mdui-space-tabs { display: block; margin: 0 -1rem 1rem; }
+.mdui-space-stats b, .mdui-space-stats span { display: block; }
+.mdui-space-stats b { font-size: 1.125rem; }
+.mdui-space-stats span { margin-top: .25rem; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .75rem; }
+.mdui-space-section { margin-top: 1rem; }
+.mdui-space-section-title { display: flex; align-items: center; justify-content: space-between; margin: 0 0 .5rem; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .875rem; }
+.mdui-space-details { padding: .5rem 1rem; }
+.mdui-space-details > div { display: flex; gap: 1rem; padding: .5rem 0; border-bottom: 1px solid rgb(var(--mdui-color-outline-variant)); font-size: .9375rem; }
+.mdui-space-details > div:last-child { border-bottom: 0; }
+.mdui-space-details span { flex: 0 0 6em; color: rgb(var(--mdui-color-on-surface-variant)); }
+.mdui-space-details b { min-width: 0; font-weight: 400; overflow-wrap: anywhere; }
+.mdui-space-medals, .mdui-space-badges, .mdui-space-links { display: flex; flex-wrap: wrap; gap: .5rem; }
+.mdui-space-medals img, .mdui-space-badges img { max-width: 3rem; max-height: 3rem; vertical-align: middle; }
+.mdui-space-badges span { display: inline-flex; align-items: center; gap: .25rem; padding: .375rem .625rem; border-radius: 999px; background: rgb(var(--mdui-color-secondary-container)); color: rgb(var(--mdui-color-on-secondary-container)); font-size: .8125rem; }
+.mdui-space-links a { padding: .375rem .625rem; border-radius: 999px; background: rgb(var(--mdui-color-secondary-container)); color: rgb(var(--mdui-color-on-secondary-container)); text-decoration: none; font-size: .8125rem; }
+.mdui-space-action { margin: .75rem 0; }
+
+/* “我的”页独立于普通空间资料页，采用概览、宫格和设置列表三段布局。 */
+.mdui-mycenter-bar { background: rgb(var(--mdui-color-primary)); color: rgb(var(--mdui-color-on-primary)); }
+.mdui-mycenter { padding: 1rem 1rem 5.5rem; background: rgb(var(--mdui-color-surface-container-low)); }
+.mdui-mycenter-profile,
+.mdui-mycenter-grid,
+.mdui-mycenter-list { box-sizing: border-box; margin-bottom: 1rem; border-radius: 1rem; background: rgb(var(--mdui-color-surface)); }
+.mdui-mycenter-profile { display: flex; align-items: center; gap: .75rem; padding: 1rem; }
+.mdui-mycenter-profile mdui-avatar { width: 4.5rem; height: 4.5rem; flex: 0 0 auto; }
+.mdui-mycenter-user { min-width: 0; flex: 1; }
+.mdui-mycenter-user > div { font-size: 1.125rem; font-weight: 600; overflow-wrap: anywhere; }
+.mdui-mycenter-user mdui-chip { margin-left: .25rem; --mdui-comp-chip-height: 1.5rem; font-size: .75rem; }
+.mdui-mycenter-user > div:nth-child(2),
+.mdui-mycenter-count span { display: block; margin-top: .25rem; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .75rem; }
+.mdui-mycenter-count { min-width: 2.75rem; text-align: center; }
+.mdui-mycenter-count b { display: block; color: rgb(var(--mdui-color-primary)); font-size: 1.25rem; }
+.mdui-mycenter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; padding: .75rem .5rem; }
+.mdui-mycenter-grid > div { display: grid; justify-items: center; gap: .25rem; min-width: 0; color: rgb(var(--mdui-color-primary)); cursor: pointer; font-size: .8125rem; text-align: center; }
+.mdui-mycenter-grid mdui-button-icon { color: inherit; }
+.mdui-mycenter-grid > div > span { overflow-wrap: anywhere; }
+.mdui-mycenter-list { display: block; padding: .5rem; }
+.mdui-mycenter-list mdui-list-item { --mdui-comp-list-item-container-color: transparent; }
+.mdui-mycenter-list mdui-list-item + mdui-list-item { border-top: 1px solid rgb(var(--mdui-color-outline-variant)); }
+
+.mdui-credit-rules { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+.mdui-credit-rules th,
+.mdui-credit-rules td { padding: .75rem; border-bottom: 1px solid rgb(var(--mdui-color-outline-variant)); }
+.mdui-credit-rules th { color: rgb(var(--mdui-color-on-surface-variant)); font-size: .8125rem; font-weight: 500; }
+
+.mdui-credit-log-list { display: grid; gap: .75rem; padding: 0; }
+.mdui-credit-log-item { --mdui-comp-list-item-container-color: rgb(var(--mdui-color-surface-container-high)); border-radius: .75rem; }
+.mdui-credit-log-title a { color: inherit; text-decoration: none; }
+.mdui-credit-log-description { display: flex; justify-content: space-between; gap: .75rem; overflow-wrap: anywhere; }
+.mdui-credit-log-description > span { min-width: 0; }
+.mdui-credit-log-description time { flex: 0 0 auto; white-space: nowrap; font-size: .75rem; }
+.mdui-credit-log-amount { color: rgb(var(--mdui-color-primary)); font-weight: 600; white-space: nowrap; }
+.mdui-credit-exchange-card { display: block; padding: 1rem; }
+.mdui-credit-exchange-card form { display: grid; gap: .875rem; }
+.mdui-credit-exchange-title { margin-bottom: 1rem; font-size: 1.125rem; font-weight: 600; }
+.mdui-credit-field-label { display: block; margin-bottom: -.5rem; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .8125rem; }
+.mdui-credit-select { width: 100%; box-sizing: border-box; min-height: 3.5rem; padding: 0 .75rem; border: 1px solid rgb(var(--mdui-color-outline)); border-radius: .25rem; background: transparent; color: inherit; font: inherit; }
+.mdui-credit-exchange-hint { color: rgb(var(--mdui-color-on-surface-variant)); font-size: .8125rem; line-height: 1.5; }
+
+.mdui-center-list { display: grid; gap: .75rem; padding: 0; }
+.mdui-center-item { --mdui-comp-list-item-container-color: rgb(var(--mdui-color-surface-container-high)); }
+.mdui-center-title { color: inherit; font-weight: 600; text-decoration: none; }
+.mdui-center-detail { display: block; padding: 1rem; }
+.mdui-center-detail-section { display: grid; gap: .5rem; margin-top: 1rem; line-height: 1.5; }
+.mdui-task-progress { display: grid; gap: .5rem; margin: 1rem 0; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .875rem; }
+.mdui-task-progress span { color: rgb(var(--mdui-color-primary)); font-weight: 600; }
+.mdui-center-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem; }
+.mdui-center-grid mdui-card { display: grid; gap: .5rem; padding: .75rem; text-align: center; }
+.mdui-center-grid img { width: 3.5rem; height: 3.5rem; margin: auto; object-fit: contain; }
+.mdui-magic-summary { display: block; margin-bottom: .75rem; padding: .875rem 1rem; }
+.mdui-magic-card { text-align: left !important; }
+.mdui-magic-card img { margin: 0; }
+.mdui-magic-card span, .mdui-magic-card small { display: block; color: rgb(var(--mdui-color-on-surface-variant)); overflow-wrap: anywhere; }
+
+.mdui-wall-author { color: inherit; text-decoration: none; }
+.mdui-wall-author:hover { text-decoration: none; }
+.mdui-wall-faces { display: grid; grid-template-columns: repeat(5, 1fr); gap: .25rem; min-width: 16rem; }

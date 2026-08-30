@@ -1,0 +1,15 @@
+<!--{template common/header}-->
+<mdui-dialog open close-on-esc close-on-overlay-click>
+	<div slot="headline">$magic['name']</div>
+	<form method="post" action="home.php?mod=magic&action=mybox">
+		<div slot="description"><div style="display:flex;gap:1rem;align-items:center"><mdui-avatar src="$magic['pic']"></mdui-avatar><div>$magic['description']</div></div>
+			<!--{if $operation == 'use'}-->
+				<!--{if method_exists($magicclass, 'show')}--><!--{eval $magicclass->show();}--><!--{/if}-->
+			<!--{elseif $operation == 'give'}--><mdui-text-field name="tousername" label="{lang magics_target_present}" required></mdui-text-field><!--{/if}-->
+			<!--{if $operation != 'use'}--><mdui-text-field name="magicnum" type="number" value="1" label="{lang magics_num}" required></mdui-text-field><!--{/if}-->
+		</div>
+		<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="operation" value="$operation"><input type="hidden" name="magicid" value="$magicid"><!--{if $operation == 'use'}--><input type="hidden" name="usesubmit" value="yes"><!--{else}--><input type="hidden" name="operatesubmit" value="yes"><!--{/if}-->
+		<mdui-button slot="action" type="button" variant="text" onclick="history.back()">{lang cancel}</mdui-button><mdui-button slot="action" type="submit" variant="text"><!--{if $operation == 'use'}-->{lang magics_operation_use}<!--{elseif $operation == 'give'}-->{lang magics_operation_present}<!--{elseif $operation == 'sell'}-->{lang magics_operation_sell}<!--{else}-->{lang magics_operation_drop}<!--{/if}--></mdui-button>
+	</form>
+</mdui-dialog>
+<!--{template common/footer}-->

@@ -1,0 +1,142 @@
+<div style="padding:0 .75rem 88px">
+	<mdui-tabs value="{if $_GET['op']}{$_GET['op']}{else}group{/if}" full-width>
+		<mdui-tab value="group" data-href="forum.php?mod=group&action=manage&op=group&fid={$_G['fid']}" icon="settings">{lang group_setup}</mdui-tab>
+		<!--{if !empty($groupmanagers[$_G['uid']]) || $_G['adminid'] == 1}-->
+		<mdui-tab value="checkuser" data-href="forum.php?mod=group&action=manage&op=checkuser&fid={$_G['fid']}" icon="person_add">{lang group_member_moderate}</mdui-tab>
+		<mdui-tab value="manageuser" data-href="forum.php?mod=group&action=manage&op=manageuser&fid={$_G['fid']}" icon="manage_accounts">{lang group_member_management}</mdui-tab>
+		<!--{/if}-->
+		<!--{if $_G['forum']['founderuid'] == $_G['uid'] || $_G['adminid'] == 1}-->
+		<mdui-tab value="threadtype" data-href="forum.php?mod=group&action=manage&op=threadtype&fid={$_G['fid']}" icon="label">{lang group_threadtype}</mdui-tab>
+		<mdui-tab value="demise" data-href="forum.php?mod=group&action=manage&op=demise&fid={$_G['fid']}" icon="swap_horiz">{lang group_demise}</mdui-tab>
+		<!--{/if}-->
+	</mdui-tabs>
+
+	<!--{if $_GET['op'] == 'group' || !$_GET['op']}-->
+	<form enctype="multipart/form-data" action="forum.php?mod=group&action=manage&op=group&fid={$_G['fid']}" method="post" autocomplete="off">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<!--{if !empty($specialswitch['allowchangename']) && ($_G['uid'] == $_G['forum']['founderuid'] || $_G['adminid'] == 1)}-->
+		<mdui-text-field name="name" label="{lang group_name}" value="{$_G['forum']['name']}" required></mdui-text-field>
+		<!--{/if}-->
+		<!--{if !empty($specialswitch['allowchangetype']) && ($_G['uid'] == $_G['forum']['founderuid'] || $_G['adminid'] == 1)}-->
+		<mdui-select id="mdui_manage_parent" name="parentid" label="{lang group_category}" onchange="mduiManageGroupSelect(this.value)">
+			{$groupselect[first]}
+		</mdui-select>
+		<div id="mdui_manage_secondgroup" style="display:none">{$groupselect[second]}</div>
+		<!--{/if}-->
+		<mdui-text-field name="descriptionnew" label="{lang group_description}" value="{$_G['forum']['descriptionnew']}" rows="5"></mdui-text-field>
+		<div style="padding:.75rem 1rem 0;font-size:.875rem;font-weight:600;opacity:.75">{lang group_perm_visit}</div>
+		<mdui-radio-group name="gviewpermnew" value="{$_G['forum']['gviewperm']}" style="padding:0 .75rem">
+			<mdui-radio value="1">{lang group_perm_all_user}</mdui-radio>
+			<!--{if $_G['adminid'] == 1}--><mdui-radio value="0">{lang group_perm_member_only}</mdui-radio><!--{/if}-->
+		</mdui-radio-group>
+		<div style="padding:.75rem 1rem 0;font-size:.875rem;font-weight:600;opacity:.75">{lang group_join_type}</div>
+		<mdui-radio-group name="jointypenew" value="{$_G['forum']['jointype']}" style="padding:0 .75rem">
+			<mdui-radio value="0">{lang group_join_type_free}</mdui-radio>
+			<!--{if $_G['adminid'] == 1}--><mdui-radio value="2">{lang group_join_type_moderate}</mdui-radio><mdui-radio value="1">{lang group_join_type_invite}</mdui-radio><!--{/if}-->
+			<!--{if !empty($specialswitch['allowclosegroup'])}--><mdui-radio value="-1">{lang close}</mdui-radio><!--{/if}-->
+		</mdui-radio-group>
+		<!--{if !empty($_G['group']['allowupbanner']) || $_G['adminid'] == 1}-->
+		<mdui-card variant="outlined" style="display:block;margin:.75rem 0;padding:1rem">
+			<div style="font-weight:600;margin-bottom:.5rem">{lang group_icon}</div>
+			<!--{if $_G['forum']['icon']}--><mdui-avatar src="{$_G['forum']['icon']}?{TIMESTAMP}"></mdui-avatar><!--{/if}-->
+			<input type="file" name="iconnew" accept="image/*">
+			<div style="font-weight:600;margin:1rem 0 .5rem">{lang group_image}</div>
+			<!--{if $_G['forum']['banner']}--><img src="{$_G['forum']['banner']}?{TIMESTAMP}" style="display:block;width:100%;max-height:8rem;object-fit:cover;margin-bottom:.5rem"><!--{/if}-->
+			<input type="file" name="bannernew" accept="image/*">
+		</mdui-card>
+		<!--{/if}-->
+		<input type="hidden" name="groupmanage" value="true">
+		<mdui-button type="submit" full-width>{lang submit}</mdui-button>
+	</form>
+	<!--{elseif $_GET['op'] == 'checkuser'}-->
+	<!--{if $checkusers}-->
+	<mdui-card variant="filled" style="display:block;margin-top:.75rem;overflow:hidden">
+		<mdui-list>
+		<!--{loop $checkusers $uid $user}-->
+		<mdui-list-item>
+			<mdui-avatar slot="icon" src="<!--{avatar($user['uid'], 'middle', true)}-->"></mdui-avatar>
+			{$user['username']}<span slot="description">{$user['joindateline']}</span>
+			<mdui-button-icon slot="end-icon" icon="check" href="forum.php?mod=group&action=manage&op=checkuser&fid={$_G['fid']}&uid={$user['uid']}&checktype=1" title="{lang pass}"></mdui-button-icon>
+			<mdui-button-icon slot="end-icon" icon="close" href="forum.php?mod=group&action=manage&op=checkuser&fid={$_G['fid']}&uid={$user['uid']}&checktype=2" title="{lang ignore}"></mdui-button-icon>
+		</mdui-list-item>
+		<!--{/loop}-->
+		</mdui-list>
+	</mdui-card>
+	<div style="display:flex;gap:.5rem;margin-top:.75rem"><mdui-button href="forum.php?mod=group&action=manage&op=checkuser&fid={$_G['fid']}&checkall=1" full-width>{lang pass_all}</mdui-button><mdui-button variant="outlined" href="forum.php?mod=group&action=manage&op=checkuser&fid={$_G['fid']}&checkall=2" full-width>{lang ignore_all}</mdui-button></div>
+	<!--{else}--><div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang group_no_member_moderated}</div><!--{/if}-->
+	<!--{elseif $_GET['op'] == 'manageuser'}-->
+	<form action="forum.php?mod=group&action=manage&op=manageuser&fid={$_G['fid']}" method="post" style="display:flex;gap:.5rem;margin:.75rem 0">
+		<mdui-text-field name="srchuser" value="{$_GET['srchuser']}" label="{lang enter_member_user}" style="flex:1"></mdui-text-field><mdui-button type="submit" icon="search">{lang search}</mdui-button>
+	</form>
+	<form action="forum.php?mod=group&action=manage&op=manageuser&fid={$_G['fid']}&manageuser=true" method="post" id="mdui_manageuser_form">
+		<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="targetlevel" id="mdui_targetlevel" value="0">
+		<mdui-card variant="filled" style="display:block;overflow:hidden"><mdui-list>
+		<!--{loop $adminuserlist $user}--><mdui-list-item><mdui-avatar slot="icon" src="<!--{avatar($user['uid'], 'middle', true)}-->"></mdui-avatar>{$user['username']}<span slot="description">{lang group_admin_member}</span><mdui-checkbox slot="end-icon" name="muid[{$user['uid']}]" value="{$user['level']}"></mdui-checkbox></mdui-list-item><!--{/loop}-->
+		<!--{loop $staruserlist $user}--><mdui-list-item><mdui-avatar slot="icon" src="<!--{avatar($user['uid'], 'middle', true)}-->"></mdui-avatar>{$user['username']}<span slot="description">{lang group_star_member_title}</span><mdui-checkbox slot="end-icon" name="muid[{$user['uid']}]" value="{$user['level']}"></mdui-checkbox></mdui-list-item><!--{/loop}-->
+		<!--{loop $userlist $user}--><mdui-list-item><mdui-avatar slot="icon" src="<!--{avatar($user['uid'], 'middle', true)}-->"></mdui-avatar>{$user['username']}<mdui-checkbox slot="end-icon" name="muid[{$user['uid']}]" value="{$user['level']}"></mdui-checkbox></mdui-list-item><!--{/loop}-->
+		</mdui-list></mdui-card>
+		<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem"><!--{loop $mtype $key $name}--><mdui-button type="button" variant="outlined" onclick="mduiManageUser({$key})">{$name}</mdui-button><!--{/loop}--></div>
+	</form>
+	<!--{elseif $_GET['op'] == 'threadtype'}-->
+	<form action="forum.php?mod=group&action=manage&op=threadtype&fid={$_G['fid']}" method="post">
+		<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="tab" value="groupmanage">
+		<mdui-checkbox name="threadtypesnew[status]" value="1"{if $_G['forum']['threadtypes']['status']} checked{/if}>{lang threadtype_turn_on}</mdui-checkbox>
+		<mdui-checkbox name="threadtypesnew[required]" value="1"{if $_G['forum']['threadtypes']['required']} checked{/if}>{lang threadtype_required}</mdui-checkbox>
+		<mdui-checkbox name="threadtypesnew[prefix]" value="1"{if $_G['forum']['threadtypes']['prefix']} checked{/if}>{lang threadtype_prefix}</mdui-checkbox>
+		<mdui-card variant="filled" style="display:block;margin:.75rem 0;overflow:hidden"><mdui-list>
+		<!--{loop $threadtypes $type}--><mdui-list-item><mdui-checkbox slot="icon" name="threadtypesnew[options][enable][{$type['typeid']}]" value="1"{$type['enablechecked']}></mdui-checkbox><mdui-text-field name="threadtypesnew[options][name][{$type['typeid']}]" value="{$type['name']}" label="{lang threadtype_name}"></mdui-text-field><mdui-text-field slot="end-icon" name="threadtypesnew[options][displayorder][{$type['typeid']}]" value="{$type['displayorder']}" label="{lang displayorder}" style="width:5rem"></mdui-text-field></mdui-list-item><!--{/loop}-->
+		</mdui-list></mdui-card>
+		<input type="hidden" name="groupthreadtype" value="true"><mdui-button type="submit" full-width>{lang submit}</mdui-button>
+	</form>
+	<!--{elseif $_GET['op'] == 'demise'}-->
+	<!--{if $groupmanagers}--><div style="padding:.75rem 0;opacity:.75">{lang group_demise_comment}<br>{lang group_demise_notice}</div><form action="forum.php?mod=group&action=manage&op=demise&fid={$_G['fid']}" method="post"><input type="hidden" name="formhash" value="{FORMHASH}"><mdui-radio-group name="suid" label="{lang transfer_group_to}"><!--{loop $groupmanagers $user}--><mdui-radio value="{$user['uid']}"><mdui-avatar src="<!--{avatar($user['uid'], 'middle', true)}-->"></mdui-avatar> {$user['username']}</mdui-radio><!--{/loop}--></mdui-radio-group><mdui-text-field type="password" name="grouppwd" label="{lang group_input_password}" required></mdui-text-field><input type="hidden" name="groupdemise" value="true"><mdui-button type="submit" full-width>{lang submit}</mdui-button></form><!--{else}--><div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang group_no_admin_member}</div><!--{/if}-->
+	<!--{/if}-->
+</div>
+<script>
+function mduiManageUser(level) { document.getElementById('mdui_targetlevel').value = level; document.getElementById('mdui_manageuser_form').submit(); }
+function mduiManageGroupOptions(root) {
+	if (!root) return;
+	root.querySelectorAll('option').forEach(function (option) {
+		var item = document.createElement('mdui-menu-item');
+		item.value = option.value;
+		item.textContent = option.textContent;
+		if (option.selected) item.setAttribute('selected', '');
+		option.replaceWith(item);
+	});
+}
+function mduiManageGroupAjaxHtml(text) {
+	var xml = new DOMParser().parseFromString(text, 'text/xml');
+	return xml.documentElement && xml.documentElement.nodeName === 'root' ? xml.documentElement.textContent : text;
+}
+function mduiManageGroupSelect(id) {
+	var wrapper = document.getElementById('mdui_manage_secondgroup');
+	wrapper.innerHTML = '';
+	wrapper.style.display = 'none';
+	if (!id || id === '0') return;
+	fetch('forum.php?mod=ajax&action=secondgroup&fupid=' + id + '&inajax=1').then(function (r) { return r.text(); }).then(function (text) {
+		wrapper.innerHTML = mduiManageGroupAjaxHtml(text);
+		var select = wrapper.querySelector('select[name="fup"]');
+		if (select) {
+			var field = document.createElement('mdui-select');
+			field.name = 'fup';
+			field.label = '{lang group_category}';
+			field.innerHTML = select.innerHTML;
+			select.replaceWith(field);
+			mduiManageGroupOptions(field);
+			wrapper.style.display = '';
+		}
+	});
+}
+mduiManageGroupOptions(document.getElementById('mdui_manage_parent'));
+var mduiManageSecond = document.getElementById('mdui_manage_secondgroup');
+if (mduiManageSecond && mduiManageSecond.children.length) {
+	var mduiManageSecondField = document.createElement('mdui-select');
+	mduiManageSecondField.name = 'fup';
+	mduiManageSecondField.label = '{lang group_category}';
+	mduiManageSecondField.innerHTML = mduiManageSecond.innerHTML;
+	mduiManageSecond.innerHTML = '';
+	mduiManageSecond.appendChild(mduiManageSecondField);
+	mduiManageGroupOptions(mduiManageSecondField);
+	mduiManageSecond.style.display = '';
+}
+</script>

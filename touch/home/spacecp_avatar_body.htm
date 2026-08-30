@@ -1,0 +1,120 @@
+<!-- 头像裁剪脚本依赖以下元素 ID、隐藏字段和 iframe，不能改名。 -->
+<style>
+	/* 原头像脚本按屏幕宽度计算画布，容器必须占满可用宽度。 */
+	#avatardesigner {
+		box-sizing: border-box;
+		width: 100%;
+		padding: 10px;
+		border: 1px solid rgb(var(--mdui-color-outline));
+		border-radius: .75rem;
+		background: rgb(var(--mdui-color-surface));
+	}
+	#avatarfileselector {
+		border-radius: .5rem;
+		background-color: rgb(var(--mdui-color-surface-container-high));
+	}
+	#avataradjuster2 {
+		display: none;
+		gap: .75rem;
+		margin-top: .75rem;
+	}
+	#avataradjuster2 .mt10 {
+		flex: 1;
+		margin: 0;
+	}
+	#avataradjuster2 input,
+	.finishbutton {
+		box-sizing: border-box;
+		width: 100%;
+		min-height: 2.5rem;
+		padding: .5rem 1rem;
+		border: 0;
+		border-radius: 1.25rem;
+		background: rgb(var(--mdui-color-primary));
+		color: rgb(var(--mdui-color-on-primary));
+		font: inherit;
+		cursor: pointer;
+	}
+	#avataradjuster2 .backfileselection {
+		background: rgb(var(--mdui-color-secondary-container));
+		color: rgb(var(--mdui-color-on-secondary-container));
+	}
+	.finishbuttondiv {
+		width: 100%;
+		right: 0;
+		top: 360px;
+		padding: 0 10px;
+		box-sizing: border-box;
+		background: none;
+	}
+	.finishbutton {
+		opacity: 1;
+		position: static;
+	}
+</style>
+
+<div id="avatardesigner">
+	<div id="avatarfileselector">
+		<input type="file" name="Filedata" id="avatarfile" accept="image/*" />
+	</div>
+	<div id="avataradjuster">
+		<div style="display:none"><img id="avatarimage" style="visibility:hidden;display:none" /></div>
+		<canvas id="avatarcanvas" style="position:absolute;top:0;left:0"></canvas>
+		<div id="widgetparent" style="position:absolute;left:0;top:0"></div>
+	</div>
+	<div id="avatardisplayer">
+		<canvas id="avatardisplaycanvas"></canvas>
+		<div class="finishbuttondiv">
+			<input type="button" value="{lang finished}" class="finishbutton" onclick="reloadbyres();" />
+		</div>
+	</div>
+</div>
+<div id="avataradjuster2">
+	<div class="mt10"><input type="button" id="backfileselection" name="backfileselection" class="backfileselection" value="{lang back}" /></div>
+	<div class="mt10"><input type="submit" id="avconfirm" name="confirm" value="{lang confirms}" class="saveAvatar" /></div>
+	<input type="hidden" id="avatar1" name="avatar1" />
+	<input type="hidden" id="avatar2" name="avatar2" />
+	<input type="hidden" id="avatar3" name="avatar3" />
+</div>
+
+<!-- 这里必须再次载入 jQuery：avatar_mobile.js 会 noConflict(true)，用独立副本避免影响主题全局 jQuery。 -->
+<script src="{STATICURL}js/mobile/jquery.min.js?{VERHASH}"></script>
+<script type="text/javascript">
+	var data = "{echo implode(',', $uc_avatarflash);}".split(',');
+	function reloadbyres() {
+		if (window.mduiTip) window.mduiTip('头像已上传，正在刷新');
+		setTimeout(function () { location.reload(true); }, 1000);
+	}
+</script>
+<link rel="stylesheet" href="{STATICURL}avatar/avatar.css?{VERHASH}" />
+<style>
+	/* 覆盖原移动端图片按钮，改成可见的 MDUI 风格实体按钮。 */
+	#avataradjuster2 .backfileselection,
+	#avataradjuster2 .saveAvatar,
+	.finishbutton {
+		position: static;
+		opacity: 1;
+		width: 100%;
+		height: auto;
+	}
+	#avataradjuster2 .backfileselection {
+		background: rgb(var(--mdui-color-secondary-container));
+		color: rgb(var(--mdui-color-on-secondary-container));
+	}
+	.finishbuttondiv {
+		width: 100%;
+		right: 0;
+		top: 360px;
+		padding: 0 10px;
+		box-sizing: border-box;
+		background: none;
+	}
+</style>
+<script src="{STATICURL}avatar/jquery-ui.min.js?{VERHASH}"></script>
+<script src="{STATICURL}avatar/hammer.min.js"></script>
+<script src="{STATICURL}avatar/iscroll-zoom.min.js"></script>
+<script src="{STATICURL}avatar/lrz.all.bundle.js?{VERHASH}"></script>
+<script src="{STATICURL}avatar/jquery.photoClip.min.js"></script>
+<script src="{STATICURL}avatar/avatar_mobile.js?{VERHASH}"></script>
+<iframe name="uploadframe" id="uploadframe" style="display:none"></iframe>
+<iframe name="rectframe" id="rectframe" style="display:none"></iframe>

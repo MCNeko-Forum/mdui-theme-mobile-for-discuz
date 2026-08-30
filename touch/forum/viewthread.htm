@@ -1,0 +1,1290 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+
+<!--{eval
+	$vt_faved = $_G['uid'] ? C::t('home_favorite')->fetch_by_id_idtype($_G['tid'], 'tid', $_G['uid']) : 0;
+	$vt_recadd = $_G['uid'] ? C::t('forum_memberrecommend')->fetch_by_recommenduid_tid($_G['uid'], $_G['tid']) : 0;
+	$vt_show_rec = ($_G['group']['allowrecommend'] || !$_G['uid']) && !empty($_G['setting']['recommendthread']['status']) && !empty($_G['setting']['recommendthread']['addtext']);
+}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{eval echo strip_tags($_G['forum']['name']);}--></mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<mdui-button-icon icon="home" onclick="location.href='portal.php?mod=index'"></mdui-button-icon>
+</mdui-top-app-bar>
+<!--{hook/viewthread_top_mobile}-->
+
+<style>
+.mdui-prose img[smilieid] { display:inline-block; width:auto; height:auto; max-width:100%; vertical-align:bottom; }
+.mdui-prose img:not([smilieid]) { display:block; max-width:100%; height:auto; }
+.vt_imgs, .vt_atts { list-style:none; margin:.75rem 0 0; padding:0; }
+.vt_imgs li { list-style:none; margin:.5rem 0; padding:0; max-width:100%; }
+.vt_imgs li img { display:block; width:auto; max-width:100%; height:auto; max-height:720px; object-fit:contain; }
+.vt_imgs li:has(> img:only-child)::marker { content:none; }
+.vt_imgs li img { border-radius:.35rem; }
+.vt_atts > li { list-style:none; margin:.5rem 0; padding:0; }
+.vt_atts .byg_attach { display:block; margin:0; padding:.65rem .75rem; border:1px solid rgb(var(--mdui-color-outline-variant)); border-radius:.35rem; background:rgb(var(--mdui-color-surface)); overflow:hidden; }
+.vt_atts .byg_attach dd { margin:0; }
+.vt_atts .byg_attach .attnm { display:flex; align-items:center; gap:.4rem; margin:0; }
+.vt_atts .byg_attach .attnm a { position:relative; display:flex; align-items:center; gap:.35rem; min-width:0; color:rgb(var(--mdui-color-primary)); font-weight:500; text-decoration:none; overflow:hidden; overflow-wrap:anywhere; }
+.vt_atts .byg_attach .attnm a::before { content:'↓'; display:inline-flex; flex:0 0 auto; align-items:center; justify-content:center; width:1.15rem; height:1.15rem; border-radius:.2rem; background:rgb(var(--mdui-color-primary)); color:rgb(var(--mdui-color-on-primary)); font-size:.85rem; font-weight:700; }
+.vt_atts .byg_attach .attnm a::after { content:''; position:absolute; left:50%; top:50%; width:1rem; height:1rem; border-radius:50%; background:rgba(var(--mdui-color-primary),.22); transform:translate(-50%,-50%) scale(0); opacity:0; pointer-events:none; }
+.vt_atts .byg_attach .attnm a:active::after { animation:mdui-attach-ripple .45s ease-out; }
+.vt_atts .byg_attach .attnm a img { width:1rem; height:1rem; object-fit:contain; }
+.vt_atts .byg_attach .xg1 { display:block; margin-top:.3rem; padding-left:1.5rem; font-size:.7rem; color:rgb(var(--mdui-color-on-surface-variant)); }
+@keyframes mdui-attach-ripple { from { transform:translate(-50%,-50%) scale(0); opacity:.75; } to { transform:translate(-50%,-50%) scale(16); opacity:0; } }
+#vt_magic_body form, #vt_rate_body form { display:block !important; width:100%; margin:0; }
+#vt_magic_body ul, #vt_rate_body ul { list-style:none; margin:0; padding:0; }
+#vt_magic_body li { display:block !important; margin:.5rem 0; }
+#vt_magic_body li > span { display:block; margin-bottom:.25rem; }
+#vt_magic_num { display:none; width:6rem; }
+#vt_rate_body .flex-box, #vt_rate_body .flex, #vt_rate_body .tit { display:block !important; width:auto !important; float:none !important; }
+#vt_rate_body .flex-box { margin:.75rem 0; padding-bottom:.75rem; border-bottom:1px solid rgba(var(--mdui-color-outline), .2); }
+#vt_rate_body .tit { margin-bottom:.25rem; font-weight:500; }
+#vt_rate_body .y { display:none !important; }
+.vt_form_actions { position:sticky; top:0; z-index:2; padding:.5rem 0; background:rgb(var(--mdui-color-surface-container-high)); }
+.mdui-prose .locked, .locked { display:block !important; position:relative; box-sizing:border-box; width:100%; margin:1rem 0; padding:1rem 1rem 1rem 3.25rem; border:2px solid #d97706; border-radius:.75rem; background-color:#fff7ed !important; color:#7c2d12 !important; box-shadow:0 2px 8px rgba(124,45,18,.16); overflow:hidden; }
+.mdui-prose .locked::before, .locked::before { content:'🔒'; position:absolute; left:1rem; top:1rem; font-size:1.25rem; }
+.mdui-prose .locked::after, .locked::after { content:'隐藏内容'; display:block; margin-top:.35rem; font-size:.75rem; font-weight:700; letter-spacing:.08em; color:#b45309; }
+.mdui-prose .locked a, .locked a { color:#92400e !important; font-weight:600; }
+.vt_reply-area { display:flex; justify-content:flex-end; margin:0 1rem .75rem; }
+.vt_reply-area mdui-button { --mdui-color-primary:#6750a4; }
+.vt_forum-more { position:relative; display:flex; align-items:center; gap:.65rem; margin:.25rem 1rem .75rem; padding:.9rem 1rem; border-radius:.75rem; background:rgb(var(--mdui-color-surface-container)); color:rgb(var(--mdui-color-on-surface)); text-decoration:none; overflow:hidden; -webkit-tap-highlight-color:transparent; }
+.vt_forum-more mdui-icon { flex:0 0 auto; color:rgb(var(--mdui-color-primary)); }
+.vt_forum-more strong { color:rgb(var(--mdui-color-primary)); }
+.vt_forum-more::after { content:''; position:absolute; left:var(--vt-ripple-x, 50%); top:var(--vt-ripple-y, 50%); width:1rem; height:1rem; border-radius:50%; background:rgba(var(--mdui-color-primary),.22); transform:translate(-50%,-50%) scale(0); opacity:0; pointer-events:none; }
+.vt_forum-more:active::after { animation:vt-forum-ripple .45s ease-out; }
+@keyframes vt-forum-ripple { from { transform:translate(-50%,-50%) scale(0); opacity:.75; } to { transform:translate(-50%,-50%) scale(28); opacity:0; } }
+.mdui-prose .showhide, .showhide { display:block !important; position:relative; box-sizing:border-box; width:100%; margin:1rem 0; padding:1rem; border:2px solid #d97706; border-radius:.75rem; background-color:#fff7ed !important; color:#7c2d12 !important; box-shadow:0 2px 8px rgba(124,45,18,.16); overflow:hidden; }
+.mdui-prose .showhide h4, .showhide h4 { margin:0 0 .65rem; color:#b45309 !important; font-size:.95rem; font-weight:700; }
+.mdui-prose .showhide a, .showhide a { color:#92400e !important; font-weight:600; }
+.mdui-prose .hidecode { display:block; margin:1rem 0; padding:1rem; border:2px solid #d97706; border-radius:.75rem; background-color:#fff7ed !important; color:#7c2d12 !important; box-shadow:0 2px 8px rgba(124,45,18,.16); }
+/* 已点赞：禁用但保持主题色，表达「已完成」而非「不可用」 */
+.vt_recadded { opacity:1; --mdui-color-on-surface:var(--mdui-color-primary); }
+</style>
+<div style="padding-bottom:88px">
+	<div style="padding:1rem 1rem .5rem">
+		<!--{if $_G['forum_thread']['icon'] >= 0 && $_G['cache']['stamps'][$_G['forum_thread']['icon']]}-->
+		<!--{eval $vt_icon = $_G['cache']['stamps'][$_G['forum_thread']['icon']];}-->
+		<div style="margin-bottom:.375rem;line-height:1"><img src="{STATICURL}image/stamp/{$vt_icon['url']}" alt="{$vt_icon['text']}" title="{$vt_icon['text']}" style="vertical-align:middle"></div>
+		<!--{/if}-->
+		<div style="display:flex;align-items:flex-start;gap:.75rem">
+		<h1 style="font-size:1.375rem;font-weight:500;margin:0;line-height:1.4;flex:1;min-width:0">
+			<!--{if $_G['forum_thread']['typeid'] && $_G['forum']['threadtypes']['types'][$_G['forum_thread']['typeid']]}--><span style="opacity:.7">[{$_G['forum']['threadtypes']['types'][$_G['forum_thread']['typeid']]}]</span><!--{/if}-->
+			<!--{if $threadsorts && $_G['forum_thread']['sortid']}--><span style="opacity:.7">[{$_G['forum']['threadsorts']['types'][$_G['forum_thread']['sortid']]}]</span><!--{/if}-->
+			{$_G['forum_thread']['subject']}
+			<!--{if $_G['forum_thread']['closed']}--><span style="display:inline-block;margin-left:.375rem;padding:.0625rem .375rem;border:1px solid #d32f2f;border-radius:.25rem;color:#d32f2f;font-size:.75rem;font-weight:500;vertical-align:middle;line-height:1.4">关闭</span><!--{/if}-->
+			<!--{if $_G['forum_thread']['displayorder'] == -2}--><span style="opacity:.6">({lang moderating})</span>
+			<!--{elseif $_G['forum_thread']['displayorder'] == -3}--><span style="opacity:.6">({lang have_ignored})</span>
+			<!--{elseif $_G['forum_thread']['displayorder'] == -4}--><span style="opacity:.6">({lang draft})</span>
+			<!--{/if}-->
+		</h1>
+		<!--{if $_G['forum_threadstamp']}-->
+		<img src="{STATICURL}image/stamp/{$_G['forum_threadstamp']['url']}" alt="{$_G['forum_threadstamp']['text']}" title="{$_G['forum_threadstamp']['text']}" style="height:2.75rem;flex-shrink:0">
+		<!--{/if}-->
+		</div>
+		<div style="font-size:.875rem;opacity:.7;margin-top:.5rem;display:flex;gap:1rem">
+			<span>{lang views}: {$_G['forum_thread']['views']}</span>
+			<span>{lang reply}: {$_G['forum_thread']['allreplies']}</span>
+		</div>
+	</div>
+
+	<!--{if $_G['forum_thread']['replycredit'] > 0}-->
+	<mdui-card variant="filled" style="display:block;margin:0 1rem .5rem;padding:.75rem">
+		<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+			<mdui-icon name="redeem" style="color:rgb(var(--mdui-color-primary))"></mdui-icon>
+			<strong>{lang replycredit}</strong>
+			<strong style="color:rgb(var(--mdui-color-primary))">{$_G['forum_thread']['replycredit']} {$_G['setting']['extcredits'][$_G['forum_thread']['replycredit_rule']['extcreditstype']]['unit']}{$_G['setting']['extcredits'][$_G['forum_thread']['replycredit_rule']['extcreditstype']]['title']}</strong>
+		</div>
+		<div style="font-size:.8125rem;opacity:.7;margin-top:.25rem">{lang thread_replycredit_tips1} {lang thread_replycredit_tips2}<!--{if $_G['forum_thread']['replycredit_rule']['random'] > 0}--> {lang thread_replycredit_tips3}<!--{/if}--></div>
+	</mdui-card>
+	<!--{/if}-->
+
+	<!--{eval $postcount = 0;}-->
+	<div id="vt_post_list">
+	<!--{loop $postlist $post}-->
+	<!--{eval $needhiddenreply = ($hiddenreplies && $_G['uid'] != $post['authorid'] && $_G['uid'] != $_G['forum_thread']['authorid'] && !$post['first'] && !$_G['forum']['ismoderator']);}-->
+	<!--{hook/viewthread_posttop_mobile $postcount}-->
+	<mdui-card variant="filled" style="display:block;margin:.75rem 1rem;padding:1rem" id="pid$post['pid']">
+		<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+			<mdui-avatar src="<!--{if !$post['authorid'] || $post['anonymous']}--><!--{avatar(0, 'small', true)}--><!--{else}--><!--{avatar($post['authorid'], 'small', true)}--><!--{/if}-->"></mdui-avatar>
+			<div style="flex:1;min-width:0">
+				<div style="font-weight:500">
+					<!--{if $post['authorid'] && $post['username'] && !$post['anonymous']}-->
+						<a href="home.php?mod=space&uid=$post['authorid']" style="color:inherit;text-decoration:none">{$post['author']}</a>
+						<!--{if $post['authortitle']}--><a href="home.php?mod=spacecp&ac=usergroup&gid={$post['groupid']}" style="font-size:.75rem;opacity:.65;margin-left:.25rem;text-decoration:none">{$post['authortitle']}</a><!--{/if}-->
+					<!--{elseif !$post['authorid']}-->
+						{lang guest} <span style="font-size:.75rem;opacity:.6">{$post['useip']}<!--{if $post['port']}-->:{$post['port']}<!--{/if}--></span>
+					<!--{elseif $post['authorid'] && $post['username'] && $post['anonymous']}-->
+					<!--{if $_G['forum']['ismoderator']}--><a href="home.php?mod=space&uid={$post['authorid']}" style="color:inherit;text-decoration:none">{$_G['setting']['anonymoustext']}</a><!--{else}-->{$_G['setting']['anonymoustext']}<!--{/if}-->
+					<!--{else}-->
+						{$post['author']} <span style="opacity:.6">{lang member_deleted}</span>
+					<!--{/if}-->
+				</div>
+				<div style="font-size:.8125rem;opacity:.6">{$post['dateline']}</div>
+			</div>
+			<mdui-chip elevated class="vt_floor_link" data-copy-url="forum.php?mod=redirect&amp;goto=findpost&amp;ptid={$_G['tid']}&amp;pid={$post['pid']}" title="点击复制本楼链接" style="--mdui-comp-chip-height:24px;cursor:pointer">
+					<!--{if isset($post['isstick'])}--><mdui-icon name="push_pin" style="font-size:1rem;vertical-align:middle"></mdui-icon> {lang from} {$post['number']}{$postnostick}
+					<!--{elseif $post['number'] == -1}-->{lang recommend_post}
+					<!--{else}--><!--{if !empty($postno[$post['number']])}-->{$postno[$post['number']]}<!--{else}-->{$post['number']}{$postno[0]}<!--{/if}-->
+					<!--{/if}-->
+				</mdui-chip>
+			<!--{if $post['first'] && $vt_show_rec}--><span id="recommendv_add" style="font-size:.75rem;opacity:.65;white-space:nowrap"><mdui-icon name="thumb_up" style="font-size:1rem;vertical-align:middle"></mdui-icon> {$_G['forum_thread']['recommend_add']}</span><!--{/if}-->
+			<!--{eval $vt_canreport = $_G['uid'] && $post['authorid'] && $post['authorid'] != $_G['uid'];}-->
+			<!--{eval $vt_canmod = $post['first'] ? ($modmenu['thread'] && $_G['forum']['ismoderator']) : ($modmenu['post'] && ($_G['forum']['ismoderator'] && ($_G['group']['allowdelpost'] || $_G['group']['allowbanpost'] || $_G['group']['allowwarnpost'] || $_G['group']['allowstickreply']) || $_G['forum_thread']['authorid'] == $_G['uid']));}-->
+			<!--{if $vt_canmod || $vt_canreport}-->
+			<mdui-dropdown class="vt_moremenu" placement="auto">
+				<mdui-button-icon slot="trigger" icon="more_horiz"></mdui-button-icon>
+				<mdui-menu>
+					<!--{if $post['first'] && $_G['forum']['ismoderator']}-->
+						<!--{if $_G['group']['allowdelpost']}-->
+						<mdui-menu-item icon="delete" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=delete&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_deletethread}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowbumpthread'] && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="swap_vert" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=bump&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_updown}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowstickthread'] && ($_G['forum_thread']['displayorder'] <= 3 || $_G['adminid'] == 1) && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="vertical_align_top" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=stick&optgroup=1&from={$_G['tid']}&mobile=2">{lang modmenu_stickthread}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowlivethread'] && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="live_tv" class="vt_modact" href="forum.php?mod=topicadmin&action=live&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_live}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowhighlightthread'] && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="format_color_text" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=highlight&optgroup=1&from={$_G['tid']}&mobile=2">{lang modmenu_highlight}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowdigestthread'] && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="star" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=digest&optgroup=1&from={$_G['tid']}&mobile=2">{lang modmenu_digestpost}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowstampthread'] && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="approval" class="vt_modact" href="forum.php?mod=topicadmin&action=stamp&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_stamp}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowstamplist'] && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="label" class="vt_modact" href="forum.php?mod=topicadmin&action=stamplist&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_icon}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowclosethread'] && !$_G['forum_thread']['is_archived'] && $_G['forum']['status'] != 3}-->
+						<mdui-menu-item icon="lock" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&from={$_G['tid']}&optgroup=4&mobile=2"><!--{if !$_G['forum_thread']['closed']}-->{lang modmenu_switch_off}<!--{else}-->{lang modmenu_switch_on}<!--{/if}--></mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowmovethread'] && !$_G['forum_thread']['is_archived'] && $_G['forum']['status'] != 3}-->
+						<mdui-menu-item icon="drive_file_move" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=move&optgroup=2&from={$_G['tid']}&mobile=2">{lang modmenu_move}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowedittypethread'] && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="category" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=type&optgroup=2&from={$_G['tid']}&mobile=2">{lang modmenu_type}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowsplitthread'] && !$_G['forum_thread']['is_archived'] && $_G['forum']['status'] != 3}-->
+						<mdui-menu-item icon="call_split" class="vt_modact" href="forum.php?mod=topicadmin&action=split&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_split}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowrepairthread'] && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="build" class="vt_modact" href="forum.php?mod=topicadmin&action=repair&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_repair}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['forum_firstpid']}-->
+							<!--{if $_G['group']['allowwarnpost']}-->
+							<mdui-menu-item icon="warning" class="vt_modact" href="forum.php?mod=topicadmin&action=warn&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_warn}</mdui-menu-item>
+							<!--{/if}-->
+							<!--{if $_G['group']['allowbanpost']}-->
+							<mdui-menu-item icon="visibility_off" class="vt_modact" href="forum.php?mod=topicadmin&action=banpost&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_banthread}</mdui-menu-item>
+							<!--{/if}-->
+						<!--{/if}-->
+						<!--{if $_G['group']['allowremovereward'] && $_G['forum_thread']['special'] == 3 && !$_G['forum_thread']['is_archived']}-->
+						<mdui-menu-item icon="money_off" class="vt_modact" href="forum.php?mod=topicadmin&action=removereward&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_removereward}</mdui-menu-item>
+						<!--{/if}-->
+						<!--{if $_G['group']['allowmanagetag']}-->
+						<mdui-menu-item icon="sell" href="forum.php?mod=tag&op=manage&tid={$_G['tid']}&mobile=2">{lang post_tag}</mdui-menu-item>
+						<!--{/if}-->
+					<!--{elseif !$post['first']}-->
+						<!--{if $_G['forum']['ismoderator']}-->
+							<!--{if $_G['group']['allowdelpost']}-->
+							<mdui-menu-item icon="delete" class="vt_modact" href="forum.php?mod=topicadmin&action=delpost&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_deletepost}</mdui-menu-item>
+							<!--{/if}-->
+							<!--{if $_G['group']['allowbanpost']}-->
+							<mdui-menu-item icon="visibility_off" class="vt_modact" href="forum.php?mod=topicadmin&action=banpost&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_banpost}</mdui-menu-item>
+							<!--{/if}-->
+							<!--{if $_G['group']['allowwarnpost']}-->
+							<mdui-menu-item icon="warning" class="vt_modact" href="forum.php?mod=topicadmin&action=warn&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_warn}</mdui-menu-item>
+							<!--{/if}-->
+						<!--{/if}-->
+						<!--{if ($_G['forum']['ismoderator'] && $_G['group']['allowstickreply']) || $_G['forum_thread']['authorid'] == $_G['uid']}-->
+						<mdui-menu-item icon="push_pin" class="vt_modact" href="forum.php?mod=topicadmin&action=stickreply&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_stickpost}</mdui-menu-item>
+						<!--{/if}-->
+					<!--{/if}-->
+					<!--{if $vt_canreport}-->
+					<!--{if $vt_canmod}--><mdui-divider></mdui-divider><!--{/if}-->
+					<mdui-menu-item icon="flag" class="vt_report" data-pid="{$post['pid']}">{lang report}</mdui-menu-item>
+					<!--{/if}-->
+				</mdui-menu>
+			</mdui-dropdown>
+			<!--{/if}-->
+		</div>
+
+		<div class="mdui-prose" style="line-height:1.7;word-wrap:break-word;overflow-wrap:break-word">
+			<!--{if !$post['first'] && $post['replycredit'] > 0}-->
+			<div style="font-size:.8125rem;color:rgb(var(--mdui-color-primary));margin-bottom:.5rem">{lang replycredit} +{$post['replycredit']} {$_G['setting']['extcredits'][$_G['forum_thread']['replycredit_rule']['extcreditstype']]['unit']}{$_G['setting']['extcredits'][$_G['forum_thread']['replycredit_rule']['extcreditstype']]['title']}</div>
+			<!--{/if}-->
+			<!--{if $post['warned']}--><blockquote>{lang warn_get}</blockquote><!--{/if}-->
+			<!--{if !$post['first'] && !empty($post['subject']) && !$needhiddenreply}--><h3>{$post['subject']}</h3><!--{/if}-->
+			<!--{if $_G['adminid'] != 1 && $_G['setting']['bannedmessages'] & 1 && (($post['authorid'] && !$post['username']) || ($post['groupid'] == 4 || $post['groupid'] == 5) || $post['status'] == -1 || $post['memberstatus'])}-->
+				<blockquote>{lang message_banned}</blockquote>
+			<!--{elseif $_G['adminid'] != 1 && $post['status'] & 1}-->
+				<blockquote>{lang message_single_banned}</blockquote>
+			<!--{elseif $needhiddenreply}-->
+				<blockquote>{lang message_ishidden_hiddenreplies}</blockquote>
+			<!--{elseif $post['first'] && $_G['forum_threadpay']}-->
+				<!--{template forum/viewthread_pay}-->
+			<!--{else}-->
+				<!--{if $post['first'] && $threadsortshow}-->
+					<!--{if $threadsortshow['optionlist'] == 'expire'}-->
+						<blockquote>{lang has_expired}</blockquote>
+					<!--{elseif $threadsortshow['optionlist'] && !($post['status'] & 1) && !$_G['forum_threadpay']}-->
+						<div style="margin:.75rem 0;padding:.75rem;background:rgba(var(--mdui-color-surface-variant),.35);border-radius:.5rem">
+							<strong>{$_G['forum']['threadsorts']['types'][$_G['forum_thread']['sortid']]}</strong>
+							<table style="width:100%;margin-top:.5rem;border-collapse:collapse;font-size:.8125rem">
+							<!--{loop $threadsortshow['optionlist'] $option}-->
+								<!--{if $option['type'] != 'info'}-->
+								<tr><th style="text-align:left;padding:.25rem 0;width:35%;font-weight:500">{$option['title']}</th><td style="padding:.25rem 0"><!--{if $option['value']}-->{$option['value']} {$option['unit']}<!--{else}-->-<!--{/if}--></td></tr>
+								<!--{/if}-->
+							<!--{/loop}-->
+							</table>
+						</div>
+					<!--{/if}-->
+				<!--{/if}-->
+				<!--{if $post['first'] && !$_G['forum_thread']['special'] && !empty($_G['setting']['guesttipsinthread']['flag']) && !$_G['uid'] && !$post['attachment'] && $_GET['from'] != 'preview'}-->
+					<div style="margin:.75rem 0;padding:.75rem;background:rgba(var(--mdui-color-surface-variant),.35);border-radius:.5rem">
+						<strong><!--{if !empty($_G['setting']['guesttipsinthread']['text'])}-->{$_G['setting']['guesttipsinthread']['text']}<!--{else}-->{lang guesttipsinthread_text}<!--{/if}--></strong>
+						<div style="font-size:.8125rem;opacity:.7;margin-top:.25rem">{lang attach_nopermission_login}</div>
+					</div>
+				<!--{/if}-->
+				<!--{if $post['first'] && $_G['forum_thread']['price'] > 0 && $_G['forum_thread']['special'] == 0}-->
+					<blockquote>{lang pay_threads}: <strong>{$_G['forum_thread']['price']}</strong> <a href="forum.php?mod=misc&action=viewpayments&tid=$_G['tid']">{lang pay_view}</a></blockquote>
+				<!--{/if}-->
+				<!--{if $post['first'] && $_G['forum_thread']['special'] == 1}-->
+					<!--{template forum/viewthread_poll}-->
+				<!--{elseif $post['first'] && $_G['forum_thread']['special'] == 2}-->
+					<!--{template forum/viewthread_trade}-->
+				<!--{elseif $post['first'] && $_G['forum_thread']['special'] == 3}-->
+					<!--{template forum/viewthread_reward}-->
+				<!--{elseif $post['first'] && $_G['forum_thread']['special'] == 4}-->
+					<!--{template forum/viewthread_activity}-->
+				<!--{elseif $post['first'] && $_G['forum_thread']['special'] == 5}-->
+					<!--{template forum/viewthread_debate}-->
+				<!--{else}-->
+					<!--{if $post['first'] && $threadplughtml}-->$threadplughtml<!--{/if}-->
+					$post['message']
+				<!--{/if}-->
+			<!--{/if}-->
+		</div>
+
+		<!--{if $_G['setting']['mobile']['mobilesimpletype'] == 0 && !$needhiddenreply}-->
+			<!--{if $post['attachment']}-->
+				<blockquote style="opacity:.7;font-size:.875rem">{lang attachment}: <!--{if $_G['uid']}-->{lang attach_nopermission}<!--{else}-->{lang attach_nopermission_login}<!--{/if}--></blockquote>
+			<!--{else}-->
+				<!--{if $post['imagelist']}--><!--{eval $vtimgs = trim(showattach($post, 1));}--><!--{if $vtimgs}--><ul class="vt_imgs">$vtimgs</ul><!--{/if}--><!--{/if}-->
+				<!--{if $post['attachlist']}--><ul class="vt_atts">{echo showattach($post)}</ul><!--{/if}-->
+			<!--{/if}-->
+		<!--{/if}-->
+
+		<!--{if $post['first'] && $post['tags'] && $_GET['from'] != 'preview'}-->
+			<div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
+				<!--{loop $post['tags'] $var}-->
+					<mdui-chip href="misc.php?mod=tag&id=$var[0]" style="--mdui-comp-chip-height:24px;font-size:.75rem">$var[1]</mdui-chip>
+				<!--{/loop}-->
+			</div>
+		<!--{/if}-->
+
+		<!--{if $post['first'] && !empty($post['relateitem']) && $_GET['from'] != 'preview'}-->
+			<mdui-card variant="outlined" style="display:block;margin-top:.75rem;padding:.75rem">
+				<div style="display:flex;align-items:center;gap:.375rem;font-weight:500;margin-bottom:.25rem">
+					<mdui-icon name="link"></mdui-icon>{lang related_thread}
+				</div>
+				<!--{loop $post['relateitem'] $var}-->
+					<a href="forum.php?mod=viewthread&tid={$var['tid']}" style="display:block;padding:.625rem 0;text-decoration:none;color:inherit;border-top:1px solid rgba(var(--mdui-color-on-surface),.1)">
+						<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{$var['subject']}</div>
+						<div style="font-size:.75rem;opacity:.65;margin-top:.25rem">
+							<!--{if $var['authorid'] && $var['author']}-->{$var['author']}<!--{else}-->{$_G['setting']['anonymoustext']}<!--{/if}-->
+							<!--{if isset($var['views'])}--> · {$var['views']} {lang views}<!--{/if}-->
+						</div>
+					</a>
+				<!--{/loop}-->
+			</mdui-card>
+		<!--{/if}-->
+
+		<!--{if $_GET['from'] != 'preview' && !empty($post['ratelog'])}-->
+		<div style="margin-top:.75rem;padding:.75rem;background:rgba(var(--mdui-color-surface-variant),.35);border-radius:.5rem">
+			<div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;margin-bottom:.5rem">
+				<strong>打赏</strong>
+				<span style="flex:1;opacity:.7">参与人数：{echo count($post['ratelog'])}</span>
+				<!--{if !empty($postlist[$post['pid']]['totalrate']) && $_G['forum']['ismoderator']}-->
+				<mdui-button variant="text" href="forum.php?mod=misc&action=removerate&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">撤销打赏</mdui-button>
+				<!--{/if}-->
+			</div>
+			<div style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap">
+				<!--{loop $post['ratelog'] $uid $ratelog}-->
+					<mdui-avatar src="<!--{avatar($uid, 'small', true)}-->" title="{$ratelog['username']}" style="width:2rem;height:2rem"></mdui-avatar>
+				<!--{/loop}-->
+				<mdui-button variant="text" href="forum.php?mod=misc&action=viewratings&tid={$_G['tid']}&pid={$post['pid']}">查看全部打赏</mdui-button>
+			</div>
+			<!--{eval $vt_recent_rates = array_slice($post['ratelog'], 0, 5, true);}-->
+			<div style="margin-top:.5rem;font-size:.8125rem">
+				<!--{loop $vt_recent_rates $uid $ratelog}-->
+					<div style="display:flex;gap:.5rem;padding:.25rem 0">
+						<a href="home.php?mod=space&uid={$uid}">{$ratelog['username']}</a>
+						<span style="flex:1;opacity:.7"><!--{loop $ratelog['score'] $extcredit $score}-->{$score} {$_G['setting']['extcredits'][$extcredit]['title']}<!--{/loop}--><!--{if $ratelog['reason']}--> · {$ratelog['reason']}<!--{/if}--></span>
+					</div>
+				<!--{/loop}-->
+			</div>
+		</div>
+		<!--{/if}-->
+
+		<!--{if $post['signature'] && ($_G['setting']['bannedmessages'] & 4 && ($post['memberstatus'] == '-1' || ($post['authorid'] && !$post['username']) || ($post['groupid'] == 4 || $post['groupid'] == 5) || ($post['status'] & 1)))}-->
+			<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgba(var(--mdui-color-on-surface),.12);opacity:.7;font-size:.8125rem">{lang member_signature_banned}</div>
+		<!--{elseif $post['signature'] && !$post['anonymous'] && $showsignatures}-->
+			<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgba(var(--mdui-color-on-surface),.12);max-height:{$_G['setting']['maxsigrows']}px;overflow:hidden;font-size:.8125rem;opacity:.7">{$post['signature']}</div>
+		<!--{elseif !$post['anonymous'] && $showsignatures && !empty($_G['setting']['globalsightml'])}-->
+			<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgba(var(--mdui-color-on-surface),.12);font-size:.8125rem;opacity:.7">{$_G['setting']['globalsightml']}</div>
+		<!--{/if}-->
+
+		<div id="comment_$post['pid']">
+		<!--{if $_GET['from'] != 'preview' && $_G['setting']['commentnumber'] && !empty($comments[$post['pid']])}-->
+			<mdui-divider style="margin:.75rem 0"></mdui-divider>
+			<div style="font-size:.875rem;opacity:.7;margin-bottom:.5rem">{lang comments}</div>
+			<!--{loop $comments[$post['pid']] $comment}-->
+				<div style="display:flex;gap:.5rem;margin-bottom:.5rem" id="commentdetail_{$comment['id']}">
+					<div style="font-size:.8125rem;opacity:.8;white-space:nowrap">
+						<!--{if $comment['authorid']}--><a href="home.php?mod=space&uid=$comment['authorid']">$comment['author']</a><!--{else}-->{lang guest}<!--{/if}-->:
+					</div>
+					<div style="font-size:.8125rem;flex:1">$comment['comment']</div>
+				</div>
+			<!--{/loop}-->
+			<!--{if $commentcount[$post['pid']] > $_G['setting']['commentnumber']}-->
+				<mdui-button variant="text" onclick="ajaxget('forum.php?mod=misc&action=commentmore&tid=$post[tid]&pid=$post[pid]&page=2', 'comment_$post[pid]')">{lang next_page}</mdui-button>
+			<!--{/if}-->
+		<!--{/if}-->
+		</div>
+		<!--{if $post['first'] && $allowpostreply && !$_G['forum_thread']['closed']}-->
+		<div class="vt_reply-area">
+			<mdui-button variant="filled" icon="reply" href="forum.php?mod=post&action=reply&fid={$_G['fid']}&tid={$_G['tid']}&extra={$_GET['extra']}&page={$page}">{lang reply}</mdui-button>
+		</div>
+		<!--{/if}-->
+
+		<div id="post_rate_div_{$post['pid']}"></div>
+
+		<mdui-divider style="margin:.75rem 0"></mdui-divider>
+		<div style="display:flex;gap:.25rem;flex-wrap:wrap">
+			<!--{if $_G['uid'] && $allowpostreply && !$post['first']}-->
+				<mdui-button variant="text" icon="reply" href="forum.php?mod=post&action=reply&fid={$_G['fid']}&tid={$_G['tid']}&repquote={$post['pid']}&extra={$_GET['extra']}&page={$page}">{lang reply}</mdui-button>
+			<!--{/if}-->
+			<!--{if $allowpostreply && $post['allowcomment'] && $post['invisible'] == 0 && (!$_G['forum_thread']['closed'] || $_G['forum']['ismoderator'])}-->
+				<mdui-button variant="text" icon="chat_bubble_outline" class="vt_form_dialog" data-title="{lang comments}" data-url="forum.php?mod=misc&action=comment&tid={$post['tid']}&pid={$post['pid']}&extra={$_GET['extra']}&page={$page}">{lang comments}</mdui-button>
+			<!--{/if}-->
+			<!--{if $_G['setting']['magicstatus'] && $post['invisible'] == 0}-->
+			<mdui-dropdown placement="top-start">
+				<mdui-button slot="trigger" variant="text" icon="auto_fix_high">{lang thread_magic}</mdui-button>
+				<mdui-menu>
+					<!--{if $post['first']}-->
+						<!--{eval $vt_magics = array('bump', 'stick', 'close', 'open', 'highlight', 'sofa', 'jack');}-->
+						<!--{loop $vt_magics $vt_magic}-->
+							<!--{if !empty($_G['setting']['magics'][$vt_magic])}--><mdui-menu-item class="vt_magic" data-url="home.php?mod=magic&mid={$vt_magic}&idtype=tid&id={$_G['tid']}" href="javascript:;">{$_G['setting']['magics'][$vt_magic]}</mdui-menu-item><!--{/if}-->
+						<!--{/loop}-->
+					<!--{/if}-->
+					<!--{if !empty($_G['setting']['magics']['repent']) && $post['authorid'] == $_G['uid'] && !$rushreply}--><mdui-menu-item class="vt_magic" data-url="home.php?mod=magic&mid=repent&idtype=pid&id={$post['pid']}:{$_G['tid']}" href="javascript:;">{$_G['setting']['magics']['repent']}</mdui-menu-item><!--{/if}-->
+					<!--{if !empty($_G['setting']['magics']['anonymouspost']) && $post['authorid'] == $_G['uid']}--><mdui-menu-item class="vt_magic" data-url="home.php?mod=magic&mid=anonymouspost&idtype=pid&id={$post['pid']}:{$_G['tid']}" href="javascript:;">{$_G['setting']['magics']['anonymouspost']}</mdui-menu-item><!--{/if}-->
+					<!--{if !empty($_G['setting']['magics']['namepost'])}--><mdui-menu-item class="vt_magic" data-url="home.php?mod=magic&mid=namepost&idtype=pid&id={$post['pid']}:{$_G['tid']}" href="javascript:;">{$_G['setting']['magics']['namepost']}</mdui-menu-item><!--{/if}-->
+					<!--{hook/viewthread_magic_thread}-->
+					<!--{hook/viewthread_magic_post $postcount}-->
+				</mdui-menu>
+			</mdui-dropdown>
+			<!--{/if}-->
+
+			<!--{if $_G['group']['raterange'] && $post['authorid']}-->
+				<mdui-button variant="text" icon="volunteer_activism" class="vt_rate" data-url="forum.php?mod=misc&action=rate&tid={$_G['tid']}&pid={$post['pid']}" href="javascript:;">打赏</mdui-button>
+			<!--{/if}-->
+			<!--{if (($_G['forum']['ismoderator'] && $_G['group']['alloweditpost'] && (!in_array($post['adminid'], array(1, 2, 3)) || $_G['adminid'] <= $post['adminid'])) || ($_G['forum']['alloweditpost'] && $_G['uid'] && ($post['authorid'] == $_G['uid'] && $_G['forum_thread']['closed'] == 0) && !(!$alloweditpost_status && $edittimelimit && TIMESTAMP - $post['dbdateline'] > $edittimelimit)))}-->
+				<mdui-button variant="text" icon="edit" href="forum.php?mod=post&action=edit&fid={$_G['fid']}&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">{lang edit}</mdui-button>
+			<!--{elseif $_G['uid'] && $post['authorid'] == $_G['uid'] && $_G['setting']['postappend']}-->
+				<mdui-button variant="text" icon="add_comment" href="forum.php?mod=misc&action=postappend&tid={$post['tid']}&pid={$post['pid']}&extra={$_GET['extra']}&page={$page}">{lang postappend}</mdui-button>
+			<!--{/if}-->
+			<!--{if $_G['forum_thread']['special'] == 3 && ($_G['forum']['ismoderator'] && (!$_G['setting']['rewardexpiration'] || $_G['setting']['rewardexpiration'] > 0 && ($_G['timestamp'] - $_G['forum_thread']['dateline']) / 86400 > $_G['setting']['rewardexpiration']) || $_G['forum_thread']['authorid'] == $_G['uid']) && $post['authorid'] != $_G['forum_thread']['authorid'] && $post['first'] == 0 && $_G['uid'] != $post['authorid'] && $_G['forum_thread']['price'] > 0}-->
+				<mdui-button variant="text" icon="workspace_premium" class="vt_bestanswer" href="forum.php?mod=misc&action=bestanswer&tid={$post['tid']}&pid={$post['pid']}&from={$_GET['from']}&bestanswersubmit=yes&formhash={FORMHASH}&mobile=2">{lang reward_set_bestanswer}</mdui-button>
+			<!--{/if}-->
+			<!--{hook/viewthread_postfooter_mobile $postcount}-->
+		</div>
+	</mdui-card>
+	<!--{hook/viewthread_postbottom_mobile $postcount}-->
+	<!--{eval $postcount++;}-->
+
+	<!--{if $post['first']}-->
+		<a class="vt_forum-more" href="forum.php?mod=forumdisplay&fid={$_G['fid']}">
+			<mdui-icon name="forum"></mdui-icon>
+			<span>点击查看更多<strong><!--{eval echo strip_tags($_G['forum']['name']);}--></strong>内容</span>
+		</a>
+			<div style="display:flex;align-items:center;padding:.5rem 1rem;font-size:.875rem;opacity:.8;flex-wrap:wrap">
+				<span>{lang all}{lang reply}<!--{if $_G['forum_thread']['allreplies']}--> {$_G['forum_thread']['allreplies']}<!--{/if}--></span>
+				<div style="flex-grow:1"></div>
+				<!--{if !IS_ROBOT && !$_GET['authorid'] && !$_G['forum_thread']['archiveid']}-->
+					<mdui-button variant="text" href="forum.php?mod=viewthread&tid={$_G['tid']}&page={$page}&extra={$_GET['extra']}&ordertype={$ordertype}&authorid={$_G['forum_thread']['authorid']}">{lang viewonlyauthorid}</mdui-button>
+				<!--{elseif !$_G['forum_thread']['archiveid']}-->
+					<mdui-button variant="text" href="forum.php?mod=viewthread&tid={$_G['tid']}&page={$page}&extra={$_GET['extra']}&ordertype={$ordertype}">{lang thread_show_all}</mdui-button>
+				<!--{/if}-->
+				<!--{if !$rushreply}-->
+					<!--{if $ordertype != 1}-->
+						<mdui-button variant="text" href="forum.php?mod=viewthread&tid={$_G['tid']}&extra={$_GET['extra']}&ordertype=1<!--{if $_GET['authorid']}-->&authorid={$_GET['authorid']}<!--{/if}-->">{lang post_descview}</mdui-button>
+					<!--{else}-->
+						<mdui-button variant="text" href="forum.php?mod=viewthread&tid={$_G['tid']}&extra={$_GET['extra']}&ordertype=2<!--{if $_GET['authorid']}-->&authorid={$_GET['authorid']}<!--{/if}-->">{lang post_ascview}</mdui-button>
+					<!--{/if}-->
+				<!--{/if}-->
+			</div>
+		<!--{if !$_G['forum_thread']['allreplies']}-->
+			<div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang mobnoreply}</div>
+		<!--{/if}-->
+	<!--{/if}-->
+	<!--{/loop}-->
+
+	</div>
+	<!-- 自动加载只接管第 1 页；第 2 页及以后始终保留翻页。 -->
+	<!--{if $multipage && (!$_G['style']['mdui_thread_autoload'] || $page > 1)}-->
+	<div class="mdui-thread-pages">$multipage</div>
+	<script>
+	(function () {
+		function goPage(page) {
+			if (!page) return;
+			var url = 'forum.php?mod=viewthread&tid={$_G['tid']}&ordertype={$ordertype}&mobile=2';
+			<!--{if $_GET['extra']}-->url += '&extra={$_GET['extra']}';<!--{/if}-->
+			<!--{if $_GET['authorid']}-->url += '&authorid={$_GET['authorid']}';<!--{/if}-->
+			if (page != '1') url += '&page=' + page;
+			location.href = url;
+		}
+		function upgradePageSelect() {
+			var pageBox = document.querySelector('.mdui-thread-pages');
+			if (!pageBox) return;
+			pageBox.querySelectorAll('select:not([data-mdui-upgraded])').forEach(function (oldSelect) {
+				var select = document.createElement('mdui-select');
+				select.setAttribute('label', '选择页码');
+				select.setAttribute('value', oldSelect.value);
+				select.style.cssText = 'display:inline-block;min-width:7rem;vertical-align:middle;--mdui-menu-max-height:18rem';
+				Array.prototype.forEach.call(oldSelect.options, function (option) {
+					var item = document.createElement('mdui-menu-item');
+					item.value = option.value;
+					item.textContent = option.textContent;
+					if (option.selected) item.setAttribute('selected', '');
+					select.appendChild(item);
+				});
+				select.addEventListener('change', function () {
+					goPage(select.value);
+				});
+				oldSelect.replaceWith(select);
+			});
+		}
+		customElements.whenDefined('mdui-select').then(function () {
+			upgradePageSelect();
+			new MutationObserver(upgradePageSelect).observe(document.body, {childList:true, subtree:true});
+			setTimeout(upgradePageSelect, 100);
+			setTimeout(upgradePageSelect, 500);
+		});
+	})();
+	</script>
+	<!--{/if}-->
+</div>
+<!--{hook/viewthread_bottom_mobile}-->
+
+<!--{if $_G['style']['mdui_thread_autoload']}-->
+<!--{eval $vt_totalpage = max(1, ceil(($_G['forum_thread']['replies'] + 1) / $_G['ppp']));}-->
+<!--{if $vt_totalpage > $page}-->
+<mdui-card id="vt_load_more" variant="outlined" style="display:block;margin:0 1rem 1rem;padding:.75rem;text-align:center">
+	<mdui-button variant="text">{lang next_page}</mdui-button>
+</mdui-card>
+<script>
+(function () {
+	var box = document.getElementById('vt_load_more');
+	var list = document.getElementById('vt_post_list');
+	var page = {if $page}{echo intval($page) + 1}{else}2{/if};
+	var totalpage = {$vt_totalpage};
+	var loading = false;
+	var last = page > totalpage;
+	var button = box.querySelector('mdui-button');
+	if (last) box.remove();
+	function load() {
+		if (loading || last) return;
+		loading = true;
+		button.loading = true;
+		fetch('forum.php?mod=viewthread&tid={$_G['tid']}&page=' + page + '&ordertype={$ordertype}<!--{if $_GET['authorid']}-->&authorid={$_GET['authorid']}<!--{/if}-->&mobile=2', {credentials: 'same-origin'})
+			.then(function (r) { return r.text(); })
+			.then(function (html) {
+				var doc = new DOMParser().parseFromString(html, 'text/html');
+				var incoming = doc.getElementById('vt_post_list');
+				if (!incoming || !incoming.innerHTML.trim()) {
+					last = true;
+					box.remove();
+				} else {
+					list.insertAdjacentHTML('beforeend', incoming.innerHTML);
+					page++;
+					if (page > totalpage) {
+						last = true;
+						box.remove();
+					}
+				}
+			})
+			.catch(function () { mduiTip('加载失败，请重试', true); })
+			.then(function () {
+				loading = false;
+				button.loading = false;
+			});
+	}
+	button.addEventListener('click', load);
+	window.addEventListener('scroll', function () {
+		if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) load();
+	});
+})();
+</script>
+<!--{/if}-->
+<!--{/if}-->
+
+<mdui-bottom-app-bar style="position:fixed;bottom:0;left:0;right:0">
+	<!--{if helper_access::check_module('favorite')}-->
+		<!-- 收藏可取消：用 selectable 让 mdui 自己切换空心 star_border / 实心 star -->
+		<mdui-button-icon selectable icon="star_border" selected-icon="star" {if $vt_faved}selected{/if} id="vt_fav_btn" title="{lang favorite}"></mdui-button-icon>
+	<!--{/if}-->
+	<!--{if $page <= 1 && $_G['setting']['commentnumber']}-->
+		<mdui-button-icon icon="chat_bubble_outline" title="查看评论" href="#comment_{$_G['forum_firstpid']}"></mdui-button-icon>
+	<!--{/if}-->
+	<!--{if $vt_show_rec}-->
+		<!-- 点赞后端不允许取消（recommend_duplicate），已赞即固定实心并禁用；徽标显示点赞数 -->
+		<!-- badge 不能放进 button-icon 的 default slot（那是图标位），用外层容器定位 -->
+		<span style="position:relative;display:inline-flex">
+			<!-- disabled 会让图标变灰，已赞用 vt_recadded 保持主题色以示「已点赞」而非「不可用」 -->
+			<mdui-button-icon icon="{if $vt_recadd}thumb_up{else}thumb_up_off_alt{/if}" id="vt_rec_btn" title="{$_G['setting']['recommendthread']['addtext']}" {if $vt_recadd}disabled class="vt_recadded"{/if}></mdui-button-icon>
+			<mdui-badge id="vt_rec_badge" style="position:absolute;top:0;right:0;pointer-events:none{if !$_G['forum_thread']['recommend_add']};display:none{/if}">{$_G['forum_thread']['recommend_add']}</mdui-badge>
+		</span>
+	<!--{/if}-->
+	<!--{if helper_access::check_module('share')}-->
+		<mdui-button-icon icon="share" class="vt_form_dialog" data-title="{lang share}" data-url="home.php?mod=spacecp&ac=share&type=thread&id={$_G['tid']}"></mdui-button-icon>
+	<!--{/if}-->
+	<!--{if !$_G['forum']['disablecollect'] && helper_access::check_module('collection')}-->
+		<mdui-button-icon icon="bookmark_border" onclick="location.href='forum.php?mod=collection&action=edit&op=addthread&tid={$_G['tid']}'"></mdui-button-icon>
+	<!--{/if}-->
+	<div style="flex-grow:1"></div>
+	<mdui-fab icon="edit" onclick="location.href='forum.php?mod=post&action=reply&fid={$_G['fid']}&tid={$_G['tid']}&reppost={$_G['forum_firstpid']}&page={$page}'"></mdui-fab>
+</mdui-bottom-app-bar>
+
+<!--{if $modmenu['thread'] || $modmenu['post']}-->
+<mdui-dialog id="vt_mod_dlg" close-on-overlay-click close-on-esc>
+	<div id="vt_mod_body"></div>
+</mdui-dialog>
+<script>
+(function () {
+	var dlg = document.getElementById('vt_mod_dlg');
+	var body = document.getElementById('vt_mod_body');
+
+	// topicadmin 模块硬编码了 $_G['inajax'] = 1，直接跳会看到 XML 源码，
+	// 必须自己解开 <root><![CDATA[表单 HTML]]></root> 再塞进对话框
+	function unwrap(text) {
+		var doc = new DOMParser().parseFromString(text, 'text/xml');
+		var root = doc.querySelector('root');
+		return root ? root.textContent : '';
+	}
+
+	// showmessage 的返回里跟着 succeedhandle_xxx 的内联 script，
+	// 直接 textContent 会把脚本源码也念出来，得先摘掉 script 再取纯文本
+	function plain(html) {
+		var d = new DOMParser().parseFromString(html, 'text/html');
+		d.querySelectorAll('script').forEach(function (s) { s.remove(); });
+		return d.body.textContent.trim();
+	}
+
+	// default 的 topicadmin 表单是 PC 那套裸 input/select，塞进 mdui-dialog 里样式格格不入。
+	// 逐个换成对应的 MDUI 组件；打 data-mdui 标记保证幂等，因为移动/分类的下拉是
+	// ajaxget 异步塞进来的，得靠 MutationObserver 再跑一次
+	function mduify(scope) {
+		// 高亮的 B / I / U 是三个 <a onclick="switchhl(this,n)">，换成可选中的图标按钮，
+		// selected 直接读隐藏域当前值，点击仍转发给 switchhl 去改隐藏域
+		scope.querySelectorAll('.dopt a:not([data-mdui])').forEach(function (a) {
+			a.setAttribute('data-mdui', '1');
+			var n = (a.id.match(/(\d+)$/) || [])[1];
+			var hid = n && scope.querySelector('#highlight_style_' + n);
+			var bi = document.createElement('mdui-button-icon');
+			bi.selectable = true;
+			bi.selected = !!(hid && parseInt(hid.value));
+			bi.innerHTML = '<span style="font:' + (n === '2' ? 'italic ' : '') + '700 1rem/1 serif;' +
+				(n === '3' ? 'text-decoration:underline;' : '') + '">' + a.textContent.trim() + '</span>';
+			// switchhl 只认原生元素的 className，把隐藏的 a 传进去让它照常翻值
+			bi.addEventListener('click', function () { try { switchhl(a, parseInt(n)); } catch (e) {} });
+			a.style.display = 'none';
+			a.parentNode.insertBefore(bi, a);
+		});
+		scope.querySelectorAll('select:not([data-mdui])').forEach(function (sel) {
+			sel.setAttribute('data-mdui', '1');
+			var ms = document.createElement('mdui-select');
+			ms.variant = 'outlined';
+			ms.name = sel.name;
+			ms.value = sel.value;
+			ms.style.width = '100%';
+			// 高亮色下拉的 option 是纯色块没有文字，label 提示一下选的是什么
+			if (sel.id === 'highlight_color') ms.label = '颜色';
+			sel.querySelectorAll('option').forEach(function (op) {
+				var mi = document.createElement('mdui-menu-item');
+				mi.value = op.value;
+				var bg = op.style.background;
+				if (bg) {
+					// 颜色项渲染成色块，比念一串 #EE1B2E 直观
+					mi.innerHTML = '<span style="display:inline-block;width:2.5rem;height:1rem;' +
+						'border-radius:2px;background:' + bg + '"></span>';
+				} else {
+					mi.textContent = op.textContent.trim() || '{lang default}';
+				}
+				ms.appendChild(mi);
+			});
+			// onchange 里是 ajaxget(...) 联动（移动版块 → 拉取该版块分类），转发过去
+			if (sel.getAttribute('onchange')) {
+				var fn = sel.getAttribute('onchange');
+				ms.addEventListener('change', function () {
+					sel.value = ms.value;
+					try { window.eval(fn.replace(/\bthis\b/g, 'document.getElementById("' + sel.id + '")')); } catch (e) {}
+				});
+			}
+			// 原生 select 留着但藏起来，联动脚本要用 getID() 找到它写 options；
+			// disabled 让它不进 FormData，否则同名字段会重复提交（JS 读写 value 不受影响）
+			sel.style.display = 'none';
+			sel.disabled = true;
+			sel.parentNode.insertBefore(ms, sel);
+		});
+		scope.querySelectorAll('input[type=text]:not([data-mdui]), input[type=password]:not([data-mdui])').forEach(function (inp) {
+			var tf = document.createElement('mdui-text-field');
+			tf.variant = 'outlined';
+			tf.name = inp.name;
+			tf.value = inp.value;
+			tf.label = inp.placeholder || '';
+			tf.type = inp.type;
+			inp.parentNode.replaceChild(tf, inp);
+		});
+		scope.querySelectorAll('textarea:not([data-mdui])').forEach(function (ta) {
+			var tf = document.createElement('mdui-text-field');
+			tf.variant = 'outlined';
+			tf.name = ta.name;
+			tf.value = ta.value;
+			tf.rows = ta.rows > 1 ? ta.rows : 3;
+			ta.parentNode.replaceChild(tf, ta);
+		});
+		scope.querySelectorAll('input[type=checkbox]:not([data-mdui])').forEach(function (cb) {
+			var mc = document.createElement('mdui-checkbox');
+			mc.name = cb.name;
+			mc.value = cb.value;
+			mc.checked = cb.checked;
+			mc.disabled = cb.disabled;
+			// 勾选项的文字同样在同一行的 .tit 里
+			var tit = cb.closest('li') && cb.closest('li').querySelector('.tit');
+			if (tit) {
+				mc.textContent = tit.textContent.trim();
+				tit.remove();
+			}
+			cb.parentNode.replaceChild(mc, cb);
+		});
+		// radio 按 name 分组：mdui-radio-group 要求 mdui-radio 是它的直接子元素，
+		// 而 default 模板把 radio 拆散在各 <li> 里，只能整组重建后插回原位
+		var radios = {};
+		scope.querySelectorAll('input[type=radio]').forEach(function (rd) {
+			(radios[rd.name] = radios[rd.name] || []).push(rd);
+		});
+		Object.keys(radios).forEach(function (name) {
+			var group = document.createElement('mdui-radio-group');
+			group.name = name;
+			group.style.display = 'block';
+			var list = radios[name];
+			var box = list[0].closest('ul') || list[0].parentNode;
+			list.forEach(function (rd) {
+				var li = rd.closest('li');
+				var mr = document.createElement('mdui-radio');
+				mr.value = rd.value;
+				mr.style.display = 'block';
+				// 选项文字在同一行的 .tit 里
+				var tit = li && li.querySelector('.tit');
+				mr.textContent = tit ? tit.textContent.trim() : rd.value;
+				if (rd.checked) group.value = rd.value;
+				// 升降那组把 switchitemcp() 挂在外层 <label> 的 onclick 上，转发过来
+				var row = li && li.parentNode.tagName === 'LABEL' ? li.parentNode : li;
+				var act = row && row.getAttribute ? row.getAttribute('onclick') : '';
+				if (act) mr.addEventListener('click', function () { try { window.eval(act); } catch (e) {} });
+				group.appendChild(mr);
+				row ? row.remove() : rd.remove();
+			});
+			box.parentNode.insertBefore(group, box);
+		});
+		// 提交按钮换 mdui-button 挪到 dialog 的 action 槽
+		scope.querySelectorAll('input[type=submit]').forEach(function (sb) {
+			var form = scope.querySelector('form');
+			var mb = document.createElement('mdui-button');
+			mb.variant = 'tonal';
+			mb.textContent = sb.value;
+			mb.slot = 'action';
+			mb.addEventListener('click', function () { form.requestSubmit(); });
+			sb.remove();
+			dlg.appendChild(mb);
+		});
+	}
+
+	function fill(html, title) {
+		body.innerHTML = html;
+		// 上一次留在 dialog 上的 action 按钮要清掉，否则会越点越多
+		dlg.querySelectorAll('mdui-button[slot=action]').forEach(function (b) { b.remove(); });
+		// 标题在表单里，提出来放到 dialog 的 headline；
+		// 开关帖（optgroup=4）那一支 default 模板没给 h2，退回用菜单项文字
+		var h2 = body.querySelector('h2');
+		dlg.headline = h2 ? h2.textContent.trim() : (title || '');
+		if (h2) h2.remove();
+		var form = body.querySelector('form');
+		if (form) form.addEventListener('submit', submit);
+		// 移动/分类里的联动脚本（getthreadtypes）靠内联 script，innerHTML 不执行，手动跑
+		body.querySelectorAll('script').forEach(function (s) {
+			try { window.eval(s.textContent); } catch (e) {}
+		});
+		// 转 MDUI 组件放在联动脚本之后，避免脚本写 select.options 时组件已生成
+		mduify(body);
+		// 移动的分类下拉是 ajaxget 异步塞进来的，晚到的节点补转一次（mduify 幂等）
+		new MutationObserver(function () { mduify(body); }).observe(body, {childList: true, subtree: true});
+		// default 的取消按钮调 popup.close()，这里换成关本对话框
+		body.querySelectorAll('[onclick*="popup.close"]').forEach(function (a) {
+			var mb = document.createElement('mdui-button');
+			mb.variant = 'text';
+			mb.textContent = a.textContent.trim();
+			mb.slot = 'action';
+			mb.addEventListener('click', function () { dlg.open = false; });
+			a.remove();
+			dlg.insertBefore(mb, dlg.querySelector('mdui-button[slot=action]'));
+		});
+		dlg.open = true;
+	}
+
+	function submit(e) {
+		e.preventDefault();
+		var form = e.target;
+		fetch(form.action + '&handlekey=' + form.id + '&inajax=1', {
+			method: 'POST',
+			body: new FormData(form),
+			credentials: 'same-origin'
+		}).then(function (r) {
+			return r.text();
+		}).then(function (t) {
+			// 成功时返回的是 showmessage 的提示 HTML，取纯文本弹 snackbar 后刷新
+			dlg.open = false;
+			mduiTip(plain(unwrap(t)));
+			setTimeout(function () { location.reload(); }, 1000);
+		}).catch(function () {
+			dlg.open = false;
+			mduiTip('操作失败，请重试', true);
+		});
+	}
+
+	// mdui-menu-item 的点击是内部 <a> 发出的，绑在宿主元素上收不到，
+	// 所以统一用 document 级委托拦截，靠 closest 找回菜单项
+	document.addEventListener('click', function (e) {
+		var item = e.target.closest ? e.target.closest('.vt_modact') : null;
+		if (!item) return;
+		e.preventDefault();
+		var url = item.getAttribute('href');
+		fetch(url, {credentials: 'same-origin'})
+			.then(function (r) { return r.text(); })
+			.then(function (t) {
+				var html = unwrap(t);
+				// repair 之类没有表单、直接返回提示文本的操作，弹提示就够了
+				html.indexOf('<form') < 0 ? (mduiTip(plain(html)), setTimeout(function () { location.reload(); }, 1000)) : fill(html, item.textContent.trim());
+			})
+			.catch(function () { location.href = url; });
+	});
+})();
+</script>
+<!--{/if}-->
+
+<!--{if $_G['uid']}-->
+<mdui-dialog id="vt_magic_dlg" close-on-overlay-click close-on-esc style="--mdui-dialog-max-width:min(92vw, 34rem);--mdui-dialog-max-height:calc(100dvh - 2rem);contain:layout">
+	<div id="vt_magic_body" style="box-sizing:border-box;width:100%;max-width:100%"></div>
+</mdui-dialog>
+<script>
+(function () {
+	var dlg = document.getElementById('vt_magic_dlg');
+	var body = document.getElementById('vt_magic_body');
+
+	function parseResponse(html) {
+		var xml = new DOMParser().parseFromString(html, 'text/xml');
+		var root = xml.querySelector('root');
+		if (root) html = root.textContent;
+		return new DOMParser().parseFromString(html, 'text/html');
+	}
+	function resultText(doc, fallback) {
+		var source = doc.querySelector('#messagetext, .alert_error, .alert_info, .tip, .c');
+		if (source) source.querySelectorAll('script, style').forEach(function (node) { node.remove(); });
+		return ((source || doc.body).textContent || '').replace(/\s+/g, ' ').trim() || fallback;
+	}
+	function showResult(scope, doc, fallback) {
+		scope.innerHTML = '<div style="padding:1rem">' + resultText(doc, fallback) + '</div>';
+	}
+	function mduify(scope) {
+		var dialog = scope.closest('mdui-dialog');
+		if (dialog) dialog.querySelectorAll('mdui-button[data-vt-action]').forEach(function (button) { button.remove(); });
+		scope.querySelectorAll('input:not([type="hidden"]), textarea, select, button').forEach(function (el) {
+			if (el.closest('[data-vt-mdui]')) return;
+			var replacement;
+			if (el.type === 'submit' || el.type === 'button') {
+				var hidden = document.createElement('input');
+				hidden.type = 'hidden';
+				hidden.name = el.name;
+				hidden.value = el.value || 'yes';
+				el.replaceWith(hidden);
+				return;
+			} else if (el.tagName === 'SELECT') {
+				if (el.classList.contains('select_change')) {
+					var target = el.form && el.form.querySelector('[name="' + el.id.replace(/_change$/, '') + '"]');
+					if (target) {
+						el.addEventListener('change', function () { target.value = el.value; });
+					}
+					el.remove();
+					return;
+				}
+				replacement = document.createElement('mdui-select');
+				replacement.name = el.name;
+				replacement.value = el.value;
+				replacement.label = el.name || '';
+				Array.prototype.forEach.call(el.options, function (option) {
+					var item = document.createElement('mdui-menu-item');
+					item.value = option.value;
+					item.textContent = option.textContent;
+					if (option.selected) item.setAttribute('selected', '');
+					replacement.appendChild(item);
+				});
+			} else if (el.tagName === 'BUTTON') {
+				var buttonForm = el.form;
+				var buttonHidden = document.createElement('input');
+				buttonHidden.type = 'hidden';
+				buttonHidden.name = el.name;
+				buttonHidden.value = el.value || 'yes';
+				el.replaceWith(buttonHidden);
+				replacement = document.createElement('mdui-button');
+				replacement.type = 'button';
+				replacement.textContent = el.textContent.trim() || el.value;
+				replacement.variant = 'tonal';
+				replacement.style.cssText = 'display:flex !important;width:100%;min-height:44px;margin:0';
+				if (buttonForm) replacement.addEventListener('click', function () { buttonForm.requestSubmit(); });
+				var buttonActions = scope.querySelector('.vt_form_actions');
+				if (!buttonActions) {
+					buttonActions = document.createElement('div');
+					buttonActions.className = 'vt_form_actions';
+					scope.appendChild(buttonActions);
+				}
+				buttonActions.appendChild(replacement);
+				return;
+			} else if (el.type === 'checkbox') {
+				replacement = document.createElement('mdui-checkbox');
+				replacement.name = el.name;
+				replacement.value = el.value || '1';
+				replacement.checked = el.checked;
+				replacement.textContent = el.parentElement ? el.parentElement.textContent.trim() : '';
+			} else {
+				replacement = document.createElement('mdui-text-field');
+				replacement.name = el.name;
+				replacement.value = el.value;
+				replacement.type = el.name === 'magicnum' || el.type === 'number' ? 'number' : 'text';
+				replacement.label = el.name === 'magicnum' ? '购买数量' : (el.placeholder || el.name || '');
+				if (el.name === 'magicnum') replacement.min = 1;
+				if (el.tagName === 'TEXTAREA') replacement.rows = 3;
+			}
+			replacement.setAttribute('data-vt-mdui', '1');
+			if (replacement.getAttribute('data-vt-action') && dialog) {
+				el.remove();
+				dialog.appendChild(replacement);
+			} else {
+				el.replaceWith(replacement);
+			}
+		});
+		scope.querySelectorAll('table, .f_c, .o, .tfm').forEach(function (el) {
+			el.style.display = 'block';
+			el.style.margin = '.5rem 0';
+		});
+	}
+	window.vtMduiParse = parseResponse;
+	window.vtMduiShowResult = showResult;
+	window.vtMduiify = mduify;
+	function load(url, kind) {
+		var target = kind === 'magic' ? body : document.getElementById('vt_rate_body');
+		target.innerHTML = '<div style="padding:1rem;text-align:center">正在加载…</div>';
+		if (kind === 'magic') dlg.open = true;
+		fetch(url + '&infloat=yes&inajax=1&mobile=2', {credentials: 'same-origin'})
+			.then(function (r) { return r.text(); })
+			.then(function (html) {
+				var doc = parseResponse(html);
+				var form = doc.querySelector('form');
+				if (!form) {
+					showResult(target, doc, '操作无法继续');
+					return;
+				}
+				var sourceDialog = doc.querySelector('mdui-dialog');
+				if (kind === 'magic' && sourceDialog) {
+					dlg.innerHTML = sourceDialog.innerHTML;
+					dlg.querySelectorAll('mdui-button[onclick*="history.back"]').forEach(function (button) {
+					button.removeAttribute('onclick');
+					button.addEventListener('click', function () { dlg.open = false; });
+				});
+				return;
+				}
+				form.removeAttribute('onsubmit');
+				target.innerHTML = form.outerHTML;
+				mduify(target);
+				// 评分理由由后端生成 <li>，在当前页插入表单后转为 MDUI 菜单项。
+				var reasonSource = target.querySelector('#reason_options');
+				var reasonMenu = target.querySelector('#reason_menu');
+				if (reasonSource && reasonMenu) {
+					Array.prototype.forEach.call(reasonSource.querySelectorAll('li'), function (li) {
+						var text = li.textContent.trim();
+						if (!text) return;
+						var item = document.createElement('mdui-menu-item');
+						item.dataset.reason = text;
+						item.textContent = text;
+						reasonMenu.appendChild(item);
+					});
+					reasonMenu.addEventListener('click', function (event) {
+						var path = event.composedPath ? event.composedPath() : [];
+						var item = path.find(function (node) { return node && node.matches && node.matches('mdui-menu-item[data-reason]'); });
+						if (!item) return;
+						var reason = target.querySelector('#reason');
+						if (reason) reason.value = item.dataset.reason;
+					});
+					reasonSource.remove();
+				}
+			})
+			.catch(function () { target.innerHTML = '<div style="padding:1rem">页面加载失败，请重试。</div>'; });
+	}
+	function submitForm(form) {
+		var target = form.closest('#vt_magic_body, #vt_rate_body');
+		var original = target.innerHTML;
+		var data = new FormData(form);
+		var url = form.action + (form.action.indexOf('?') === -1 ? '?' : '&') + 'inajax=1&ajaxdata=json&mobile=2';
+		target.innerHTML = '<div style="padding:1rem;text-align:center">正在提交…</div>';
+		fetch(url, {method: 'POST', body: data, credentials: 'same-origin'})
+			.then(function (r) { return r.text(); })
+			.then(function (html) {
+				var data;
+				try { data = JSON.parse(html); } catch (ignore) {}
+				var message = data && data.message ? data.message : resultText(parseResponse(html), '操作已提交');
+				if (target === body) {
+					mduiTip(message, /^抱歉|失败|错误/.test(message));
+					dlg.open = false;
+					return;
+				}
+				if (message === '请输入正确的分值') {
+					target.innerHTML = original;
+					mduiTip(message, true);
+					return;
+				}
+				target.innerHTML = '<div style="padding:1rem">' + message + '</div>';
+			})
+			.catch(function () {
+				if (target === body) {
+					mduiTip('提交失败，请重试。', true);
+					return;
+				}
+				target.innerHTML = '<div style="padding:1rem">提交失败，请重试。</div>';
+			});
+	}
+	window.vtMduiSubmit = submitForm;
+	document.addEventListener('click', function (e) {
+		var floor = e.target.closest ? e.target.closest('.vt_floor_link') : null;
+		if (!floor && e.composedPath) {
+			floor = e.composedPath().find(function (node) {
+				return node && node.matches && node.matches('.vt_floor_link');
+			});
+		}
+		if (floor) {
+			e.preventDefault();
+			var url = new URL(floor.dataset.copyUrl, location.href).href;
+			if (navigator.clipboard && window.isSecureContext) {
+				navigator.clipboard.writeText(url).then(function () {
+					mduiTip('本楼链接已复制');
+				}).catch(function () { mduiTip(url); });
+			} else {
+				var input = document.createElement('textarea');
+				input.value = url;
+				document.body.appendChild(input);
+				input.select();
+				document.execCommand('copy');
+				input.remove();
+				mduiTip('本楼链接已复制');
+			}
+			return;
+		}
+		var item = e.target.closest ? e.target.closest('.vt_magic') : null;
+		if (!item) return;
+		e.preventDefault();
+		load(item.getAttribute('data-url'), 'magic');
+	});
+	document.addEventListener('submit', function (e) {
+		var form = e.target.closest ? e.target.closest('#vt_magic_body form, #vt_rate_body form') : null;
+		if (!form) return;
+		e.preventDefault();
+		submitForm(form);
+	});
+})();
+</script>
+
+<mdui-dialog id="vt_form_dlg" close-on-overlay-click close-on-esc>
+	<div id="vt_form_body"></div>
+</mdui-dialog>
+<script>
+(function () {
+	var dlg = document.getElementById('vt_form_dlg'), body = document.getElementById('vt_form_body');
+	function text(html) {
+		var doc = new DOMParser().parseFromString(html, 'text/html');
+		doc.querySelectorAll('script').forEach(function (item) { item.remove(); });
+		return doc.body.textContent.trim();
+	}
+	document.addEventListener('click', function (e) {
+		var item = e.target.closest ? e.target.closest('.vt_form_dialog') : null;
+		if (!item) return;
+		e.preventDefault();
+		dlg.headline = item.dataset.title || '';
+		body.innerHTML = '<div style="padding:1rem;text-align:center">正在加载…</div>';
+		dlg.open = true;
+		fetch(item.dataset.url + '&infloat=yes&inajax=1&mobile=2', {credentials: 'same-origin'})
+			.then(function (r) { return r.text(); })
+			.then(function (html) {
+				var doc = new DOMParser().parseFromString(html, 'text/html'), form = doc.querySelector('form');
+				if (!form) { body.innerHTML = '<div style="padding:1rem">' + text(html) + '</div>'; return; }
+				form.removeAttribute('onsubmit');
+				body.innerHTML = form.outerHTML;
+				form = body.querySelector('form');
+				form.addEventListener('submit', function (submitEvent) {
+					submitEvent.preventDefault();
+					mduiPost(form.action, Object.fromEntries(new FormData(form)), function () { dlg.open = false; location.reload(); });
+				});
+			})
+			.catch(function () { body.innerHTML = '<div style="padding:1rem">表单加载失败，请重试。</div>'; });
+	});
+})();
+</script>
+
+<mdui-dialog id="vt_rate_dlg" close-on-overlay-click close-on-esc headline="打赏" style="--mdui-dialog-max-width:min(92vw, 34rem);--mdui-dialog-max-height:calc(100dvh - 2rem)">
+	<div id="vt_rate_body" style="box-sizing:border-box;width:100%;max-width:100%"></div>
+	<mdui-button id="vt_rate_cancel" slot="action" variant="text" style="display:none">取消</mdui-button>
+	<mdui-button id="vt_rate_submit" slot="action" variant="tonal" style="display:none">确认打赏</mdui-button>
+</mdui-dialog>
+<script>
+(function () {
+	var dlg = document.getElementById('vt_rate_dlg');
+	var body = document.getElementById('vt_rate_body');
+	var cancel = document.getElementById('vt_rate_cancel');
+	var submit = document.getElementById('vt_rate_submit');
+	cancel.addEventListener('click', function () { dlg.open = false; });
+	submit.addEventListener('click', function () {
+		var form = body.querySelector('form');
+		if (form && window.vtMduiSubmit) window.vtMduiSubmit(form);
+	});
+	document.addEventListener('click', function (e) {
+		var item = e.target.closest ? e.target.closest('.vt_rate') : null;
+		if (!item) return;
+		e.preventDefault();
+		cancel.style.display = 'none';
+		submit.style.display = 'none';
+		body.innerHTML = '<div style="padding:1rem;text-align:center">正在加载打赏表单…</div>';
+		dlg.open = true;
+		fetch(item.getAttribute('data-url') + '&infloat=yes&inajax=1&mobile=2', {credentials: 'same-origin'})
+			.then(function (r) { return r.text(); })
+			.then(function (html) {
+				var doc = window.vtMduiParse ? window.vtMduiParse(html) : new DOMParser().parseFromString(html, 'text/html');
+				var form = doc.getElementById('rateform') || doc.querySelector('form');
+				if (!form) {
+					if (window.vtMduiShowResult) window.vtMduiShowResult(body, doc, '无法打开打赏表单');
+					else body.innerHTML = '<div style="padding:1rem">无法打开打赏表单</div>';
+					return;
+				}
+				form.removeAttribute('onsubmit');
+				var title = form.querySelector('.log_tit');
+				if (title) title.textContent = '打赏';
+				body.innerHTML = form.outerHTML;
+				if (window.vtMduiify) window.vtMduiify(body);
+				cancel.style.display = 'inline-flex';
+				submit.style.display = 'inline-flex';
+			})
+			.catch(function () { body.innerHTML = '<div style="padding:1rem">打赏表单加载失败，请重试。</div>'; });
+	});
+})();
+</script>
+
+<mdui-dialog id="vt_rep_dlg" close-on-overlay-click close-on-esc headline="{lang report}">
+	<div style="font-size:.875rem;opacity:.7;margin-bottom:.5rem">{lang report_reason}</div>
+	<mdui-radio-group id="vt_rep_reasons" style="display:block"></mdui-radio-group>
+	<mdui-text-field id="vt_rep_other" style="display:none;margin-top:.5rem" variant="outlined" rows="3" maxlength="200" counter label="{lang report_reason_other}"></mdui-text-field>
+	<mdui-button slot="action" variant="text" id="vt_rep_cancel">{lang cancel}</mdui-button>
+	<mdui-button slot="action" variant="tonal" id="vt_rep_ok">{lang confirms}</mdui-button>
+</mdui-dialog>
+<script>
+(function () {
+	var dlg = document.getElementById('vt_rep_dlg');
+	var group = document.getElementById('vt_rep_reasons');
+	var other = document.getElementById('vt_rep_other');
+	// 举报理由在语言包里就是个 JS 数组字面量，最后一项是“其他”，选中它才让填自定义内容
+	var reasons = {lang report_reason_message};
+	var pid = 0;
+	reasons.forEach(function (r) {
+		var mr = document.createElement('mdui-radio');
+		mr.value = r;
+		mr.style.cssText = 'display:flex;align-items:center;min-height:2.75rem';
+		mr.textContent = r;
+		group.appendChild(mr);
+	});
+	group.addEventListener('change', function () {
+		other.style.display = group.value === reasons[reasons.length - 1] ? '' : 'none';
+	});
+
+	// mdui-menu-item 的点击由内部 <a> 发出，绑宿主收不到，统一走 document 级委托
+	document.addEventListener('click', function (e) {
+		var item = e.target.closest ? e.target.closest('.vt_report') : null;
+		if (!item) return;
+		e.preventDefault();
+		pid = item.getAttribute('data-pid');
+		group.value = '';
+		other.value = '';
+		other.style.display = 'none';
+		dlg.open = true;
+	});
+
+	document.getElementById('vt_rep_cancel').addEventListener('click', function () {
+		dlg.open = false;
+	});
+	document.getElementById('vt_rep_ok').addEventListener('click', function () {
+		var last = reasons[reasons.length - 1];
+		var msg = group.value === last ? other.value.trim() : group.value;
+		if (!msg) {
+			mduiTip(group.value === last ? '{lang report_reason_other}' : '{lang report_reason}', true);
+			return;
+		}
+		dlg.open = false;
+		// misc_report.php 要求 inajax 非空，mduiPost 已自动带上，不能整页跳转
+		mduiPost(
+			'misc.php?mod=report&rtype=post&rid=' + pid + '&tid={$_G['tid']}&fid={$_G['fid']}',
+			{reportsubmit: 'true', message: msg}
+		);
+	});
+})();
+</script>
+<!--{/if}-->
+
+<!--{if $_G['forum_thread']['special'] == 3}-->
+<script>
+// 选最佳答案不可撤销，走 mdui.confirm 二次确认（default 里也是 confirm 之后才提交）。
+// mdui-button 带 href 时点击由内部 <a> 发出，所以同样用 document 级委托拦
+document.addEventListener('click', function (e) {
+	var btn = e.target.closest ? e.target.closest('.vt_bestanswer') : null;
+	if (!btn) return;
+	e.preventDefault();
+	mdui.confirm({
+		headline: '{lang reward_set_bestanswer}',
+		description: '您确认要把该回复选为“最佳答案”吗？',
+		confirmText: '{lang submit}',
+		cancelText: '{lang cancel}',
+		onConfirm: function () { mduiGet(btn.getAttribute('href'), function () { location.reload(); }); }
+	});
+});
+</script>
+<!--{/if}-->
+
+<!--{if helper_access::check_module('favorite')}-->
+<mdui-dialog id="vt_fav_dlg" close-on-overlay-click headline="{lang favorite}">
+	<div style="font-size:.875rem;opacity:.7;margin-bottom:.75rem">{lang favorite_thread_confirm}<!--{echo cutstr($_G['forum_thread']['subject'], 60, '')}--></div>
+	<mdui-text-field id="vt_fav_desc" label="{lang description}" rows="2" variant="outlined" maxlength="255" counter></mdui-text-field>
+	<mdui-button slot="action" variant="text" id="vt_fav_cancel">{lang cancel}</mdui-button>
+	<mdui-button slot="action" variant="tonal" id="vt_fav_ok">{lang submit}</mdui-button>
+</mdui-dialog>
+<script>
+(function () {
+	var btn = document.getElementById('vt_fav_btn');
+	var dlg = document.getElementById('vt_fav_dlg');
+	var desc = document.getElementById('vt_fav_desc');
+	var faved = {if $vt_faved}true{else}false{/if};
+	var favid = '{if $vt_faved}{$vt_faved['favid']}{/if}';
+	var uid = {if $_G['uid']}{$_G['uid']}{else}0{/if};
+	btn.addEventListener('click', function () {
+		if (!uid) {
+			location.href = 'member.php?mod=logging&action=login';
+			return;
+		}
+		// selectable 会在点击时自行切换 selected，请求发出前先还原，等结果确定再置位
+		btn.selected = faved;
+		if (faved) {
+			// 取消收藏
+			mduiPost(
+				'home.php?mod=spacecp&ac=favorite&op=delete&favid=' + favid + '&type=thread',
+				{deletesubmit: 'true'},
+				function () { faved = false; btn.selected = false; }
+			);
+			return;
+		}
+		desc.value = '';
+		dlg.open = true;
+	});
+	document.getElementById('vt_fav_cancel').addEventListener('click', function () {
+		dlg.open = false;
+	});
+	document.getElementById('vt_fav_ok').addEventListener('click', function () {
+		dlg.open = false;
+		// 注意别把 formhash 放进 URL：spacecp_favorite.php 见到 type=thread 且 GET 带 formhash
+		// 会跳过备注直接入库，备注就丢了。只用 POST 提交
+		mduiPost(
+			'home.php?mod=spacecp&ac=favorite&type=thread&id={$_G['tid']}',
+			{favoritesubmit: 'true', description: desc.value},
+			function () { faved = true; btn.selected = true; }
+		);
+	});
+})();
+</script>
+<!--{/if}-->
+
+<!--{if !empty($_G['setting']['recommendthread']['status'])}-->
+<script>
+(function () {
+	document.addEventListener('click', function (e) {
+		var btn = e.target.closest ? e.target.closest('.vt_recommend') : null;
+		if (!btn) return;
+		e.preventDefault();
+		if (btn.disabled) return;
+		var action = btn.getAttribute('data-do');
+		mduiGet(
+			'forum.php?mod=misc&action=recommend&do=' + action + '&tid={$_G['tid']}&hash={FORMHASH}',
+			function () {
+				var count = document.getElementById('recommendv_' + action);
+				if (count) count.textContent = parseInt(count.textContent || '0', 10) + 1;
+				btn.disabled = true;
+			}
+		);
+	});
+
+	var btn = document.getElementById('vt_rec_btn');
+	if (!btn) return;
+	var recadd = {if $vt_recadd}true{else}false{/if};
+	var uid = {if $_G['uid']}{$_G['uid']}{else}0{/if};
+	btn.addEventListener('click', function () {
+		if (!uid) {
+			location.href = 'member.php?mod=logging&action=login';
+			return;
+		}
+		if (recadd) return;
+		mduiGet(
+			'forum.php?mod=misc&action=recommend&do=add&tid={$_G['tid']}&hash={FORMHASH}',
+			function (j) {
+				// json 通道只回 message，无成败字段；只有 recommend_succeed / recommend_daycount_succeed
+				// 两条成功文案带 id="recommentv"，据此区分，避免「不能评价自己的帖子」也被当成成功
+				if (!j || !j.message || j.message.indexOf('recommentv') < 0) return;
+				recadd = true;
+				btn.icon = 'thumb_up';
+				// 后端不支持取消点赞，成功后禁用按钮但保持主题色
+				btn.disabled = true;
+				btn.classList.add('vt_recadded');
+				var badge = document.getElementById('vt_rec_badge');
+				if (badge) {
+					// 后端返回的 recommendc 是自增前的旧值，不能采信，本地 +1
+					badge.textContent = parseInt(badge.textContent || '0', 10) + 1;
+					badge.style.display = '';
+				}
+				var count = document.getElementById('recommendv_add');
+				if (count) count.lastChild.textContent = ' ' + (parseInt(count.lastChild.textContent || '0', 10) + 1);
+			}
+		);
+	});
+})();
+</script>
+<!--{/if}-->
+
+<!--{template common/footer}-->

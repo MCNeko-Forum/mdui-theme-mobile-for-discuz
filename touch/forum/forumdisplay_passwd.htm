@@ -1,0 +1,21 @@
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{eval echo strip_tags($_G['forum']['name']);}--></mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="home" href="portal.php?mod=index"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<mdui-dialog open close-on-esc close-on-overlay-click headline="{lang forum_password_require}">
+	<form method="post" autocomplete="off" action="forum.php?mod=forumdisplay&fid={$_G['fid']}&action=pwverify">
+		<div slot="description">
+			<mdui-text-field name="pw" type="password" label="{lang forum_password_require}" required autofocus></mdui-text-field>
+		</div>
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<mdui-button slot="action" type="button" variant="text" onclick="history.back()">{lang cancel}</mdui-button>
+		<mdui-button slot="action" type="submit" variant="text" name="loginsubmit" value="true">{lang submit}</mdui-button>
+	</form>
+</mdui-dialog>
+
+<!--{template common/footer}-->

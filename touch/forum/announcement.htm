@@ -1,0 +1,52 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang announcement}</mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="home" data-href="portal.php?mod=index"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<style>
+	.mdui-announcement-page { padding:0 1rem 1.5rem; }
+	.mdui-announcement-months { margin:0 -1rem 1rem; overflow-x:auto; }
+	.mdui-announcement-months mdui-tabs { min-width:max-content; }
+	.mdui-announcement-list { display:grid; gap:.75rem; }
+	.mdui-announcement-card { display:block; overflow:hidden; }
+	.mdui-announcement-toggle { display:block; width:100%; }
+	.mdui-announcement-toggle::part(button) { display:flex; width:100%; height:auto; min-height:0; padding:1rem; color:inherit; text-align:left; white-space:normal; }
+	.mdui-announcement-title { min-width:0; flex:1; font-weight:600; line-height:1.5; overflow-wrap:anywhere; }
+	.mdui-announcement-meta { display:flex; flex-wrap:wrap; gap:.25rem .75rem; padding:0 1rem 1rem; color:rgb(var(--mdui-color-on-surface-variant)); font-size:.8125rem; }
+	.mdui-announcement-message { padding:1rem; border-top:1px solid rgb(var(--mdui-color-outline-variant)); line-height:1.7; overflow-wrap:anywhere; }
+	.mdui-announcement-message img { max-width:100%; height:auto; }
+</style>
+
+<div class="mdui-announcement-page">
+	<div class="mdui-announcement-months">
+		<mdui-tabs value="<!--{if $_GET['m']}-->$_GET['m']<!--{else}-->all<!--{/if}-->">
+			<mdui-tab value="all" data-href="forum.php?mod=announcement">{lang all}</mdui-tab>
+			<!--{loop $months $month}-->
+				<!--{eval $mdui_month_value = $month[0].$month[1]; $mdui_month_label = $month[0].$lang['year'].$month[1].$lang['month'];}-->
+				<mdui-tab value="$mdui_month_value" data-href="forum.php?mod=announcement&m=$mdui_month_value">$mdui_month_label</mdui-tab>
+			<!--{/loop}-->
+		</mdui-tabs>
+	</div>
+
+	<div class="mdui-announcement-list">
+		<!--{eval $mdui_announcement_index = 0;}-->
+		<!--{loop $announcelist $ann}-->
+			<!--{eval $mdui_announcement_index++;}-->
+			<mdui-card variant="outlined" class="mdui-announcement-card">
+				<mdui-button class="mdui-announcement-toggle" variant="text" id="mdui_announcement_toggle_{$ann['id']}" type="button" onclick="var content=document.getElementById('mdui_announcement_content_{$ann['id']}');var icon=document.getElementById('mdui_announcement_icon_{$ann['id']}');var expanded=content.hidden;content.hidden=!expanded;icon.name=expanded?'expand_less':'expand_more';">
+					<span class="mdui-announcement-title">$ann['subject']</span>
+					<mdui-icon id="mdui_announcement_icon_{$ann['id']}" name="<!--{if $mdui_announcement_index == 1 && !$annid || $ann['id'] == $annid}-->expand_less<!--{else}-->expand_more<!--{/if}-->"></mdui-icon>
+				</mdui-button>
+				<div class="mdui-announcement-meta"><span>{lang author}：<a href="home.php?mod=space&username=$ann['authorenc']&do=profile">$ann['author']</a></span><span>$ann['starttime']</span><!--{if $ann['endtime']}--><span>至 $ann['endtime']</span><!--{/if}--></div>
+				<div id="mdui_announcement_content_{$ann['id']}" class="mdui-announcement-message"<!--{if !($mdui_announcement_index == 1 && !$annid || $ann['id'] == $annid)}--> hidden<!--{/if}-->>$ann['message']</div>
+			</mdui-card>
+		<!--{/loop}-->
+	</div>
+</div>
+
+<!--{template common/footer}-->

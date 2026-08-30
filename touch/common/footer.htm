@@ -1,0 +1,211 @@
+<!--{hook/global_footer_mobile}-->
+<!--{if $_G['style']['mdui_footer']}--><!--{eval $mdui_footer = htmlspecialchars_decode($_G['style']['mdui_footer'], ENT_QUOTES);}-->$mdui_footer<!--{/if}-->
+
+<!--{if !$nofooter}-->
+<div style="height:80px"></div>
+<mdui-navigation-bar value="{if $_G['basescript'] == 'group'}group{elseif $_G['basescript'] == 'forum' && ($_GET['mod'] == 'misc' || $_GET['mod'] == 'post')}post{elseif $_G['basescript'] == 'home' && $_GET['mycenter'] == 1}my{elseif $_G['basescript'] == 'portal' && CURMODULE == 'index'}home{elseif $_G['basescript'] == 'forum'}forum{else}home{/if}" style="position:fixed;left:0;right:0;bottom:0;z-index:100">
+	<!-- 手机版首页固定走门户，桌面版仍按后台的 defaultindex（论坛）走 -->
+	<mdui-navigation-bar-item value="home" icon="home" href="portal.php?mod=index">{lang mobhome}</mdui-navigation-bar-item>
+	<mdui-navigation-bar-item value="forum" icon="forum" href="<!--{if $_G['setting']['mobile']['forum']['index'] > 1}-->forum.php<!--{elseif $_G['setting']['mobile']['forum']['index'] == 1}-->forum.php?mod=guide&view=newthread<!--{else}-->forum.php?forumlist=1<!--{/if}-->">{$_G['setting']['navs'][2]['navname']}</mdui-navigation-bar-item>
+	<!--{if $_G['uid']}-->
+	<mdui-navigation-bar-item value="post" icon="add_circle" onclick="var s = document.getElementById('mdui_post_sheet'); s.open = !s.open;">{lang mobpost}</mdui-navigation-bar-item>
+	<!--{else}-->
+	<mdui-navigation-bar-item value="post" icon="add_circle" href="member.php?mod=logging&action=login">{lang login}</mdui-navigation-bar-item>
+	<!--{/if}-->
+	<mdui-navigation-bar-item value="group" icon="groups" href="group.php?mod=index">{$_G['setting']['navs'][3]['navname']}</mdui-navigation-bar-item>
+	<mdui-navigation-bar-item value="my" icon="person" href="{if $_G['uid']}home.php?mod=space&uid={$_G['uid']}&do=profile&mycenter=1{else}member.php?mod=logging&action=login{/if}">
+		{lang mobmy}
+		<!--{if $_G['uid'] && ($_G['member']['newpm'] || $_G['member']['newprompt'])}--><mdui-badge slot="badge"></mdui-badge><!--{/if}-->
+	</mdui-navigation-bar-item>
+</mdui-navigation-bar>
+
+<!-- 发布面板：mdui 没有 bottom-sheet，用 dialog 定位到底部复用它的遮罩和动画 -->
+<!--{if $_G['uid']}-->
+<mdui-dialog id="mdui_post_sheet" close-on-esc close-on-overlay-click class="mdui-post-sheet">
+	<div style="font-size:.875rem;opacity:.6;margin-bottom:1rem">来发点什么吧...</div>
+	<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem .5rem">
+		<!--{eval
+			// 只列出当前站点真正开着的入口，避免点进去撞权限提示
+			$fp_items = array();
+			$fp_items[] = array('post', '#F37D7D', 'edit', '发帖子', 'forum.php?mod=misc&action=nav');
+			if(helper_access::check_module('group')) $fp_items[] = array('group', '#9DCA06', 'groups', '逛圈子', 'forum.php?mod=group');
+			if($_G['uid'] && helper_access::check_module('doing')) $fp_items[] = array('doing', '#3EBBFD', 'chat', '写记录', 'home.php?mod=spacecp&ac=doing');
+			if($_G['uid'] && helper_access::check_module('blog')) $fp_items[] = array('blog', '#FFB300', 'article', '写日志', 'home.php?mod=spacecp&ac=blog');
+			if($_G['uid'] && helper_access::check_module('album')) $fp_items[] = array('album', '#FF9900', 'photo_camera', '传相册', 'home.php?mod=spacecp&ac=upload');
+		}-->
+		<!--{loop $fp_items $fp_item}-->
+			<a href="{$fp_item[4]}" style="display:flex;flex-direction:column;align-items:center;gap:.4rem;text-decoration:none;color:inherit">
+				<span style="width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:{$fp_item[1]}"><mdui-icon name="{$fp_item[2]}" style="color:#fff;font-size:1.5rem"></mdui-icon></span>
+				<span style="font-size:.75rem">{$fp_item[3]}</span>
+			</a>
+		<!--{/loop}-->
+	</div>
+</mdui-dialog>
+<style>
+/* dialog 默认居中，这里压到底部并铺满宽度，模拟 bottom sheet */
+.mdui-post-sheet::part(panel) {
+	position: fixed;
+	left: 0;
+	right: 0;
+	/* 给底栏留位，让底栏保持可见可点 */
+	bottom: 80px;
+	max-width: none;
+	width: 100vw;
+	max-height: calc(100vh - 80px);
+	border-radius: 1rem 1rem 0 0;
+}
+/* 面板 z-index 为 2300，底栏要抬到它之上才不会被遮住 */
+.mdui-post-sheet-open mdui-navigation-bar {
+	z-index: 2301 !important;
+}
+</style>
+<!--{/if}-->
+<!--{/if}-->
+
+<script>
+// 没有上一页时（新标签打开、外链直入）藏掉返回按钮，避免点了没反应。
+// history.length 在同标签内至少为 2，直入时为 1
+history.length < 2 && document.querySelectorAll('[onclick="history.back()"]').forEach(function (b) {
+	b.style.display = 'none';
+});
+document.querySelector('#mdui_menu_btn')?.addEventListener('click', function () {
+	document.querySelector('#mdui_drawer').open = true;
+});
+// 从屏幕左边缘向右滑动打开侧边栏（参考触发区域 20px）
+(function () {
+	var drawer = document.querySelector('#mdui_drawer');
+	var startX = 0;
+	var startY = 0;
+	var edgeZone = 20;
+	if (!drawer) return;
+	document.addEventListener('touchstart', function (event) {
+		var touch = event.touches[0];
+		if (touch && touch.clientX <= edgeZone) {
+			startX = touch.clientX;
+			startY = touch.clientY;
+		} else {
+			startX = 0;
+		}
+	}, {passive: true});
+	document.addEventListener('touchend', function (event) {
+		if (startX === 0) return;
+		var touch = event.changedTouches[0];
+		if (!touch) return;
+		if (touch.clientX - startX >= 60 && touch.clientX - startX > Math.abs(touch.clientY - startY)) drawer.open = true;
+		startX = 0;
+	}, {passive: true});
+})();
+document.querySelector('#mdui_theme_toggle')?.addEventListener('click', function () {
+	var next = {light: 'dark', dark: 'auto', auto: 'light'}[mdui.getTheme()];
+	mdui.setTheme(next);
+	document.cookie = 'mdui_theme=' + next + ';path=/;max-age=31536000';
+});
+(function () {
+	var m = document.cookie.match(/(?:^|;\s*)mdui_theme=(light|dark|auto)/);
+	m && mdui.setTheme(m[1]);
+})();
+// mdui-tab 没有 href 属性（不同于 mdui-navigation-bar-item），用 data-href 事件委托实现跳转
+// 使用 composedPath() 兼容点击组件内部 Shadow DOM 内容的情况
+ document.addEventListener('click', function (e) {
+	var link = e.target.closest && e.target.closest('[data-href]');
+	if (!link && e.composedPath) {
+		link = e.composedPath().find(function (node) {
+			return node && node.matches && node.matches('[data-href]');
+		});
+	}
+	if (link && link.dataset.href) location.href = link.dataset.href;
+});
+// 激活项滚动进视野，让当前位置在长导航里可见
+document.querySelectorAll('mdui-tabs').forEach(function (tabs) {
+	tabs.updateComplete && tabs.updateComplete.then(function () {
+		var active = tabs.querySelector('mdui-tab[active]');
+		active && active.scrollIntoView({block: 'nearest', inline: 'center'});
+	});
+});
+
+// 发布面板开合时切换加号/关闭图标，并让加号在面板打开时充当关闭按钮
+(function () {
+	var sheet = document.getElementById('mdui_post_sheet');
+	var btn = document.querySelector('mdui-navigation-bar-item[value=post]');
+
+	if (!sheet || !btn) return;
+
+	sheet.addEventListener('open', function () {
+		btn.icon = 'close';
+		document.body.classList.add('mdui-post-sheet-open');
+	});
+	sheet.addEventListener('close', function () {
+		btn.icon = 'add_circle';
+		document.body.classList.remove('mdui-post-sheet-open');
+	});
+})();
+
+// 全局提示：Discuz 的 showmessage 支持 &ajaxdata=json 直接返回 {message, data}，
+// 比解析 <root><![CDATA[html]]></root> 干净。统一用 snackbar 显示在底部。
+window.mduiTip = function (text, err) {
+	if (!text) return;
+	mdui.snackbar({
+		message: String(text).replace(/<[^>]+>/g, '').trim(),
+		placement: 'bottom',
+		autoCloseDelay: err ? 5000 : 3000,
+		closeable: !!err
+	});
+};
+
+// 走 Discuz 的 json 提示通道。成功后按需刷新，失败也给出提示不静默
+window.mduiPost = function (url, data, done) {
+	var body = new URLSearchParams(data || {});
+	body.set('formhash', '{FORMHASH}');
+	fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + 'inajax=1&ajaxdata=json&mobile=2', {
+		method: 'POST',
+		headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+		body: body,
+		credentials: 'same-origin'
+	}).then(function (r) {
+		return r.json();
+	}).then(function (j) {
+		mduiTip(j.message);
+		done && done(j);
+	}).catch(function () {
+		// json 通道拿不到（插件输出脏数据等），退回整页跳转，功能不能断
+		location.href = url;
+	});
+};
+
+// 同 mduiPost，但用 GET。Discuz 某些接口只读 GET 参数（如 recommend 的 hash）
+window.mduiGet = function (url, done) {
+	fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + 'inajax=1&ajaxdata=json&mobile=2', {
+		method: 'GET',
+		credentials: 'same-origin'
+	}).then(function (r) {
+		return r.json();
+	}).then(function (j) {
+		mduiTip(j.message);
+		done && done(j);
+	}).catch(function () {
+		location.href = url;
+	});
+};
+</script>
+
+<!--{if !$_G['setting']['bbclosed'] && empty($_G['member']['freeze'] && $_G['member']['groupid'] != 5)}-->
+	<!--{if $_G['uid'] && !isset($_G['cookie']['checkpm'])}-->
+	<script type="text/javascript" src="home.php?mod=spacecp&ac=pm&op=checknewpm&rand=$_G[timestamp]"></script>
+	<!--{/if}-->
+	<!--{if $_G['uid'] && helper_access::check_module('follow') && !isset($_G['cookie']['checkfollow'])}-->
+	<script type="text/javascript" src="home.php?mod=spacecp&ac=follow&op=checkfeed&rand=$_G[timestamp]"></script>
+	<!--{/if}-->
+	<!--{if !isset($_G['cookie']['sendmail'])}-->
+	<script type="text/javascript" src="home.php?mod=misc&ac=sendmail&rand=$_G[timestamp]"></script>
+	<!--{/if}-->
+<!--{/if}-->
+
+<!--{if $_G['setting']['statcode']}--><div style="display:none;">{$_G['setting']['statcode']}</div><!--{/if}-->
+</body>
+</html>
+<!--{eval updatesession();}-->
+<!--{if defined('IN_MOBILE')&&!defined('IN_PREVIEW')}-->
+	<!--{eval output();}-->
+<!--{else}-->
+	<!--{eval output_preview();}-->
+<!--{/if}-->

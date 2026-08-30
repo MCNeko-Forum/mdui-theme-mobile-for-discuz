@@ -1,0 +1,69 @@
+<mdui-card id="comment_$value['cid']_li" variant="filled" style="display:block;padding:1rem">
+	<div style="display:flex;gap:.75rem;align-items:flex-start">
+		<!--{if $value['author']}--><mdui-avatar src="<!--{avatar($value['authorid'], 'small', true)}-->"></mdui-avatar><!--{else}--><mdui-avatar icon="person_off"></mdui-avatar><!--{/if}-->
+		<div style="min-width:0;flex:1">
+			<div style="display:flex;gap:.5rem;align-items:center"><b style="min-width:0;overflow-wrap:anywhere"><!--{if $value['author']}--><a class="mdui-wall-author" href="home.php?mod=space&uid=$value['authorid']&do=profile">$value['author']</a><!--{else}-->$_G['setting']['anonymoustext']<!--{/if}--></b><span style="margin-left:auto;font-size:.75rem;opacity:.65;white-space:nowrap"><!--{date($value['dateline'])}--></span></div>
+			<div id="comment_$value['cid']" class="mdui-prose<!--{if $value['magicflicker']}--> magicflicker<!--{/if}-->" style="margin-top:.5rem"><!--{if $value['status'] == 0 || $value['authorid'] == $_G['uid'] || $_G[adminid] == 1}-->$value['message']<!--{else}-->{lang moderate_not_validate}<!--{/if}--></div>
+			<div style="display:flex;justify-content:flex-end;gap:.25rem;margin-top:.5rem">
+				<!--{if $value['status'] == 1}--><mdui-chip disabled style="--mdui-comp-chip-height:24px">{lang moderate_need}</mdui-chip><!--{/if}-->
+				<!--{if $value['authorid']!=$_G['uid'] && ($value['idtype'] != 'uid' || $space['self']) && $value['author']}--><mdui-button variant="text" onclick="document.getElementById('mdui_wall_reply_$value['cid']').open=true">{lang reply}</mdui-button><!--{/if}-->
+				<!--{if $value['authorid']==$_G['uid']}--><mdui-button variant="text" onclick="mduiWallEditMessage_$value['cid']();document.getElementById('mdui_wall_edit_$value['cid']').open=true">{lang edit}</mdui-button><!--{/if}-->
+				<!--{if $_G['uid'] && ($value['authorid']==$_G['uid'] || $value['uid']==$_G['uid'] || checkperm('managecomment'))}--><mdui-button variant="text" onclick="document.getElementById('mdui_wall_delete_$value['cid']').open=true">{lang delete}</mdui-button><!--{/if}-->
+			</div>
+		</div>
+	</div>
+	<!--{hook/global_space_comment_op_mobile $k}-->
+	<!--{hook/global_comment_bottom_mobile}-->
+</mdui-card>
+
+<!--{if $value['authorid']!=$_G['uid'] && ($value['idtype'] != 'uid' || $space['self']) && $value['author']}-->
+<mdui-dialog id="mdui_wall_reply_$value['cid']" close-on-esc close-on-overlay-click>
+	<div slot="headline">{lang reply}</div>
+	<form method="post" action="home.php?mod=spacecp&ac=comment">
+		<div slot="description"><mdui-text-field name="message" label="{lang reply}" textarea rows="4" required></mdui-text-field></div>
+		<input type="hidden" name="referer" value="home.php?mod=space&uid=$space['uid']&do=wall">
+		<input type="hidden" name="id" value="$value['uid']"><input type="hidden" name="idtype" value="$value['idtype']"><input type="hidden" name="cid" value="$value['cid']"><input type="hidden" name="commentsubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}">
+		<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_wall_reply_$value['cid']').open=false">{lang cancel}</mdui-button>
+		<mdui-button slot="action" type="submit" variant="text" name="commentsubmit_btn" value="true">{lang reply}</mdui-button>
+	</form>
+</mdui-dialog>
+<!--{/if}-->
+<!--{if $value['authorid']==$_G['uid']}-->
+<mdui-dialog id="mdui_wall_edit_$value['cid']" close-on-esc close-on-overlay-click>
+	<div slot="headline">{lang edit}</div>
+	<form method="post" action="home.php?mod=spacecp&ac=comment&op=edit&cid=$value['cid']">
+		<div slot="description"><mdui-text-field id="mdui_wall_edit_message_$value['cid']" name="message" label="{lang edit}" textarea rows="4" required></mdui-text-field></div>
+		<input type="hidden" name="referer" value="home.php?mod=space&uid=$space['uid']&do=wall"><input type="hidden" name="editsubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}">
+		<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_wall_edit_$value['cid']').open=false">{lang cancel}</mdui-button>
+		<mdui-button slot="action" type="submit" variant="text" name="editsubmit_btn" value="true">{lang submit}</mdui-button>
+	</form>
+</mdui-dialog>
+<script>
+function mduiWallEditMessage_$value['cid']() {
+	var field = document.getElementById('mdui_wall_edit_message_$value['cid']'), source = document.getElementById('comment_$value['cid']');
+	if (!field || !source) return;
+	var copy = source.cloneNode(true), images = copy.querySelectorAll('img');
+	Array.prototype.forEach.call(images, function (image) {
+		var id = image.getAttribute('smilieid'), src = image.getAttribute('src') || '', match = src.match(/\/comcom\/(\d+)\.gif(?:$|[?#])/i), code = match ? '[em:' + match[1] + ':]' : '';
+		if (!code && typeof smilies_type == 'object' && typeof smilies_array == 'object') {
+			for (var key in smilies_type) {
+				var pages = smilies_array[key.replace('_', '')] || {};
+				for (var page in pages) for (var i = 0; i < pages[page].length; i++) if (String(pages[page][i][0]) === String(id)) code = pages[page][i][1];
+			}
+		}
+		image.replaceWith(document.createTextNode(code));
+	});
+	field.value = copy.textContent.replace(/\u00a0/g, ' ');
+}
+</script>
+<!--{/if}-->
+<!--{if $_G['uid'] && ($value['authorid']==$_G['uid'] || $value['uid']==$_G['uid'] || checkperm('managecomment'))}-->
+<mdui-dialog id="mdui_wall_delete_$value['cid']" close-on-esc close-on-overlay-click>
+	<div slot="headline">{lang delete}</div><div slot="description">{lang delete_reply_message}</div>
+	<form method="post" action="home.php?mod=spacecp&ac=comment&op=delete&cid=$value['cid']">
+		<input type="hidden" name="referer" value="home.php?mod=space&uid=$space['uid']&do=wall"><input type="hidden" name="deletesubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}">
+		<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_wall_delete_$value['cid']').open=false">{lang cancel}</mdui-button>
+		<mdui-button slot="action" type="submit" variant="text" name="deletesubmitbtn" value="true">{lang determine}</mdui-button>
+	</form>
+</mdui-dialog>
+<!--{/if}-->

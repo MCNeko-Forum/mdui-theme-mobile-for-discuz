@@ -1,0 +1,34 @@
+<!--{template common/header}-->
+
+<!--{if $_GET['op'] == 'delete'}-->
+	<mdui-dialog open close-on-esc close-on-overlay-click>
+		<div slot="headline">{lang delete}</div><div slot="description">{lang determine_delete_doing}</div>
+		<form method="post" action="home.php?mod=spacecp&ac=doing&op=delete&doid=$doid&id=$id">
+			<input type="hidden" name="referer" value="{echo dreferer()}"><input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="deletesubmit" value="true">
+			<mdui-button slot="action" type="button" variant="text" onclick="history.back()">{lang cancel}</mdui-button>
+			<mdui-button slot="action" type="submit" variant="text">{lang determine}</mdui-button>
+		</form>
+	</mdui-dialog>
+<!--{elseif $_GET['op'] == 'spacenote'}-->
+	$space['spacenote']
+<!--{elseif $_GET['op'] == 'docomment' || $_GET['op'] == 'getcomment'}-->
+	<mdui-dialog open close-on-esc close-on-overlay-click>
+		<div slot="headline">{lang reply}</div>
+		<form method="post" action="home.php?mod=spacecp&ac=doing&op=docomment&doid=$doid&id=$id">
+			<div slot="description"><mdui-text-field name="message" label="{lang reply}" rows="4" maxlength="200" counter required></mdui-text-field></div>
+			<input type="hidden" name="commentsubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}">
+			<mdui-button slot="action" type="button" variant="text" onclick="history.back()">{lang cancel}</mdui-button>
+			<mdui-button slot="action" type="submit" variant="text">{lang reply}</mdui-button>
+		</form>
+	</mdui-dialog>
+	<!--{if $_GET['op'] == 'getcomment'}--><!--{template home/space_doing_li}--><!--{/if}-->
+<!--{else}-->
+	<mdui-top-app-bar>
+		<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+		<mdui-top-app-bar-title>{lang publish}{lang doing}</mdui-top-app-bar-title>
+	</mdui-top-app-bar>
+	<div style="padding:1rem"><!--{template home/space_doing_form}--></div>
+<!--{/if}-->
+
+<!--{template home/space_doing_smiley}-->
+<!--{template common/footer}-->

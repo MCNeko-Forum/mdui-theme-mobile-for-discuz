@@ -1,0 +1,117 @@
+<!--{eval $_G['home_tpl_titles'] = array('{lang remind}');}-->
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang remind}</mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="person" data-href="home.php?mod=space&uid=$_G['uid']&do=profile&mycenter=1"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<mdui-tabs value="notice" full-width>
+	<mdui-tab value="pm" data-href="home.php?mod=space&do=pm">{lang mypm}<!--{if $newpmcount}--> ($newpmcount)<!--{/if}--></mdui-tab>
+	<mdui-tab value="notice" data-href="home.php?mod=space&do=notice">{lang my}{lang remind}<!--{if $_G['member']['newprompt']}--> ($_G['member']['newprompt'])<!--{/if}--></mdui-tab>
+</mdui-tabs>
+
+<div style="padding:1rem 1rem 5.5rem">
+<!--{if empty($list)}-->
+	<mdui-card variant="filled" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">
+		<!--{if $new == 1}-->{lang no_new_notice} <a href="home.php?mod=space&do=notice&isread=1">{lang view_old_notice}</a><!--{else}-->{lang no_notice}<!--{/if}-->
+	</mdui-card>
+<!--{else}-->
+	<mdui-list class="mdui-notice-list">
+	<!--{loop $list $key $value}-->
+		<mdui-list-item class="mdui-notice-item" rounded $value['rowid'] notice="$value['id']">
+			<!--{if $value['authorid']}--><mdui-avatar slot="icon" src="<!--{avatar($value['authorid'], 'small', true)}-->"></mdui-avatar><!--{else}--><mdui-icon slot="icon" name="notifications"></mdui-icon><!--{/if}-->
+			<div class="mdui-notice-content" style="$value['style']">$value['note']</div>
+			<span slot="description"><!--{date($value['dateline'], 'u')}--><!--{if $value['from_num']}--> · {lang ignore_same_notice_message}<!--{/if}--></span>
+			<!--{if $value['authorid']}--><mdui-button slot="end-icon" variant="text" onclick="document.getElementById('mdui_notice_ignore_$value[id]').open=true">{lang shield}</mdui-button><!--{/if}-->
+		</mdui-list-item>
+		<!--{if $value['authorid']}-->
+		<mdui-dialog id="mdui_notice_ignore_$value[id]" close-on-esc close-on-overlay-click>
+			<div slot="headline">{lang shield}</div>
+			<form method="post" action="home.php?mod=spacecp&ac=common&op=ignore&type=$value[type]">
+				<div slot="description">
+					<div style="margin-bottom:.75rem">{lang no_view_notice_next}{lang bid_single_price}</div>
+					<mdui-radio-group name="authorid" value="$value[authorid]">
+						<mdui-radio value="$value[authorid]">{lang shield_this_friend}</mdui-radio>
+						<mdui-radio value="0">{lang shield_all_friend}</mdui-radio>
+					</mdui-radio-group>
+				</div>
+				<input type="hidden" name="ignoresubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="referer" value="home.php?mod=space&do=notice">
+				<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_notice_ignore_$value[id]').open=false">{lang cancel}</mdui-button>
+				<mdui-button slot="action" type="submit" variant="text" name="feedignoresubmit" value="true">{lang determine}</mdui-button>
+			</form>
+		</mdui-dialog>
+		<!--{/if}-->
+	<!--{/loop}-->
+	</mdui-list>
+	<!--{if $view!='userapp' && $space['notifications']}--><div style="padding-top:1rem;text-align:center"><mdui-button variant="text" data-href="home.php?mod=space&do=notice&ignore=all">{lang ignore_same_notice_message}</mdui-button></div><!--{/if}-->
+	<!--{if $multi}--><div style="padding-top:1rem;text-align:center">$multi</div><!--{/if}-->
+<!--{/if}-->
+</div>
+<mdui-dialog id="mdui_notice_poke_reply" close-on-esc close-on-overlay-click>
+	<div slot="headline">{lang say_hi}</div>
+	<form id="mdui_notice_poke_reply_form" method="post" action="home.php?mod=spacecp&ac=poke&op=reply">
+		<div slot="description">
+			<mdui-radio-group name="iconid" value="3" label="选择动作">
+				<mdui-radio value="0">{lang poke_0}</mdui-radio>
+				<mdui-radio value="1">{lang poke_1}</mdui-radio>
+				<mdui-radio value="2">{lang poke_2}</mdui-radio>
+				<mdui-radio value="3">{lang poke_3}</mdui-radio>
+				<mdui-radio value="4">{lang poke_4}</mdui-radio>
+				<mdui-radio value="5">{lang poke_5}</mdui-radio>
+				<mdui-radio value="6">{lang poke_6}</mdui-radio>
+				<mdui-radio value="7">{lang poke_7}</mdui-radio>
+				<mdui-radio value="8">{lang poke_8}</mdui-radio>
+				<mdui-radio value="9">{lang poke_9}</mdui-radio>
+				<mdui-radio value="10">{lang poke_10}</mdui-radio>
+				<mdui-radio value="11">{lang poke_11}</mdui-radio>
+				<mdui-radio value="12">{lang poke_12}</mdui-radio>
+				<mdui-radio value="13">{lang poke_13}</mdui-radio>
+			</mdui-radio-group>
+			<mdui-text-field name="note" label="{lang say}" maxlength="30"></mdui-text-field>
+		</div>
+		<input type="hidden" name="uid" value="">
+		<input type="hidden" name="from" value="notice">
+		<input type="hidden" name="pokesubmit" value="true">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_notice_poke_reply').open=false">{lang cancel}</mdui-button>
+		<mdui-button slot="action" type="submit" variant="text" name="pokesubmit_btn" value="true">{lang send}</mdui-button>
+	</form>
+</mdui-dialog>
+<script>
+// 好友请求的批准链接改为当前页异步提交，避免打开默认确认页面。
+document.addEventListener('click', function (e) {
+	var link = e.target.closest && e.target.closest('a[href*="ac=friend&op=add&uid="]');
+	if (!link) return;
+	e.preventDefault();
+	mduiPost(link.href, {addsubmit: 'true'}, function () {
+		location.reload();
+	});
+});
+
+// 回打招呼复用个人主页的 MDUI 动作选择与留言样式。
+document.addEventListener('click', function (e) {
+	if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+	var link = e.target.closest && e.target.closest('a[href*="ac=poke&op=reply"]');
+	if (!link) return;
+	e.preventDefault();
+	var form = document.getElementById('mdui_notice_poke_reply_form'),
+		uid = new URL(link.href, location.href).searchParams.get('uid');
+	form.querySelector('[name="uid"]').value = uid;
+	document.getElementById('mdui_notice_poke_reply').open = true;
+});
+document.getElementById('mdui_notice_poke_reply_form').addEventListener('submit', function (e) {
+	e.preventDefault();
+	var form = e.currentTarget,
+		data = new FormData(form);
+	mduiPost(form.action + '&uid=' + encodeURIComponent(data.get('uid')) + '&from=notice', {
+		pokesubmit: 'true', iconid: data.get('iconid'), note: data.get('note')
+	}, function (result) {
+		document.getElementById('mdui_notice_poke_reply').open = false;
+		mduiTip((result && result.message) || '打招呼成功');
+		setTimeout(function () { location.reload(); }, 800);
+	});
+});
+</script>
+<!--{template common/footer}-->

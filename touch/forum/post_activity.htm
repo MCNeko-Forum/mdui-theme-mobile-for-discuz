@@ -1,0 +1,107 @@
+<!-- 活动主题的附加表单：时间/地点/类别必填，其余按站点设置条件显示 -->
+<!-- 后端用 strtotime 解析时间，datetime-local 的 T 分隔格式同样能解析；
+     编辑态回填的是 "Y-m-d H:i"，得换成 T 才能被控件识别 -->
+<!--{eval $ac_from = str_replace(' ', 'T', $activity['starttimefrom']);}-->
+<!--{eval $ac_to = str_replace(' ', 'T', $activity['starttimeto']);}-->
+<!--{eval $ac_exp = str_replace(' ', 'T', $activity['expiration']);}-->
+
+<mdui-card variant="outlined" style="display:block;padding:.75rem;margin-top:1rem">
+	<!-- 确定时间与时间范围二选一，下标 0/1 对应后端的 activitytime -->
+	<div id="certainstarttime"{if $activity['starttimeto']} style="display:none"{/if}>
+		<mdui-text-field type="datetime-local" name="starttimefrom[0]" id="starttimefrom_0" variant="outlined" label="{lang post_event_time}" value="$ac_from"></mdui-text-field>
+	</div>
+	<div id="uncertainstarttime"{if !$activity['starttimeto']} style="display:none"{/if}>
+		<mdui-text-field type="datetime-local" name="starttimefrom[1]" id="starttimefrom_1" variant="outlined" label="{lang activity_starttime}" value="$ac_from"></mdui-text-field>
+		<mdui-text-field type="datetime-local" name="starttimeto" id="starttimeto" variant="outlined" label="{lang endtime}" value="$ac_to" style="margin-top:.5rem"></mdui-text-field>
+	</div>
+	<mdui-checkbox id="activitytime" name="activitytime" value="1"{if $activity['starttimeto']} checked{/if} style="display:flex;margin-top:.5rem">{lang activity_starttime_endtime}</mdui-checkbox>
+
+	<mdui-text-field name="activityplace" id="activityplace" variant="outlined" label="{lang activity_space}" value="$activity['place']" style="margin-top:.75rem"></mdui-text-field>
+	<!--{if $_GET[action] == 'newthread'}-->
+		<mdui-text-field name="activitycity" id="activitycity" variant="outlined" label="{lang activity_city}" style="margin-top:.75rem"></mdui-text-field>
+	<!--{/if}-->
+	<mdui-text-field name="activityclass" id="activityclass" variant="outlined" label="{lang activiy_sort}" value="$activity['class']" style="margin-top:.75rem"></mdui-text-field>
+
+	<div style="display:flex;gap:.5rem;margin-top:.75rem">
+		<mdui-text-field type="number" min="0" name="activitynumber" id="activitynumber" variant="outlined" label="{lang activity_need_member}" value="$activity['number']"></mdui-text-field>
+		<mdui-select name="gender" id="gender" variant="outlined" value="{if $activity['gender']}$activity['gender']{else}0{/if}" style="width:6rem;flex-shrink:0">
+			<mdui-menu-item value="0">{lang unlimited}</mdui-menu-item>
+			<mdui-menu-item value="1">{lang male}</mdui-menu-item>
+			<mdui-menu-item value="2">{lang female}</mdui-menu-item>
+		</mdui-select>
+	</div>
+
+	<!--{if $_G['setting']['activityfield']}-->
+		<mdui-divider style="margin:.75rem 0"></mdui-divider>
+		<div style="font-size:.875rem;opacity:.6">{lang optional_data}</div>
+		<!--{loop $_G['setting']['activityfield'] $key $val}-->
+			<mdui-checkbox name="userfield[]" value="$key"{if $activity['ufield']['userfield'] && in_array($key, $activity['ufield']['userfield'])} checked{/if} style="display:flex;margin-top:.25rem">$val</mdui-checkbox>
+		<!--{/loop}-->
+	<!--{/if}-->
+
+	<!--{if $_G['setting']['activityextnum']}-->
+		<mdui-text-field name="extfield" id="extfield" variant="outlined" rows="2" autosize min-rows="2" max-rows="6" label="{lang other_data}" helper="{lang post_activity_message} $_G['setting']['activityextnum'] {lang post_option}" value="{if $activity['ufield']['extfield']}$activity['ufield']['extfield']{/if}" style="margin-top:.75rem"></mdui-text-field>
+	<!--{/if}-->
+
+	<!--{if $_G['setting']['activitycredit']}-->
+		<mdui-text-field type="number" min="0" name="activitycredit" id="activitycredit" variant="outlined" label="{lang consumption_credit}" suffix="{$_G['setting']['extcredits'][$_G['setting']['activitycredit']]['title']}" helper="{lang user_consumption_money}" value="$activity['credit']" style="margin-top:.75rem"></mdui-text-field>
+	<!--{/if}-->
+
+	<mdui-text-field type="number" min="0" name="cost" id="cost" variant="outlined" label="{lang activity_payment}" suffix="{lang payment_unit}" value="$activity['cost']" style="margin-top:.75rem"></mdui-text-field>
+	<mdui-text-field type="datetime-local" name="activityexpiration" id="activityexpiration" variant="outlined" label="{lang post_closing}" helper="{lang admin_close_expire_comment}" value="$ac_exp" style="margin-top:.75rem"></mdui-text-field>
+
+	<!--{if $allowpostimg}-->
+		<!-- 活动封面：单张图，上传成功后只保留最新的 aid -->
+		<div style="display:flex;align-items:center;gap:.75rem;margin-top:.75rem">
+			<img id="activityattach_image" src="{if $activityattach['attachment']}$activityattach['url']/{if $activityattach['thumb']}{eval echo getimgthumbname($activityattach['attachment']);}{else}$activityattach['attachment']{/if}{else}{STATICURL}image/common/nophoto.gif{/if}" style="width:64px;height:64px;object-fit:cover;border-radius:.5rem">
+			<mdui-button variant="tonal" icon="image" style="position:relative;overflow:hidden">
+				{lang post_topic_image}
+				<input type="file" id="activityimg" accept="image/*" style="position:absolute;inset:0;opacity:0;font-size:0">
+			</mdui-button>
+		</div>
+		<input type="hidden" name="activityaid" id="activityaid"{if $activityattach['attachment']} value="$activityattach['aid']"{/if}>
+		<input type="hidden" name="activityaid_url" id="activityaid_url">
+	<!--{/if}-->
+	<!--{hook/post_activity_extra}-->
+</mdui-card>
+
+<script>
+// 勾选时间范围就切到起止两个输入框，字段名下标决定后端取哪一个
+document.getElementById('activitytime').addEventListener('change', function () {
+	document.getElementById('certainstarttime').style.display = this.checked ? 'none' : '';
+	document.getElementById('uncertainstarttime').style.display = this.checked ? '' : 'none';
+});
+
+<!--{if $allowpostimg}-->
+document.getElementById('activityimg').addEventListener('change', function () {
+	if (!this.files[0]) return;
+	var fd = new FormData();
+	fd.append('uid', POSTUPLOAD.uid);
+	fd.append('hash', POSTUPLOAD.hash);
+	fd.append('Filedata', this.files[0]);
+	fetch(POSTUPLOAD.imgurl, {method: 'POST', body: fd, credentials: 'same-origin'})
+		.then(function (r) { return r.text(); })
+		.then(function (data) {
+			var d = data.split('|');
+			if (d[0] !== 'DISCUZUPLOAD' || d[2] != 0) {
+				mduiTip(STATUSMSG[d[2]] || '{lang uploadpicfailed}', true);
+				return;
+			}
+			document.getElementById('activityattach_image').src = POSTUPLOAD.attachurl + d[5];
+			document.getElementById('activityaid').value = d[3];
+			document.getElementById('activityaid_url').value = d[5];
+		})
+		.catch(function () { mduiTip('{lang uploadpicfailed}', true); });
+});
+<!--{/if}-->
+
+// 时间、地点、类别是后端硬性要求，提前拦下来省一趟往返。
+// mdui-text-field 是自定义元素，取不到 form.xxx，只能按 id 拿
+document.getElementById('postsubmit').addEventListener('click', function (e) {
+	var val = function (id) { return String(document.getElementById(id).value).trim(); };
+	var stop = function (msg) { mduiTip(msg); e.stopImmediatePropagation(); };
+	if (!val('starttimefrom_0') && !val('starttimefrom_1')) return stop('{lang post_error_message_1}');
+	if (!val('activityplace')) return stop('{lang post_error_message_2}');
+	if (!val('activityclass')) return stop('{lang post_error_message_3}');
+}, true);
+</script>

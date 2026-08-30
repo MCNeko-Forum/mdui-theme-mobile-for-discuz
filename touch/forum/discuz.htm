@@ -1,0 +1,148 @@
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="menu" id="mdui_menu_btn"></mdui-button-icon>
+	<mdui-top-app-bar-title>{$_G['setting']['navs'][2]['navname']}</mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<mdui-button-icon icon="search" href="search.php?mod=forum&mobile=2"></mdui-button-icon>
+</mdui-top-app-bar>
+
+
+<!--{hook/global_header_mobile}-->
+<!--{hook/index_top}-->
+<!--{hook/index_top_mobile}-->
+
+<div style="padding-bottom:88px">
+
+	<!--{if $_G['uid']}-->
+	<mdui-list-item href="home.php?mod=space&uid={$_G['uid']}&do=profile&mycenter=1" style="margin:.75rem 1rem" rounded>
+		<mdui-avatar slot="icon" src="<!--{avatar($_G['uid'], 'middle', true)}-->"></mdui-avatar>
+		$_G['member']['username']
+		<span slot="description">{lang credits}: $_G['member']['credits']</span>
+		<mdui-icon slot="end-icon" name="chevron_right"></mdui-icon>
+		<!--{if $_G['member']['newpm'] || $_G['member']['newprompt']}--><mdui-badge slot="end-icon"></mdui-badge><!--{/if}-->
+	</mdui-list-item>
+	<!--{/if}-->
+
+	<!--{if $_G['setting']['mobile']['forum']['index'] == 3 && !empty($_G['setting']['grid']['showgrid'])}-->
+	<!-- 首页四格：数据来自 forum_index.php 的 $grids（原生缓存，不额外查库） -->
+	<mdui-card variant="filled" style="display:block;margin:.75rem 1rem;overflow:hidden">
+		<mdui-tabs value="newthread" full-width>
+			<mdui-tab value="newthread" icon="fiber_new">{lang show_newthreads}</mdui-tab>
+			<mdui-tab value="newreply" icon="mode_comment">{lang collection_lastthread}</mdui-tab>
+			<mdui-tab value="hot" icon="local_fire_department">{lang hot_thread}</mdui-tab>
+			<mdui-tab value="digest" icon="verified">{lang post_digest_thread}</mdui-tab>
+
+			<mdui-tab-panel slot="panel" value="newthread">
+				<mdui-list>
+					<!--{loop $grids['newthread'] $thread}-->
+						<!--{if !$thread['forumstick'] && $thread['closed'] > 1 && ($thread['isgroup'] == 1 || $thread['fid'] != $_G['fid'])}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
+						<mdui-list-item href="forum.php?mod=viewthread&tid=$thread['tid']" rounded>
+							{$thread['oldsubject']}
+							<span slot="description">$thread['dateline']</span>
+						</mdui-list-item>
+					<!--{/loop}-->
+				</mdui-list>
+			</mdui-tab-panel>
+			<mdui-tab-panel slot="panel" value="newreply">
+				<mdui-list>
+					<!--{loop $grids['newreply'] $thread}-->
+						<!--{if !$thread['forumstick'] && $thread['closed'] > 1 && ($thread['isgroup'] == 1 || $thread['fid'] != $_G['fid'])}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
+						<mdui-list-item href="forum.php?mod=viewthread&tid=$thread['tid']" rounded>
+							{$thread['oldsubject']}
+							<span slot="description">$thread['replies'] {lang reply}</span>
+						</mdui-list-item>
+					<!--{/loop}-->
+				</mdui-list>
+			</mdui-tab-panel>
+			<mdui-tab-panel slot="panel" value="hot">
+				<mdui-list>
+					<!--{eval $rank = 0;}-->
+					<!--{loop $grids['hot'] $thread}-->
+						<!--{if !$thread['forumstick'] && $thread['closed'] > 1 && ($thread['isgroup'] == 1 || $thread['fid'] != $_G['fid'])}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
+						<!--{eval $rank++;}-->
+						<mdui-list-item href="forum.php?mod=viewthread&tid=$thread['tid']" rounded>
+							<span slot="icon" style="width:1.5rem;text-align:center;font-weight:500;{if $rank < 4}color:rgb(var(--mdui-color-error)){else}opacity:.5{/if}">$rank</span>
+							{$thread['oldsubject']}
+							<span slot="description">$thread['views'] {lang mobrenqi}</span>
+						</mdui-list-item>
+					<!--{/loop}-->
+				</mdui-list>
+			</mdui-tab-panel>
+			<mdui-tab-panel slot="panel" value="digest">
+				<mdui-list>
+					<!--{loop $grids['digest'] $thread}-->
+						<!--{if !$thread['forumstick'] && $thread['closed'] > 1 && ($thread['isgroup'] == 1 || $thread['fid'] != $_G['fid'])}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
+						<mdui-list-item href="forum.php?mod=viewthread&tid=$thread['tid']" rounded>
+							{$thread['oldsubject']}
+							<span slot="description">$thread['author']</span>
+						</mdui-list-item>
+					<!--{/loop}-->
+				</mdui-list>
+			</mdui-tab-panel>
+		</mdui-tabs>
+	</mdui-card>
+	<!--{/if}-->
+
+	<!--{if $announcements}-->
+	<!-- $announcements 是 get_index_announcements() 直出的 <li> 串，只能包外壳 -->
+	<mdui-card variant="filled" style="display:block;margin:.75rem 1rem;padding:.75rem 1rem">
+		<div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;opacity:.7;margin-bottom:.25rem">
+			<mdui-icon name="campaign"></mdui-icon>{lang announcement}
+		</div>
+		<ul class="idx_announce">$announcements</ul>
+	</mdui-card>
+	<!--{/if}-->
+
+	<mdui-card variant="filled" style="display:flex;margin:.75rem 1rem;padding:.75rem 0">
+		<div class="idx_stat"><mdui-icon name="today"></mdui-icon><b>{$todayposts}</b><span>{lang index_today}</span></div>
+		<!--{if $yesterdayposts > 0}--><div class="idx_stat"><mdui-icon name="history"></mdui-icon><b>{$yesterdayposts}</b><span>{lang index_yesterday}</span></div><!--{/if}-->
+		<div class="idx_stat"><mdui-icon name="forum"></mdui-icon><b>{$posts}</b><span>{lang index_posts}</span></div>
+		<div class="idx_stat"><mdui-icon name="group"></mdui-icon><b>{$_G['cache']['userstats']['totalmembers']}</b><span>{lang index_members}</span></div>
+	</mdui-card>
+
+	<!--{hook/index_catlist_top}-->
+	<!--{loop $catlist $key $cat}-->
+	<mdui-card variant="filled" style="display:block;margin:.75rem 1rem;padding:.5rem 0">
+		<mdui-list-item class="idx_cat" data-target="idx_sub_$cat['fid']" icon="folder_open" end-icon="expand_less">
+			<b>$cat['name']</b>
+		</mdui-list-item>
+		<div id="idx_sub_$cat['fid']" class="idx_forums" style="grid-template-columns:repeat({if $cat['forumcolumns'] > 1}$cat['forumcolumns']{else}1{/if},1fr)">
+			<!--{loop $cat['forums'] $forumid}-->
+			<!--{eval $forum = $forumlist[$forumid]; $mdui_ic = $forum['icon'] && preg_match('/src="([^"]+)"/', $forum['icon'], $m) ? $m[1] : '';}-->
+			<a href="forum.php?mod=forumdisplay&fid={$forum['fid']}" class="idx_forum">
+				<!--{if $mdui_ic}--><img class="idx_forum_pic" src="$mdui_ic" alt="" />
+				<!--{else}--><mdui-icon name="{if $forum['redirect']}link{elseif $forum['todayposts']}local_fire_department{else}chat_bubble{/if}" class="idx_forum_ico"></mdui-icon>
+				<!--{/if}-->
+				<span class="idx_forum_txt">
+					<span class="idx_forum_name"><span>{$forum['name']}</span><!--{if !$forum['redirect']}--><em>$forum['todayposts']</em><!--{/if}--></span>
+					<!--{if $cat['forumcolumns'] < 2 && $forum['description']}--><span class="idx_forum_desc">$forum['description']</span><!--{/if}-->
+					<!--{if !$forum['redirect']}-->
+					<span class="idx_forum_num">
+						<mdui-icon name="article"></mdui-icon><!--{echo dnumber($forum['threads'])}-->
+						<mdui-icon name="chat"></mdui-icon><!--{echo dnumber($forum['posts'])}-->
+					</span>
+					<!--{/if}-->
+				</span>
+			</a>
+			<!--{/loop}-->
+		</div>
+	</mdui-card>
+	<!--{/loop}-->
+	<!--{hook/index_middle_mobile}-->
+</div>
+
+<script>
+// 版块分类折叠，默认展开状态跟随后台的 mobileforumview 设置
+document.querySelectorAll('.idx_cat').forEach(function (h) {
+	var box = document.getElementById(h.dataset.target);
+	<!--{if $_G['setting']['mobile']['mobileforumview']}-->box.style.display = 'none'; h.endIcon = 'expand_more';<!--{/if}-->
+	h.addEventListener('click', function () {
+		var hide = box.style.display === 'none';
+		box.style.display = hide ? 'grid' : 'none';
+		h.endIcon = hide ? 'expand_less' : 'expand_more';
+	});
+});
+</script>
+
+<!--{template common/footer}-->

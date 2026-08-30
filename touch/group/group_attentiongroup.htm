@@ -1,0 +1,49 @@
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang select_focus_group}</mdui-top-app-bar-title>
+</mdui-top-app-bar>
+
+<div style="padding:0 .75rem 88px">
+	<mdui-card variant="filled" style="display:block;margin:.75rem 0;overflow:hidden">
+		<div style="padding:1rem 1rem .25rem;font-weight:600">{lang select_focus_group}</div>
+		<div style="padding:.5rem 1rem 1rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem">
+			<!--{loop $usergroups['groups'] $groupid $groupname}-->
+				<mdui-checkbox data-group-id="{$groupid}"{if in_array($groupid, $attentiongroup)} checked{/if}>
+				{$groupname}
+			</mdui-checkbox>
+			<!--{/loop}-->
+		</div>
+	</mdui-card>
+
+	<form method="post" autocomplete="off" action="group.php?mod=attentiongroup">
+		<!--{if $_G['inajax']}--><input type="hidden" name="handlekey" value="{$_GET['handlekey']}"><!--{/if}-->
+		<input type="hidden" name="referer" value="{echo dreferer()}">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<input type="hidden" name="attentionsubmit" value="true">
+		<!-- 复选框位于卡片内，但表单提交需要包含它们，因此由脚本同步选中值。 -->
+		<div id="mdui_attention_values"></div>
+		<mdui-button type="submit" full-width>{lang confirms}</mdui-button>
+	</form>
+</div>
+
+<script>
+(function () {
+	var form = document.querySelector('form[action*="attentiongroup"]');
+	var values = document.getElementById('mdui_attention_values');
+	if (!form || !values) return;
+	form.addEventListener('submit', function () {
+		values.innerHTML = '';
+		document.querySelectorAll('mdui-checkbox[name="attentiongroupid[]"]').forEach(function (checkbox) {
+			if (checkbox.checked) {
+				var input = document.createElement('input');
+				input.type = 'hidden';
+				input.name = 'attentiongroupid[]';
+				input.value = checkbox.dataset.groupId;
+				values.appendChild(input);
+			}
+		});
+	});
+})();
+</script>
+<!--{template common/footer}-->

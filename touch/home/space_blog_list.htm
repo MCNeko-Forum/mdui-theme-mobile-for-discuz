@@ -1,0 +1,76 @@
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang blog}</mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<!--{if $space['self']}--><mdui-button-icon icon="edit" data-href="home.php?mod=spacecp&ac=blog"></mdui-button-icon><!--{/if}-->
+</mdui-top-app-bar>
+
+<div style="padding:0 0 5.5rem">
+	<mdui-tabs value="{$_GET['view']}" full-width>
+		<mdui-tab value="we" data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=we">{lang friend_blog}</mdui-tab>
+		<mdui-tab value="me" data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=me"><!--{if $space['self']}-->{lang my_blog}<!--{else}-->$navtitle<!--{/if}--></mdui-tab>
+		<mdui-tab value="all" data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=all">{lang view_all}</mdui-tab>
+	</mdui-tabs>
+
+	<!--{if $_GET['view'] == 'all'}-->
+	<div class="mdui-blog-chips">
+		<mdui-chip data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=all"<!--{if $orderactives['dateline']}--> selected<!--{/if}-->>{lang newest_blog}</mdui-chip>
+		<mdui-chip data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=all&order=hot"<!--{if $orderactives['hot']}--> selected<!--{/if}-->>{lang recommend_blog}</mdui-chip>
+		<!--{loop $category $value}--><mdui-chip data-href="home.php?mod=space&uid={$space['uid']}&do=blog&catid={$value['catid']}&view=all&order={$_GET['order']}"<!--{if $_GET['catid'] == $value['catid']}--> selected<!--{/if}-->>{$value['catname']}</mdui-chip><!--{/loop}-->
+	</div>
+	<!--{/if}-->
+
+	<!--{if $_GET['view'] == 'me'}-->
+	<div class="mdui-blog-chips">
+		<mdui-chip data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=me"<!--{if !$_GET['classid']}--> selected<!--{/if}-->>{lang all}</mdui-chip>
+		<!--{loop $classarr $classid $classname}--><mdui-chip data-href="home.php?mod=space&uid={$space['uid']}&do=blog&classid=$classid&view=me"<!--{if $_GET['classid'] == $classid}--> selected<!--{/if}-->>{$classname}</mdui-chip><!--{/loop}-->
+	</div>
+	<!--{/if}-->
+
+	<div class="mdui-blog-list">
+	<!--{if $list}-->
+	<!--{loop $list $blog}-->
+	<mdui-card variant="outlined" class="mdui-blog-card">
+		<div class="mdui-blog-head">
+			<mdui-avatar src="<!--{avatar($blog['uid'], 'small', true)}-->"></mdui-avatar>
+			<div class="mdui-blog-user"><a href="home.php?mod=space&uid={$blog['uid']}&do=profile">$blog['username']</a><div>$blog['dateline']</div></div>
+			<!--{if $_GET['view'] == 'me' && $blog['uid'] == $_G['uid']}-->
+			<mdui-button-icon icon="edit" data-href="home.php?mod=spacecp&ac=blog&blogid={$blog['blogid']}&op=edit"></mdui-button-icon>
+			<mdui-button-icon icon="<!--{if $blog['stickflag']}-->vertical_align_bottom<!--{else}-->vertical_align_top<!--{/if}-->" onclick="document.getElementById('mdui_blog_stick_$blog[blogid]').open=true"></mdui-button-icon>
+			<mdui-button-icon icon="delete" onclick="document.getElementById('mdui_blog_delete_$blog[blogid]').open=true"></mdui-button-icon>
+			<!--{/if}-->
+		</div>
+		<a class="mdui-blog-content" href="home.php?mod=space&uid={$blog['uid']}&do=blog&id={$blog['blogid']}">
+			<div class="mdui-blog-labels">
+				<!--{if $blog['stickflag']}--><mdui-chip disabled>{lang stick}</mdui-chip><!--{/if}-->
+				<!--{if $blog['catid'] && !empty($category[$blog['catid']]['catname'])}--><mdui-chip disabled>{$category[$blog['catid']]['catname']}</mdui-chip><!--{/if}-->
+				<!--{if $_GET['view'] == 'me' && $blog['classid'] && !empty($classarr[$blog['classid']])}--><mdui-chip disabled>{$classarr[$blog['classid']]}</mdui-chip><!--{/if}-->
+			</div>
+			<div class="mdui-blog-title">$blog['subject']</div>
+			<div class="mdui-blog-summary">$blog['message']</div>
+		</a>
+	</mdui-card>
+
+	<!--{if $_GET['view'] == 'me' && $blog['uid'] == $_G['uid']}-->
+	<mdui-dialog id="mdui_blog_stick_$blog[blogid]" close-on-esc close-on-overlay-click>
+		<div slot="headline"><!--{if $blog['stickflag']}-->{lang cancel_stick_blog}<!--{else}-->{lang stick_blog}<!--{/if}--></div>
+		<div slot="description"><!--{if $blog['stickflag']}-->{lang sure_cancel_stick_blog}<!--{else}-->{lang sure_stick_blog}<!--{/if}--></div>
+		<mdui-button slot="action" variant="text" onclick="document.getElementById('mdui_blog_stick_$blog[blogid]').open=false">{lang cancel}</mdui-button>
+		<mdui-button slot="action" variant="text" onclick="mduiPost('home.php?mod=spacecp&ac=blog&op=stick&blogid=$blog[blogid]',{sticksubmit:'true',stickflag:'<!--{if $blog['stickflag']}-->0<!--{else}-->1<!--{/if}-->',referer:location.href},function(){location.reload()})">{lang determine}</mdui-button>
+	</mdui-dialog>
+	<mdui-dialog id="mdui_blog_delete_$blog[blogid]" close-on-esc close-on-overlay-click>
+		<div slot="headline">{lang delete_blog}</div>
+		<div slot="description">{lang sure_delete_blog}</div>
+		<mdui-button slot="action" variant="text" onclick="document.getElementById('mdui_blog_delete_$blog[blogid]').open=false">{lang cancel}</mdui-button>
+		<mdui-button slot="action" variant="text" onclick="mduiPost('home.php?mod=spacecp&ac=blog&op=delete&blogid=$blog[blogid]',{deletesubmit:'true',referer:location.href},function(){location.reload()})">{lang determine}</mdui-button>
+	</mdui-dialog>
+	<!--{/if}-->
+	<!--{/loop}-->
+	<!--{else}-->
+	<mdui-card variant="outlined" class="mdui-blog-empty">{lang no_related_blog}</mdui-card>
+	<!--{/if}-->
+	</div>
+	<!--{if $multi}--><div class="mdui-blog-pages">$multi</div><!--{/if}-->
+</div>
+<!--{template common/footer}-->

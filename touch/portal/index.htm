@@ -1,0 +1,192 @@
+<!--{template common/header}-->
+<!--{eval require_once DISCUZ_ROOT.'./template/MDUI/touch/php/portal_index.php';}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="menu" id="mdui_menu_btn"></mdui-button-icon>
+	<mdui-top-app-bar-title>{$_G['setting']['bbname']}</mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<mdui-button-icon icon="search" href="search.php?mod=forum&mobile=2"></mdui-button-icon>
+</mdui-top-app-bar>
+
+
+<!--{hook/global_header_mobile}-->
+<!--{hook/portal_index_top_mobile}-->
+
+<div style="padding-bottom:88px">
+
+	<!--{if $mdui_nav}-->
+	<!-- 快捷导航：DIY「展示类 → 静态模块 → 自定义HTML」直出的 HTML，每个 <a> 渲染成胶囊 -->
+	<div class="pt_nav">$mdui_nav</div>
+	<!--{/if}-->
+
+	<!--{if $mdui_slide}-->
+	<!-- 幻灯片：CSS scroll-snap 实现横向吸附滚动，不引 Swiper -->
+	<div class="pt_slide">
+		<!--{loop $mdui_slide $sl}-->
+		<a href="{$sl['url']}" class="pt_slide_item" <!--{if $sl['pic']}-->style="background-image:url({$sl['pic']})"<!--{/if}-->>
+			<span class="pt_slide_tit"><!--{echo cutstr($sl['title'], 42, '')}--></span>
+		</a>
+		<!--{/loop}-->
+	</div>
+	<script>
+	(function () {
+		var slide = document.querySelector('.pt_slide');
+		var items = slide ? Array.from(slide.querySelectorAll('.pt_slide_item')) : [];
+		if (items.length < 2) return;
+
+		var timer;
+		function left(item) { return item.offsetLeft - items[0].offsetLeft; }
+		function play() {
+			var current = items.reduce(function (best, item, index) {
+				return Math.abs(slide.scrollLeft - left(item)) < Math.abs(slide.scrollLeft - left(items[best])) ? index : best;
+			}, 0);
+			slide.scrollTo({left: left(items[(current + 1) % items.length]), behavior: 'smooth'});
+		}
+		function schedule() {
+			clearTimeout(timer);
+			timer = setTimeout(play, 4000);
+		}
+		slide.addEventListener('scroll', schedule, {passive: true});
+		schedule();
+	})();
+	</script>
+	<!--{/if}-->
+
+	<!--{if $mdui_headline}-->
+	<mdui-card variant="filled" class="pt_headline" style="display:flex;margin:.75rem 1rem;padding:.625rem .875rem">
+		<mdui-icon name="campaign" style="color:rgb(var(--mdui-color-error));flex:0 0 auto"></mdui-icon>
+		<div class="pt_headline_box">
+			<div id="pt_headline_roll" class="pt_headline_roll">
+				<!--{loop $mdui_headline $hl}-->
+				<a href="{$hl['url']}"><!--{echo cutstr($hl['title'], 38, '')}--></a>
+				<!--{/loop}-->
+			</div>
+		</div>
+	</mdui-card>
+	<!--{if count($mdui_headline) > 1}-->
+	<script>
+	(function () {
+		var roll = document.getElementById('pt_headline_roll');
+		var items = roll.querySelectorAll('a');
+		var index = 0;
+		setInterval(function () {
+			index = (index + 1) % items.length;
+			roll.style.transform = 'translateY(' + (index * -1.375) + 'rem)';
+		}, 3000);
+	})();
+	</script>
+	<!--{/if}-->
+	<!--{/if}-->
+
+	<!--{if $mdui_entry}-->
+	<!-- 宫格入口：DIY「自定义HTML」直出，每个 <a> 里放 <h2> 标题 + <span> 说明，一行三格 -->
+	<div class="pt_entry">$mdui_entry</div>
+	<!--{/if}-->
+
+	<!--{if $mdui_an}-->
+	<mdui-card variant="filled" style="display:block;margin:.75rem 1rem;padding:.625rem .875rem">
+		<div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;opacity:.7;margin-bottom:.25rem">
+			<mdui-icon name="notifications"></mdui-icon>$mdui_l['announcement']
+		</div>
+		<ul class="idx_announce">
+			<!--{loop $mdui_an $an}-->
+			<li><a href="<!--{if $an['type'] == 1}-->{$an['message']}<!--{else}-->forum.php?mod=announcement&id={$an['id']}<!--{/if}-->">{$an['subject']}</a></li>
+			<!--{/loop}-->
+		</ul>
+	</mdui-card>
+	<!--{/if}-->
+
+	<!--{hook/portal_index_middle_mobile}-->
+
+	<mdui-card variant="filled" style="display:block;margin:.75rem 1rem;overflow:hidden">
+		<mdui-tabs value="newthread" full-width>
+			<mdui-tab value="newthread" icon="fiber_new">$mdui_l['show_newthreads']</mdui-tab>
+			<mdui-tab value="hot" icon="local_fire_department">{lang hot_thread}</mdui-tab>
+			<mdui-tab value="digest" icon="verified">$mdui_l['post_digest_thread']</mdui-tab>
+
+			<!--{loop $mdui_tabs $tabtype $tabitems}-->
+			<mdui-tab-panel slot="panel" value="$tabtype">
+				<!--{if $tabitems}-->
+				<mdui-list style="padding:0 .25rem .25rem">
+					<!--{eval $rank = 0;}-->
+					<!--{loop $tabitems $it}-->
+					<!--{eval $rank++;}-->
+					<mdui-list-item href="{$it['url']}" rounded>
+						<span slot="icon" class="pt_rank{if $rank < 4} pt_rank_top{/if}">$rank</span>
+						<!--{echo cutstr($it['title'], 34, '')}-->
+						<span slot="description">
+							<!--{if $it['authorid']}-->{$it['author']}<!--{else}-->{$_G['setting']['anonymoustext']}<!--{/if}-->
+							<!--{if $tabtype == 'hot'}--> · {$it['views']} {lang mobrenqi}<!--{else}--> · {$it['dateline']}<!--{/if}-->
+						</span>
+					</mdui-list-item>
+					<!--{/loop}-->
+				</mdui-list>
+				<!--{else}-->
+				<div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang mobnodata}</div>
+				<!--{/if}-->
+			</mdui-tab-panel>
+			<!--{/loop}-->
+		</mdui-tabs>
+	</mdui-card>
+
+	<!--{if $mdui_feed}-->
+	<div style="font-size:.875rem;opacity:.7;padding:.5rem 1.5rem .25rem">$mdui_l['latest']</div>
+	<div id="pt_feed">
+		<!--{loop $mdui_feed $fd}-->
+		<mdui-card variant="filled" class="pt_feed_item" clickable href="{$fd['url']}" style="display:block;margin:.75rem 1rem;padding:.875rem">
+			<div style="display:flex;align-items:center;gap:.625rem;margin-bottom:.5rem">
+				<mdui-avatar src="<!--{avatar($fd['authorid'], 'small', true)}-->" style="width:2rem;height:2rem"></mdui-avatar>
+				<div style="flex:1;min-width:0">
+					<div style="font-size:.875rem">
+						<!--{if $fd['authorid']}--><a href="home.php?mod=space&uid={$fd['authorid']}" style="color:inherit;text-decoration:none" onclick="event.stopPropagation()">{$fd['author']}</a><!--{else}-->{$_G['setting']['anonymoustext']}<!--{/if}-->
+					</div>
+					<div style="font-size:.75rem;opacity:.6">{$fd['dateline']}</div>
+				</div>
+			</div>
+			<div class="pt_feed_title">{$fd['title']}</div>
+			<!--{if $fd['pic']}-->
+			<div class="pt_feed_pic1" style="background-image:url({$fd['pic']})"></div>
+			<!--{elseif $fd['images']}-->
+			<div class="pt_feed_pics">
+				<!--{loop $fd['images'] $img}-->
+				<div style="background-image:url($img)"></div>
+				<!--{/loop}-->
+			</div>
+			<!--{/if}-->
+			<div class="pt_feed_num">
+				<mdui-icon name="visibility"></mdui-icon>{$fd['views']}
+				<mdui-icon name="chat_bubble_outline"></mdui-icon>{$fd['replies']}
+			</div>
+		</mdui-card>
+		<!--{/loop}-->
+	</div>
+	<mdui-button id="pt_feed_more" variant="text" full-width style="margin-bottom:1rem">{lang more}</mdui-button>
+	<script>
+	// 加载更多：条目已在 HTML 里，逐批显示，省一次 ajax 往返
+	(function () {
+		var items = document.querySelectorAll('#pt_feed .pt_feed_item');
+		var btn = document.getElementById('pt_feed_more');
+		var shown = 0;
+		function next() {
+			for (var i = 0; i < 5 && shown < items.length; i++, shown++) {
+				items[shown].style.display = 'block';
+			}
+			if (shown >= items.length) {
+				btn.style.display = 'none';
+			}
+		}
+		items.forEach(function (el) { el.style.display = 'none'; });
+		next();
+		btn.addEventListener('click', next);
+		window.addEventListener('scroll', function () {
+			if (shown < items.length && window.scrollY + window.innerHeight > document.body.scrollHeight - 600) {
+				next();
+			}
+		});
+	})();
+	</script>
+	<!--{/if}-->
+</div>
+
+<!--{hook/portal_index_bottom_mobile}-->
+<!--{template common/footer}-->

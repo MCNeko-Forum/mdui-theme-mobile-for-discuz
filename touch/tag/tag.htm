@@ -1,0 +1,36 @@
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang tag}</mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="home" data-href="portal.php?mod=index"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<style>
+	.mdui-tag-page { padding:1rem 1rem 5.5rem; }
+	.mdui-tag-search { display:flex; gap:.5rem; align-items:center; }
+	.mdui-tag-search mdui-text-field { flex:1; }
+	.mdui-tag-cloud { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
+	.mdui-tag-empty { padding:2rem 1rem; text-align:center; color:rgb(var(--mdui-color-on-surface-variant)); }
+</style>
+
+<div class="mdui-tag-page">
+	<form method="get" action="misc.php" class="mdui-tag-search">
+		<input type="hidden" name="mod" value="tag">
+		<mdui-text-field name="name" value="$keyword" label="{lang tag}" placeholder="{lang mobsearchtxt}" clearable></mdui-text-field>
+		<mdui-button type="submit" variant="tonal">{lang search}</mdui-button>
+	</form>
+
+	<!--{if $tagarray}-->
+		<div class="mdui-tag-cloud">
+			<!--{loop $tagarray $tag}-->
+				<mdui-chip data-href="misc.php?mod=tag&id={$tag['tagid']}&type=thread">{$tag['tagname']} {$tag['related_count']}</mdui-chip>
+			<!--{/loop}-->
+		</div>
+	<!--{else}-->
+		<mdui-card variant="outlined" class="mdui-tag-empty">{lang no_content}</mdui-card>
+	<!--{/if}-->
+</div>
+
+<!--{template common/footer}-->

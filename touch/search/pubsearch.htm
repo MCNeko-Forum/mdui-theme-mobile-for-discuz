@@ -1,0 +1,40 @@
+<mdui-card variant="outlined" style="padding:1rem">
+	<div style="display:flex;gap:.5rem;align-items:center">
+		<mdui-select id="mdui_search_type" value="{if CURMODULE == 'forum'}forum{elseif CURMODULE == 'blog'}blog{elseif CURMODULE == 'album'}album{elseif CURMODULE == 'group'}group{else}user{/if}" style="width:6.75rem;flex:0 0 auto">
+			<mdui-menu-item value="forum">帖子</mdui-menu-item>
+			<mdui-menu-item value="blog">日志</mdui-menu-item>
+			<mdui-menu-item value="album">相册</mdui-menu-item>
+			<!--{if $_G['setting']['groupstatus'] && $_G['setting']['search']['group']['status'] && ($_G['group']['allowsearch'] & 16 || $_G['adminid'] == 1)}--><mdui-menu-item value="group">{$_G['setting']['navs'][3]['navname']}</mdui-menu-item><!--{/if}-->
+			<mdui-menu-item value="user">用户</mdui-menu-item>
+		</mdui-select>
+		<mdui-text-field id="mdui_search_keyword" name="srchtxt" value="$keyword" label="{lang search}" icon="search" enterkeyhint="search" style="flex:1"></mdui-text-field>
+	</div>
+	<div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.75rem">
+		<mdui-button id="mdui_search_advanced" variant="text" href="search.php?mod=forum&adv=yes">高级搜索</mdui-button>
+		<input type="hidden" name="searchsubmit" value="yes">
+		<mdui-button type="submit">{lang search}</mdui-button>
+	</div>
+</mdui-card>
+<script>
+(function () {
+	var form = document.currentScript.previousElementSibling ? document.currentScript.closest('form') : null;
+	var select = document.getElementById('mdui_search_type');
+		var advanced = document.getElementById('mdui_search_advanced');
+		if (!form || !select || !advanced) return;
+		function update() {
+			var mod = select.value;
+			form.action = mod === 'user' ? 'search.php?mod=user' : 'search.php?mod=' + mod;
+			form.method = mod === 'user' ? 'get' : 'post';
+			advanced.style.display = mod === 'forum' || mod === 'user' ? '' : 'none';
+			advanced.href = mod === 'user' ? 'home.php?mod=spacecp&ac=search' : 'search.php?mod=forum&adv=yes';
+		}
+		form.addEventListener('submit', function (event) {
+			if (select.value !== 'user') return;
+			event.preventDefault();
+			var keyword = document.getElementById('mdui_search_keyword');
+			location.href = 'search.php?mod=user&srchtxt=' + encodeURIComponent(keyword ? keyword.value : '') + '&searchsubmit=yes';
+		});
+		select.addEventListener('change', update);
+		update();
+})();
+</script>

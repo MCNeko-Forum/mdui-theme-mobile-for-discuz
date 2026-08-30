@@ -1,0 +1,77 @@
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{if $a_actives['blacklist']}-->{lang my_blacklist}<!--{elseif empty($_G['setting']['sessionclose']) && $a_actives['onlinemember']}-->{lang online_member}<!--{elseif $a_actives['visitor']}-->{lang my_visitor}<!--{elseif $a_actives['trace']}-->{lang my_trace}<!--{else}-->{lang my_friends}<!--{/if}--></mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="home" href="index.php"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<div style="padding:0 1rem 5.5rem">
+	<mdui-tabs value="<!--{if $a_actives['blacklist']}-->blacklist<!--{elseif $a_actives['onlinemember']}-->online<!--{elseif $a_actives['visitor']}-->visitor<!--{elseif $a_actives['trace']}-->trace<!--{else}-->me<!--{/if}-->" full-width>
+		<mdui-tab value="me" data-href="home.php?mod=space&do=friend">{lang my_friends}</mdui-tab>
+		<!--{if $space['self']}--><mdui-tab value="blacklist" data-href="home.php?mod=space&do=friend&view=blacklist">{lang my_blacklist}</mdui-tab><!--{/if}-->
+		<!--{if empty($_G['setting']['sessionclose'])}--><mdui-tab value="online" data-href="home.php?mod=space&do=friend&view=online&type=member">{lang online_member}</mdui-tab><!--{/if}-->
+		<mdui-tab value="visitor" data-href="home.php?mod=space&do=friend&view=visitor">{lang my_visitor}</mdui-tab>
+		<mdui-tab value="trace" data-href="home.php?mod=space&do=friend&view=trace">{lang my_trace}</mdui-tab>
+	</mdui-tabs>
+
+	<!--{if $space['self'] && $_GET['view'] == 'blacklist'}-->
+	<mdui-card variant="filled" style="display:block;padding:1rem;margin-top:1rem">
+		<div style="font-size:1.05rem;margin-bottom:.5rem">{lang add_blacklist}</div>
+		<p style="margin-top:0;opacity:.7">{lang blacklist_message}</p>
+		<form method="post" autocomplete="off" name="blackform" action="home.php?mod=spacecp&ac=friend&op=blacklist&start=$_GET[start]">
+			<mdui-text-field name="username" label="{lang username}" clearable style="width:100%"></mdui-text-field>
+			<input type="hidden" name="blacklistsubmit" value="true" />
+			<input type="hidden" name="formhash" value="{FORMHASH}" />
+			<mdui-button type="submit" name="blacklistsubmit_btn" value="true" full-width style="margin-top:1rem">{lang add}</mdui-button>
+		</form>
+	</mdui-card>
+	<!--{/if}-->
+
+	<!--{if $space['self'] && $list}-->
+	<mdui-list style="padding-top:1rem">
+		<!--{loop $list $key $value}-->
+			<!--{if $value['username'] == ''}-->
+			<mdui-list-item rounded href="home.php?mod=space&uid=$value['uid']">
+				<mdui-avatar slot="icon" src="{STATICURL}image/magic/hidden.gif"></mdui-avatar>
+				{lang anonymity}
+			</mdui-list-item>
+			<!--{else}-->
+			<mdui-list-item rounded onclick="location.href='home.php?mod=space&uid=$value['uid']'">
+				<mdui-avatar slot="icon" src="<!--{avatar($value['uid'], 'small', true)}-->"></mdui-avatar>
+				<span{eval g_color($value['groupid']);}>$value['username']</span>
+				<!--{if $value['recentnote']}--><span slot="description">$value['recentnote']</span><!--{/if}-->
+				<!--{if $_GET['view'] == 'blacklist'}-->
+				<mdui-button slot="end-icon" variant="text" onclick="event.stopPropagation();document.getElementById('mdui_blacklist_delete_$value[uid]').open=true">{lang delete_blacklist}</mdui-button>
+				<!--{else}-->
+				<!--{if $_GET['view'] == 'me'}--><mdui-button slot="end-icon" variant="text" onclick="event.stopPropagation();document.getElementById('mdui_friend_delete_$value[uid]').open=true">{lang delete}</mdui-button><!--{/if}-->
+				<mdui-button slot="end-icon" variant="text" onclick="event.stopPropagation();location.href='home.php?mod=space&do=pm&subop=view&touid=$value['uid']'">{lang send_pm}</mdui-button>
+				<!--{/if}-->
+			</mdui-list-item>
+			<!--{if $_GET['view'] == 'blacklist'}-->
+			<mdui-dialog id="mdui_blacklist_delete_$value[uid]" close-on-esc close-on-overlay-click>
+				<div slot="headline">{lang delete_blacklist}</div>
+				<div slot="description">{lang delete_blacklist}</div>
+				<mdui-button slot="action" variant="text" onclick="document.getElementById('mdui_blacklist_delete_$value[uid]').open=false">{lang cancel}</mdui-button>
+				<mdui-button slot="action" variant="text" data-href="home.php?mod=spacecp&ac=friend&op=blacklist&subop=delete&uid=$value[uid]&start=$_GET[start]">{lang determine}</mdui-button>
+			</mdui-dialog>
+			<!--{/if}-->
+			<!--{if $_GET['view'] == 'me'}-->
+			<mdui-dialog id="mdui_friend_delete_$value[uid]" close-on-esc close-on-overlay-click>
+				<div slot="headline">{lang delete}</div>
+				<form method="post" action="home.php?mod=spacecp&ac=friend&op=ignore&uid=$value['uid']&confirm=1&loc=1">
+					<div slot="description">{lang determine_lgnore_friend}</div>
+					<input type="hidden" name="friendsubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="referer" value="home.php?mod=space&do=friend">
+					<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_friend_delete_$value[uid]').open=false">{lang cancel}</mdui-button>
+					<mdui-button slot="action" type="submit" variant="text" name="friendsubmit_btn" value="true">{lang determine}</mdui-button>
+				</form>
+			</mdui-dialog>
+			<!--{/if}-->
+			<!--{/if}-->
+		<!--{/loop}-->
+	</mdui-list>
+	<!--{if $multi}--><div style="padding:1rem;text-align:center">$multi</div><!--{/if}-->
+	<!--{/if}-->
+</div>
+<!--{eval $nofooter = true;}-->
+<!--{template common/footer}-->

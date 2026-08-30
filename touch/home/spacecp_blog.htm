@@ -1,0 +1,170 @@
+<!--{template common/header}-->
+<!--{if $_GET['op'] == 'delete' || $_GET['op'] == 'stick' || $_GET['op'] == 'edithot'}-->
+<mdui-dialog open>
+	<div slot="headline">
+		<!--{if $_GET['op'] == 'delete'}-->{lang delete_blog}
+		<!--{elseif $_GET['op'] == 'edithot'}-->{lang adjust_hot}
+		<!--{elseif $stickflag}-->{lang stick_blog}
+		<!--{else}-->{lang cancel_stick_blog}<!--{/if}-->
+	</div>
+	<!--{if $_GET['op'] == 'edithot'}-->
+	<form method="post" action="home.php?mod=spacecp&ac=blog&op=edithot&blogid=$blogid">
+		<mdui-text-field name="hot" value="$blog[hot]" label="{lang new_hot}" type="number"></mdui-text-field>
+		<input type="hidden" name="referer" value="{echo dreferer()}">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<input type="hidden" name="hotsubmit" value="true">
+		<mdui-button slot="action" variant="text" type="button" onclick="history.back()">{lang cancel}</mdui-button>
+		<mdui-button slot="action" variant="text" type="submit">{lang determine}</mdui-button>
+	</form>
+	<!--{else}-->
+	<div slot="description">
+		<!--{if $_GET['op'] == 'delete'}-->{lang sure_delete_blog}
+		<!--{elseif $stickflag}-->{lang sure_stick_blog}
+		<!--{else}-->{lang sure_cancel_stick_blog}<!--{/if}-->
+	</div>
+	<form method="post" action="home.php?mod=spacecp&ac=blog&op=$_GET['op']&blogid=$blogid">
+		<input type="hidden" name="referer" value="{echo dreferer()}">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<!--{if $_GET['op'] == 'delete'}-->
+		<input type="hidden" name="deletesubmit" value="true">
+		<!--{else}-->
+		<input type="hidden" name="sticksubmit" value="true">
+		<input type="hidden" name="stickflag" value="$stickflag">
+		<!--{/if}-->
+		<mdui-button slot="action" variant="text" type="button" onclick="history.back()">{lang cancel}</mdui-button>
+		<mdui-button slot="action" variant="text" type="submit">{lang determine}</mdui-button>
+	</form>
+	<!--{/if}-->
+</mdui-dialog>
+<!--{else}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{if $blog['blogid']}-->{lang edit_blog}<!--{else}-->{lang memcp_blog}<!--{/if}--></mdui-top-app-bar-title>
+</mdui-top-app-bar>
+
+<form method="post" id="postform" action="home.php?mod=spacecp&ac=blog&blogid=$blog[blogid]" enctype="multipart/form-data" style="padding:1rem 1rem 5.5rem">
+	<mdui-card variant="outlined" style="padding:1rem;display:grid;gap:1rem">
+		<mdui-text-field name="subject" value="$blog[subject]" label="{lang memcp_blog}" required></mdui-text-field>
+		<mdui-text-field name="message" value="$blog[message]" label="{lang thread_content}" textarea rows="10" required></mdui-text-field>
+
+		<!--{if $_G['setting']['blogcategorystat'] && $categoryselect}-->
+		<div>
+			<div class="mdui-blog-label">{lang select_site_blog_categories}</div>
+			<div id="mdui_blog_category_source" hidden>$categoryselect</div>
+			<div id="mdui_blog_category"></div>
+		</div>
+		<!--{/if}-->
+
+		<mdui-select id="mdui_blog_class" label="{lang personal_category}">
+			<mdui-menu-item value="" hidden></mdui-menu-item>
+			<!--{loop $classarr $value}-->
+			<mdui-menu-item value="$value[classid]">$value[classname]</mdui-menu-item>
+			<!--{/loop}-->
+			<mdui-menu-item value="__new__">+ 新建个人分类</mdui-menu-item>
+		</mdui-select>
+		<input type="hidden" name="classid" id="mdui_blog_class_value" value="$blog[classid]">
+		<mdui-text-field id="mdui_blog_new_class" label="新建个人分类" hidden></mdui-text-field>
+
+		<mdui-text-field id="mdui_blog_tag" name="tag" value="$blog[tag]" label="{lang label}"></mdui-text-field>
+		<!--{if checkperm('manageblog')}-->
+		<mdui-text-field name="hot" value="$blog[hot]" label="{lang hot}" type="number"></mdui-text-field>
+		<!--{/if}-->
+		<!--{if helper_access::check_module('feed')}-->
+		<mdui-checkbox name="makefeed" value="1"<!--{if ckprivacy('blog', 'feed')}--> checked<!--{/if}-->>{lang make_feed}</mdui-checkbox>
+		<!--{/if}-->
+		<!--{if $secqaacheck || $seccodecheck}-->
+		<!--{template common/seccheck}-->
+		<!--{/if}-->
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<input type="hidden" name="plaintext" value="true">
+		<input type="hidden" name="blogsubmit" value="true">
+		<mdui-button type="submit" full-width>{lang save_publish}</mdui-button>
+	</mdui-card>
+</form>
+
+<script>
+(function () {
+	var form = document.getElementById('postform');
+	if (form) {
+		form.addEventListener('submit', function (event) {
+			<!--{if $_G['setting']['blogcategorystat'] && $_G['setting']['blogcategoryrequired']}-->
+			var category = form.querySelector('[name="catid"]');
+			if (!category || !category.value || category.value === '0') {
+				event.preventDefault();
+				alert('{lang select_system_cat}');
+				if (category) category.focus();
+				return;
+			}
+			<!--{/if}-->
+			var makefeed = form.querySelector('[name="makefeed"]');
+			if (makefeed && !makefeed.checked && !confirm('{lang no_feed_notice}')) event.preventDefault();
+		});
+	}
+
+	function restoreSiteCategory() {
+		var source = document.querySelector('#mdui_blog_category_source select');
+		var box = document.getElementById('mdui_blog_category');
+		if (!source || !box) return;
+
+		var select = document.createElement('mdui-select');
+		var selectedValue = source.value;
+		select.name = source.name;
+		select.label = '{lang select_site_blog_categories}';
+		source.removeAttribute('name');
+
+		Array.prototype.forEach.call(source.options, function (option) {
+			var item = document.createElement('mdui-menu-item');
+			item.value = option.value;
+			item.textContent = option.text;
+			select.appendChild(item);
+		});
+		box.appendChild(select);
+		select.value = selectedValue;
+		if (select.updateComplete) {
+			select.updateComplete.then(function () {
+				select.value = selectedValue;
+			});
+		}
+	}
+
+	function restorePersonalCategory() {
+		var select = document.getElementById('mdui_blog_class');
+		var value = document.getElementById('mdui_blog_class_value');
+		var input = document.getElementById('mdui_blog_new_class');
+		if (!select || !value || !input) return;
+
+		function sync() {
+			var isNew = select.value === '__new__';
+			input.style.display = isNew ? '' : 'none';
+			input.name = '';
+			value.value = isNew ? 'new:' + input.value : (select.value || '0');
+		}
+
+		var selectedValue = value.value === '0' ? '' : value.value;
+		select.value = selectedValue;
+		select.addEventListener('change', sync);
+		input.addEventListener('input', sync);
+		if (select.updateComplete) {
+			select.updateComplete.then(function () {
+				select.value = selectedValue;
+				sync();
+			});
+		} else {
+			sync();
+		}
+	}
+
+	function restoreTag() {
+		var tag = document.getElementById('mdui_blog_tag');
+		if (tag) tag.value = tag.getAttribute('value') || '';
+	}
+
+	customElements.whenDefined('mdui-select').then(function () {
+		restoreSiteCategory();
+		restorePersonalCategory();
+		restoreTag();
+	});
+}());
+</script>
+<!--{/if}-->
+<!--{template common/footer}-->

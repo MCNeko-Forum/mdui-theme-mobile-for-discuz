@@ -1,0 +1,7 @@
+<!--{template common/header}-->
+<mdui-top-app-bar><mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon><mdui-top-app-bar-title>{lang collection}{lang search}</mdui-top-app-bar-title></mdui-top-app-bar>
+<div style="padding:1rem 1rem 5.5rem">
+	<form method="post" autocomplete="off" action="search.php?mod=collection"><input type="hidden" name="formhash" value="{FORMHASH}"><!--{subtemplate search/pubsearch}--></form>
+	<!--{if !empty($searchid) && submitcheck('searchsubmit', 1)}--><mdui-list style="margin-top:1rem"><mdui-list-subheader>{lang search_result}</mdui-list-subheader><!--{if empty($collectionlist)}--><mdui-list-item>{lang search_nomatch}</mdui-list-item><!--{else}--><!--{loop $collectionlist $collection}--><mdui-list-item href="forum.php?mod=collection&action=view&ctid=$collection[ctid]" rounded>$collection[name]<span slot="description">$collection[desc]</span></mdui-list-item><!--{/loop}--><!--{/if}--></mdui-list><!--{if $multipage}--><div style="margin-top:1rem">$multipage</div><!--{/if}--><!--{/if}-->
+</div>
+<!--{template common/footer}-->

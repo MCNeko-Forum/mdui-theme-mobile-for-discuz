@@ -1,0 +1,191 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+
+<!--{if $validate}-->
+	<div style="opacity:.8;font-size:.875rem;margin-bottom:1rem">{lang validator_comment}</div>
+	<form action="member.php?mod=regverify" method="post" autocomplete="off">
+		<input type="hidden" value="{FORMHASH}" name="formhash" />
+		<div style="margin-bottom:1rem;font-size:.9375rem"><span style="opacity:.7">{lang validator_remark}: </span>$validate['remark']</div>
+		<mdui-text-field name="regmessagenew" label="{lang validator_message}" style="margin-bottom:1rem"></mdui-text-field>
+		<mdui-button type="submit" name="verifysubmit" value="true" full-width>{lang validator_submit}</mdui-button>
+	</form>
+
+<!--{elseif $operation == 'password'}-->
+	<div style="opacity:.8;font-size:.875rem;margin-bottom:1rem">
+		<!--{if !$_G['member']['freeze']}-->
+			<!--{if empty($_G['setting']['connect']['allow']) || !$conisregister}-->{lang old_password_comment}<!--{elseif $wechatuser}-->{lang wechat_config_newpassword_comment}<!--{else}-->{lang connect_config_newpassword_comment}<!--{/if}-->
+		<!--{elseif $_G['member']['freeze'] == 1}-->
+			<span style="color:rgb(var(--mdui-color-error))">{lang freeze_pw_tips}</span>
+		<!--{elseif $_G['member']['freeze'] == 2}-->
+			<span style="color:rgb(var(--mdui-color-error))">{lang freeze_email_tips}</span>
+		<!--{elseif $_G['member']['freeze'] == -1}-->
+			<span style="color:rgb(var(--mdui-color-error))">{lang freeze_admincp_tips}</span>
+		<!--{/if}-->
+	</div>
+	<form id="mdui_profile_password_form" action="home.php?mod=spacecp&ac=profile" method="post" autocomplete="off">
+		<input type="hidden" value="{FORMHASH}" name="formhash" />
+		<input type="hidden" name="passwordsubmit" value="true" />
+		<!--{if empty($_G['setting']['connect']['allow']) || !$conisregister}-->
+			<mdui-text-field name="oldpassword" type="password" label="{lang old_password}" toggle-password style="margin-bottom:1rem"></mdui-text-field>
+		<!--{/if}-->
+		<!--{eval $mdui_strongpw = is_array($_G['setting']['strongpw']) ? $_G['setting']['strongpw'] : array();}-->
+		<mdui-text-field id="mdui_profile_newpassword" name="newpassword" type="password" label="{lang new_password}" toggle-password<!--{if $_G['setting']['pwlength']}--> minlength="{$_G['setting']['pwlength']}"<!--{/if}--> style="margin-bottom:.375rem"></mdui-text-field>
+		<!--{if $_G['setting']['pwlength'] || $mdui_strongpw}--><div style="margin:0 0 1rem;font-size:.8125rem;line-height:1.6;color:rgb(var(--mdui-color-on-surface-variant))">密码要求：<!--{if $_G['setting']['pwlength']}-->最少 {$_G['setting']['pwlength']} 个字符<!--{/if}--><!--{if $_G['setting']['pwlength'] && $mdui_strongpw}-->，且包含<!--{/if}--><!--{if $mdui_strongpw}--><!--{if in_array(1, $mdui_strongpw)}-->数字<!--{/if}--><!--{if in_array(2, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw)}-->、<!--{/if}-->小写字母<!--{/if}--><!--{if in_array(3, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw) || in_array(2, $mdui_strongpw)}-->、<!--{/if}-->大写字母<!--{/if}--><!--{if in_array(4, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw) || in_array(2, $mdui_strongpw) || in_array(3, $mdui_strongpw)}-->、<!--{/if}-->特殊符号<!--{/if}--><!--{/if}--></div><!--{/if}-->
+		<mdui-text-field id="mdui_profile_newpassword2" name="newpassword2" type="password" label="{lang new_password_confirm}" toggle-password style="margin-bottom:1rem"></mdui-text-field>
+		<mdui-text-field name="emailnew" label="{lang email}" value="$space['email']" style="margin-bottom:1rem"
+			helper="<!--{if $_G['member']['freeze'] == 2}-->{lang freeze_email_tips}<!--{elseif empty($space['newemail'])}-->{lang email_been_active}<!--{else}-->$acitvemessage<!--{/if}-->"></mdui-text-field>
+		<div style="display:flex;gap:.5rem;margin-bottom:1rem">
+			<mdui-text-field name="secmobiccnew" label="+" value="$space['secmobicc']" style="width:5rem"></mdui-text-field>
+			<mdui-text-field name="secmobilenew" label="{lang secmobile}" value="$space['secmobile']" helper="{lang memcp_profile_secmobile_comment}" style="flex:1"></mdui-text-field>
+		</div>
+		<!--{if $_G['setting']['smsstatus']}-->
+		<div style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:1rem">
+			<mdui-text-field name="secmobseccodenew" id="secmobseccodenew" label="{lang secmobseccode}" helper="{lang memcp_profile_secmobseccode_comment}" style="flex:1"></mdui-text-field>
+			<mdui-button variant="tonal" onclick="memcp_sendsecmobseccode()">{lang send}</mdui-button>
+		</div>
+		<!--{/if}-->
+		<!--{if $_G['member']['freeze'] == 2 || $_G['member']['freeze'] == -1}-->
+			<mdui-text-field name="freezereson" label="{lang freeze_reason}" rows="3" value="$space['freezereson']"
+				helper="<!--{if $_G['member']['freeze'] == 2}-->{lang freeze_reason_comment}<!--{else}-->{lang freeze_reason_admincp_comment}<!--{/if}-->" style="margin-bottom:1rem"></mdui-text-field>
+			<!--{if !empty($space['freezemodremark'])}-->
+				<mdui-text-field name="freezemodremark" label="{lang freeze_remark}" rows="3" value="$space['freezemodremark']" readonly helper="{lang freeze_remark_comment}" style="margin-bottom:1rem"></mdui-text-field>
+			<!--{/if}-->
+		<!--{/if}-->
+		<mdui-select name="questionidnew" value="" label="{lang security_question}" helper="{lang memcp_profile_security_comment}" style="margin-bottom:1rem">
+			<mdui-menu-item value="">{lang memcp_profile_security_keep}</mdui-menu-item>
+			<mdui-menu-item value="0">{lang security_question_0}</mdui-menu-item>
+			<mdui-menu-item value="1">{lang security_question_1}</mdui-menu-item>
+			<mdui-menu-item value="2">{lang security_question_2}</mdui-menu-item>
+			<mdui-menu-item value="3">{lang security_question_3}</mdui-menu-item>
+			<mdui-menu-item value="4">{lang security_question_4}</mdui-menu-item>
+			<mdui-menu-item value="5">{lang security_question_5}</mdui-menu-item>
+			<mdui-menu-item value="6">{lang security_question_6}</mdui-menu-item>
+			<mdui-menu-item value="7">{lang security_question_7}</mdui-menu-item>
+		</mdui-select>
+		<mdui-text-field name="answernew" label="{lang security_answer}" helper="{lang memcp_profile_security_answer_comment}" style="margin-bottom:1rem"></mdui-text-field>
+		<!--{if $secqaacheck || $seccodecheck}--><div style="margin-bottom:1rem"><!--{subtemplate common/seccheck}--></div><!--{/if}-->
+		<mdui-button type="submit" name="pwdsubmit" value="true" full-width>{lang save}</mdui-button>
+	</form>
+	<script>
+	(function () {
+		var form = document.getElementById('mdui_profile_password_form');
+		var password = document.getElementById('mdui_profile_newpassword');
+		var password2 = document.getElementById('mdui_profile_newpassword2');
+		var rules = {length:{$_G['setting']['pwlength'] ? $_G['setting']['pwlength'] : 0},digit:<!--{if in_array(1, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,lower:<!--{if in_array(2, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,upper:<!--{if in_array(3, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,symbol:<!--{if in_array(4, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->};
+		form.addEventListener('submit', function (event) {
+			var value = password.value || '';
+			if (!value && !password2.value) return;
+			if ((rules.length && value.length < rules.length) || (rules.digit && !/\d/.test(value)) || (rules.lower && !/[a-z]/.test(value)) || (rules.upper && !/[A-Z]/.test(value)) || (rules.symbol && !/[^a-zA-Z0-9]/.test(value))) {
+				event.preventDefault(); mduiTip('密码不符合上方要求'); password.focus(); return;
+			}
+			if (value !== password2.value) { event.preventDefault(); mduiTip('两次输入的密码不一致'); password2.focus(); }
+		});
+	})();
+	</script>
+	<!--{if $_G['setting']['smsstatus']}-->
+	<script>
+	function memcp_sendsecmobseccode() {
+		return sendsecmobseccode(1, document.querySelector('[name=secmobiccnew]').value, document.querySelector('[name=secmobilenew]').value);
+	}
+	</script>
+	<!--{/if}-->
+
+<!--{else}-->
+	<!--{hook/spacecp_profile_top}-->
+	<!--{subtemplate home/spacecp_profile_nav}-->
+	<!--{if $vid}-->
+		<div style="opacity:.8;font-size:.875rem;margin-bottom:1rem"><!--{if $showbtn}-->{lang spacecp_profile_message1}<!--{else}-->{lang spacecp_profile_message2}<!--{/if}--></div>
+	<!--{/if}-->
+	<iframe id="frame_profile" name="frame_profile" style="display:none"></iframe>
+	<form action="{if $operation != 'plugin'}home.php?mod=spacecp&ac=profile&op=$operation{else}home.php?mod=spacecp&ac=plugin&op=profile&id=$_GET['id']{/if}" method="post" enctype="multipart/form-data" autocomplete="off"{if $operation != 'plugin'} target="frame_profile"{/if} onsubmit="clearErrorInfo();">
+		<input type="hidden" value="{FORMHASH}" name="formhash" />
+		<!--{if !empty($_GET['vid'])}--><input type="hidden" value="$_GET['vid']" name="vid" /><!--{/if}-->
+		<div id="profilelist">
+			<div style="display:flex;gap:1rem;padding:.5rem 0;margin-bottom:.5rem;font-size:.9375rem">
+				<span style="opacity:.7;min-width:6em">{lang username}</span><span>$_G['member']['username']</span>
+			</div>
+			<!--{loop $settings $key $value}-->
+			<!--{if $value['available']}-->
+			<div id="tr_$key" class="spacecp_row">
+				<div id="th_$key" class="spacecp_label"><!--{if $value['required']}--><span class="mx">*</span><!--{/if}-->$value['title']</div>
+				<div id="td_$key" class="spacecp_field">$htmls[$key]</div>
+				<!--{if $vid}-->
+					<input type="hidden" name="privacy[$key]" value="3" />
+				<!--{else}-->
+					<select name="privacy[$key]" class="ps spacecp_privacy">
+						<option value="0"{if isset($privacy[$key]) && $privacy[$key] == "0"} selected="selected"{/if}>{lang open_privacy}</option>
+						<option value="1"{if isset($privacy[$key]) && $privacy[$key] == "1"} selected="selected"{/if}>{lang friend_privacy}</option>
+						<option value="3"{if isset($privacy[$key]) && $privacy[$key] == "3"} selected="selected"{/if}>{lang secrecy}</option>
+					</select>
+				<!--{/if}-->
+			</div>
+			<!--{/if}-->
+			<!--{/loop}-->
+			<!--{if $allowcstatus && is_array($allowitems) && in_array('customstatus', $allowitems)}-->
+			<div class="spacecp_row">
+				<div id="th_customstatus" class="spacecp_label">{lang permission_basic_status}</div>
+				<div id="td_customstatus" class="spacecp_field">
+					<input type="text" value="$space['customstatus']" name="customstatus" id="customstatus" class="px" />
+					<div class="rq" id="showerror_customstatus"></div>
+				</div>
+			</div>
+			<!--{/if}-->
+			<!--{if $_G['group']['maxsigsize'] && is_array($allowitems) && in_array('sightml', $allowitems)}-->
+			<div class="spacecp_row">
+				<div id="th_sightml" class="spacecp_label">{lang personal_signature}</div>
+				<div id="td_sightml" class="spacecp_field">
+					<textarea rows="3" name="sightml" id="sightmlmessage" class="pt">$space['sightml']</textarea>
+				</div>
+			</div>
+			<!--{/if}-->
+			<!--{if $operation == 'contact'}-->
+			<div class="spacecp_row">
+				<div class="spacecp_label">Email</div>
+				<div class="spacecp_field">$space['email'] (<a href="home.php?mod=spacecp&ac=profile&op=password&from=contact">{lang modify}</a>)</div>
+			</div>
+			<!--{/if}-->
+			<!--{if $operation == 'plugin'}--><!--{eval include(template($_GET['id']));}--><!--{/if}-->
+			<!--{hook/spacecp_profile_extra}-->
+		</div>
+		<!--{if $showbtn}-->
+			<input type="hidden" name="profilesubmit" value="true" />
+			<mdui-button type="submit" name="profilesubmitbtn" id="profilesubmitbtn" value="true" full-width style="margin-top:1rem">{lang save}</mdui-button>
+			<div id="submit_result" class="rq" style="margin-top:.5rem"></div>
+		<!--{/if}-->
+		<!--{hook/spacecp_profile_bottom}-->
+	</form>
+	<script>
+	// spacecp_profile.php 通过 iframe 回调 parent.show_error / parent.show_success，函数名不能改
+	function show_error(fieldid, extrainfo) {
+		var elem = document.getElementById('th_' + fieldid);
+		if (!elem) return;
+		elem.classList.add('rq');
+		document.getElementById('showerror_' + fieldid).innerHTML = '{lang check_date_item} ' + (typeof extrainfo == 'string' ? extrainfo : '');
+		document.getElementById(fieldid) && document.getElementById(fieldid).focus();
+	}
+	function show_success(message) {
+		mdui.snackbar({ message: message || '{lang update_date_success}' });
+	}
+	function clearErrorInfo() {
+		document.querySelectorAll('#profilelist [id^=showerror_]').forEach(function (el) {
+			el.innerHTML = '';
+			var th = document.getElementById('th_' + el.id.slice(10));
+			th && th.classList.remove('rq');
+		});
+	}
+	// 地区编辑链接由 profile_setting() 生成，使用事件委托兼容动态地区控件。
+	document.getElementById('profilelist').addEventListener('click', function (event) {
+		var link = event.target.closest && event.target.closest('a[onclick*="showdistrict"]');
+		if (!link || typeof window.showdistrict !== 'function') return;
+		event.preventDefault();
+		event.stopPropagation();
+		var code = link.getAttribute('onclick') || '';
+		link.removeAttribute('onclick');
+		Function(code).call(window);
+	}, true);
+	</script>
+<!--{/if}-->
+</div>
+
+<!--{template common/footer}-->

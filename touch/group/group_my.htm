@@ -1,0 +1,46 @@
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{$_G['username']}{lang somebody_group}</mdui-top-app-bar-title>
+</mdui-top-app-bar>
+
+<div style="padding-bottom:88px">
+	<mdui-tabs value="{$view}" full-width>
+		<mdui-tab value="groupthread" icon="groups" data-href="group.php?mod=my&view=groupthread">{lang group_thread}</mdui-tab>
+		<mdui-tab value="mythread" icon="person" data-href="group.php?mod=my&view=mythread">{lang my_thread}</mdui-tab>
+		<mdui-tab value="join" icon="favorite" data-href="group.php?mod=my&view=join">{lang my_join}</mdui-tab>
+		<mdui-tab value="manager" icon="admin_panel_settings" data-href="group.php?mod=my&view=manager">{lang my_manage}</mdui-tab>
+	</mdui-tabs>
+
+	<!--{if $view == 'groupthread' || $view == 'mythread'}-->
+	<!--{if $usergroups['grouptype']}-->
+	<mdui-chip-set style="padding:.5rem .75rem;overflow-x:auto;white-space:nowrap">
+		<mdui-chip href="group.php?mod=my&view={$view}"{if !$typeid} selected{/if}>{lang all}</mdui-chip>
+		<!--{loop $usergroups['grouptype'] $type}--><mdui-chip href="group.php?mod=my&view={$view}&typeid={$type['fid']}"{if $typeid == $type['fid']} selected{/if}>{$type['name']}</mdui-chip><!--{/loop}-->
+	</mdui-chip-set>
+	<!--{/if}-->
+	<!--{if $attentionthread}-->
+	<!--{loop $attentionthread $groupid $threads}-->
+	<mdui-card variant="filled" style="display:block;margin:.75rem;overflow:hidden">
+		<mdui-list-subheader>{$usergroups['groups'][$groupid]}<a href="forum.php?mod=group&fid={$groupid}" style="float:right">{lang more}</a></mdui-list-subheader>
+		<!--{loop $threads $tid $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid={$tid}&extra={$extra}">{$thread['subject']}<span slot="description">{$thread['lastposter']} · {$thread['lastpost']} · {$thread['views']} / {$thread['replies']}</span></mdui-list-item><!--{/loop}-->
+	</mdui-card>
+	<!--{/loop}-->
+	<!--{/if}-->
+	<mdui-card variant="filled" style="display:block;margin:.75rem;overflow:hidden">
+		<mdui-list-subheader><!--{if $view == 'groupthread'}-->{lang last_topic_in_group}<!--{else}-->{lang my_last_topic_in_group}<!--{/if}--></mdui-list-subheader>
+		<!--{if $groupthreadlist}-->
+		<!--{loop $groupthreadlist $tid $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid={$tid}&extra={$extra}">{$thread['subject']}<span slot="description">{$thread['groupname']} · {$thread['views']} / {$thread['replies']}</span></mdui-list-item><!--{/loop}-->
+		<!--{else}--><div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang no_related_posts}</div><!--{/if}-->
+	</mdui-card>
+	<!--{elseif $view == 'manager' || $view == 'join'}-->
+	<mdui-card variant="filled" style="display:block;margin:.75rem;overflow:hidden">
+		<mdui-list>
+		<!--{if $grouplist}-->
+		<!--{loop $grouplist $groupid $group}--><mdui-list-item href="forum.php?mod=group&fid={$group['fid']}"><!--{if $group['icon'] && !strstr($group['icon'], 'groupicon.gif')}--><mdui-avatar slot="icon" src="{$group['icon']}"></mdui-avatar><!--{else}--><mdui-icon slot="icon" name="groups"></mdui-icon><!--{/if}-->{$group['name']}<span slot="description">{$group['threads']} {lang threads}</span><mdui-icon slot="end-icon" name="chevron_right"></mdui-icon></mdui-list-item><!--{/loop}-->
+		<!--{else}--><div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang no_group_join}</div><!--{/if}-->
+		</mdui-list>
+	</mdui-card>
+	<!--{/if}-->
+</div>
+<!--{template common/footer}-->

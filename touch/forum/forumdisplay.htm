@@ -1,0 +1,325 @@
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{eval echo strip_tags($_G['forum']['name']);}--></mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<!--{if helper_access::check_module('favorite')}-->
+		<!--{eval $fd_faved = $_G['uid'] ? C::t('home_favorite')->fetch_by_id_idtype($_G['fid'], 'fid', $_G['uid']) : false;}-->
+		<mdui-button-icon icon="{if $fd_faved}favorite{else}favorite_border{/if}" onclick="document.getElementById('mdui_forum_favorite').open=true" title="{lang favorite}"></mdui-button-icon>
+		<mdui-dialog id="mdui_forum_favorite" close-on-esc close-on-overlay-click>
+			<div slot="headline">{lang favorite}</div>
+			<form method="post" action="home.php?mod=spacecp&ac=favorite&type=forum&id=$_G['fid']">
+				<div slot="description"><mdui-text-field name="description" label="{lang favorite_description_default}" textarea rows="2"></mdui-text-field></div>
+				<input type="hidden" name="favoritesubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}">
+				<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_forum_favorite').open=false">{lang cancel}</mdui-button>
+				<mdui-button slot="action" type="submit" variant="text">{lang confirms}</mdui-button>
+			</form>
+		</mdui-dialog>
+	<!--{/if}-->
+	<mdui-button-icon icon="edit" href="forum.php?mod=post&action=newthread&fid={$_G['fid']}" title="{lang post_newthread}"></mdui-button-icon>
+</mdui-top-app-bar>
+<!--{hook/forumdisplay_top_mobile}-->
+
+<div style="padding-bottom:80px">
+	<mdui-card variant="filled" style="display:block;margin:1rem;padding:1rem">
+		<div style="display:flex;align-items:center;gap:.75rem">
+			<!--{if $_G['forum']['icon']}--><mdui-avatar src="<!--{echo get_forumimg($_G['forum']['icon'])}-->" style="width:44px !important;height:44px !important"></mdui-avatar><!--{else}--><mdui-icon name="forum" style="font-size:2.5rem;opacity:.7"></mdui-icon><!--{/if}-->
+			<div style="min-width:0">
+				<div style="font-weight:500">{$_G['forum']['name']}</div>
+				<div style="font-size:.875rem;opacity:.7;margin-top:4px">{lang index_today}: {$_G['forum']['todayposts']} · {lang index_threads}: {$_G['forum']['threads']}<!--{if $_G['forum']['rank']}--> · {lang rank}: {$_G['forum']['rank']}<!--{/if}--><!--{if $_G['forum']['favtimes']}--> · {lang favorite}: {$_G['forum']['favtimes']}<!--{/if}--></div>
+			</div>
+		</div>
+		<!--{if $_G['forum']['description']}--><div style="font-size:.875rem;opacity:.7;margin-top:.75rem">{$_G['forum']['description']}</div><!--{/if}-->
+		<!--{if $moderatedby}--><div style="font-size:.75rem;opacity:.65;margin-top:.5rem">{lang forum_moderators}: $moderatedby</div><!--{/if}-->
+		<!--{if $_G['page'] == 1 && $_G['forum']['rules']}-->
+			<!-- 版规只在第一页展示，默认折叠避免挤占列表空间 -->
+			<mdui-collapse style="margin-top:.5rem">
+				<mdui-collapse-item>
+					<div slot="header" style="display:flex;align-items:center;gap:.25rem;font-size:.875rem;cursor:pointer"><mdui-icon name="gavel" style="font-size:1rem"></mdui-icon>{lang forum_rules}<mdui-icon name="expand_more" style="font-size:1.1rem"></mdui-icon></div>
+					<div style="font-size:.875rem;opacity:.8;padding:.25rem 0 .5rem">$_G['forum']['rules']</div>
+				</mdui-collapse-item>
+			</mdui-collapse>
+		<!--{/if}-->
+		<!--{hook/forumdisplay_nav_mobile}-->
+	</mdui-card>
+
+	<div style="display:flex;align-items:center;margin:0 1rem;gap:.25rem">
+		<mdui-tabs value="{if $_GET['filter']}$_GET['filter']{else}all{/if}" style="flex:1;min-width:0">
+			<mdui-tab value="all" data-href="forum.php?mod=forumdisplay&fid=$_G['fid']{if $_G['forum']['threadsorts']['defaultshow']}&filter=sortall&sortall=1{/if}{if $_GET['archiveid']}&archiveid={$_GET['archiveid']}{/if}">{lang all}</mdui-tab>
+			<mdui-tab value="lastpost" data-href="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=lastpost&orderby=lastpost$forumdisplayadd['lastpost']{if $_GET['archiveid']}&archiveid={$_GET['archiveid']}{/if}">{lang latest}</mdui-tab>
+			<mdui-tab value="heat" data-href="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=heat&orderby=heats$forumdisplayadd['heat']{if $_GET['archiveid']}&archiveid={$_GET['archiveid']}{/if}">{lang order_heats}</mdui-tab>
+			<mdui-tab value="digest" data-href="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=digest&digest=1$forumdisplayadd['digest']{if $_GET['archiveid']}&archiveid={$_GET['archiveid']}{/if}">{lang digest_posts}</mdui-tab>
+		</mdui-tabs>
+		<mdui-button-icon icon="filter_list" title="筛选和排序" onclick="document.getElementById('fd_filter').open = true"></mdui-button-icon>
+		<!--{if $_G['forum']['picstyle']}-->
+			<!-- 图片/列表模式切换，后端靠 forumdefstyle cookie 记住选择 -->
+			<mdui-button-icon icon="{if empty($_G['cookie']['forumdefstyle'])}view_list{else}grid_view{/if}" title="切换显示模式" href="forum.php?mod=forumdisplay&fid=$_G['fid']&forumdefstyle={if empty($_G['cookie']['forumdefstyle'])}yes{else}no{/if}"></mdui-button-icon>
+		<!--{/if}-->
+	</div>
+
+	<!--{eval
+		// 已选条件回填：$filter 只记录入口，实际条件要从 $_GET 逐项读
+		$fd_orderby = in_array($_GET['orderby'], array('dateline', 'replies', 'views', 'recommends', 'heats')) ? $_GET['orderby'] : 'lastpost';
+		$fd_dateline = in_array($_GET['dateline'], array('86400', '604800', '2592000')) ? $_GET['dateline'] : '';
+		$fd_specials = array();
+		if($showpoll) $fd_specials['poll'] = lang('forum/template', 'thread_poll');
+		if($showtrade) $fd_specials['trade'] = lang('forum/template', 'thread_trade');
+		if($showreward) $fd_specials['reward'] = lang('forum/template', 'thread_reward');
+		if($showactivity) $fd_specials['activity'] = lang('forum/template', 'thread_activity');
+		if($showdebate) $fd_specials['debate'] = lang('forum/template', 'thread_debate');
+	}-->
+	<mdui-dialog id="fd_filter" close-on-esc close-on-overlay-click headline="筛选和排序">
+		<div id="fd_filter_form" data-fid="$_G['fid']" data-archiveid="{if $_GET['archiveid']}{$_GET['archiveid']}{/if}">
+			<!--{if empty($_G['setting']['closeforumorderby'])}-->
+				<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">排序方式</div>
+				<mdui-radio-group data-name="orderby" value="$fd_orderby" style="margin-bottom:1.25rem">
+					<mdui-radio value="lastpost">最后回复</mdui-radio>
+					<mdui-radio value="dateline">发帖时间</mdui-radio>
+					<mdui-radio value="replies">回复数</mdui-radio>
+					<mdui-radio value="views">浏览数</mdui-radio>
+					<mdui-radio value="heats">{lang order_heats}</mdui-radio>
+					<mdui-radio value="recommends">{lang order_recommends}</mdui-radio>
+				</mdui-radio-group>
+			<!--{/if}-->
+
+			<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">发表时间</div>
+			<mdui-radio-group data-name="dateline" value="$fd_dateline" style="margin-bottom:1.25rem">
+				<mdui-radio value="">{lang all}</mdui-radio>
+				<mdui-radio value="86400">最近一天</mdui-radio>
+				<mdui-radio value="604800">最近一周</mdui-radio>
+				<mdui-radio value="2592000">最近一月</mdui-radio>
+			</mdui-radio-group>
+
+			<!--{if $_G['forum']['threadtypes'] && $_G['forum']['threadtypes']['types']}-->
+				<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">主题分类</div>
+				<mdui-select data-name="typeid" variant="outlined" value="{$_GET['typeid']}" style="margin-bottom:1.25rem">
+					<mdui-menu-item value="">{lang all}</mdui-menu-item>
+					<!--{loop $_G['forum']['threadtypes']['types'] $id $name}--><mdui-menu-item value="$id">$name</mdui-menu-item><!--{/loop}-->
+				</mdui-select>
+			<!--{/if}-->
+
+			<!--{if $fd_specials}-->
+				<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">主题类型</div>
+				<mdui-radio-group data-name="specialtype" value="{$_GET['specialtype']}" style="margin-bottom:1.25rem">
+					<mdui-radio value="">{lang all}</mdui-radio>
+					<!--{loop $fd_specials $value $name}--><mdui-radio value="$value">$name</mdui-radio><!--{/loop}-->
+				</mdui-radio-group>
+			<!--{/if}-->
+
+			<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">其它条件</div>
+			<div style="display:flex;flex-wrap:wrap;gap:.5rem 1rem">
+				<mdui-checkbox data-name="digest" value="1" <!--{if $_GET['digest']}-->checked<!--{/if}-->>{lang digest_posts}</mdui-checkbox>
+				<!--{if !empty($_G['setting']['recommendthread']['status'])}-->
+					<mdui-checkbox data-name="recommend" value="1" <!--{if $_GET['recommend']}-->checked<!--{/if}-->>{lang order_recommends}</mdui-checkbox>
+				<!--{/if}-->
+			</div>
+
+			<!--{if !$_GET['archiveid']}-->
+				<!-- 热帖走后端独立分支（按日历取热度榜、无分页），不能和上面的条件叠加，单独给入口 -->
+				<mdui-divider style="margin:1.25rem 0 1rem"></mdui-divider>
+				<mdui-button variant="outlined" icon="local_fire_department" href="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=hot" full-width>{lang hot_thread}</mdui-button>
+			<!--{/if}-->
+		</div>
+		<mdui-button slot="action" variant="text" onclick="fd_filter_reset()">重置</mdui-button>
+		<mdui-button slot="action" variant="text" onclick="document.getElementById('fd_filter').open = false">{lang cancel}</mdui-button>
+		<mdui-button slot="action" variant="text" onclick="fd_filter_submit()">{lang submit}</mdui-button>
+	</mdui-dialog>
+	<script>
+		// 后端把 query 里每个 filterfield 逐项叠加进 $filterarr，所以多类型条件可以一起提交；
+		// filter 只是入口标记，优先用真实筛选条件，都没填时才退回排序对应的 filter
+		function fd_filter_submit() {
+			var scope = document.getElementById('fd_filter_form');
+			var params = new URLSearchParams();
+			var orderby = '';
+			var filter = '';
+
+			scope.querySelectorAll('mdui-radio-group, mdui-select').forEach(function (field) {
+				var name = field.getAttribute('data-name');
+
+				if (field.value) {
+					if (name == 'orderby') {
+						orderby = field.value;
+					} else {
+						filter = filter || name;
+					}
+
+					params.append(name, field.value);
+				}
+			});
+
+			scope.querySelectorAll('mdui-checkbox').forEach(function (box) {
+				var name = box.getAttribute('data-name');
+
+				if (box.checked) {
+					filter = filter || name;
+					params.append(name, box.value);
+				}
+			});
+
+			// 排序本身不是筛选条件，只有在没有其它条件时才拿它当入口
+			filter = filter || (orderby ? { dateline: 'author', replies: 'reply', views: 'view', heats: 'heat', recommends: 'recommend' }[orderby] || 'lastpost' : '');
+
+			var url = 'forum.php?mod=forumdisplay&fid=' + scope.dataset.fid;
+
+			filter && (url += '&filter=' + filter + '&' + params.toString());
+			scope.dataset.archiveid && (url += '&archiveid=' + scope.dataset.archiveid);
+			location.href = url;
+		}
+
+		function fd_filter_reset() {
+			var scope = document.getElementById('fd_filter_form');
+
+			location.href = 'forum.php?mod=forumdisplay&fid=' + scope.dataset.fid + (scope.dataset.archiveid ? '&archiveid=' + scope.dataset.archiveid : '');
+		}
+	</script>
+
+	<!--{if ($_G['forum']['threadtypes'] && $_G['forum']['threadtypes']['listable']) || $_G['forum']['threadsorts']}-->
+		<div style="display:flex;gap:.5rem;overflow-x:auto;padding:.75rem 1rem">
+			<!--{if $_G['forum']['threadtypes'] && $_G['forum']['threadtypes']['listable']}-->
+				<!--{loop $_G['forum']['threadtypes']['types'] $id $name}--><mdui-chip clickable href="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=typeid&typeid=$id$forumdisplayadd['typeid']{if $_GET['archiveid']}&archiveid={$_GET['archiveid']}{/if}" <!--{if $_GET['typeid'] == $id}-->selected<!--{/if}-->>$name<!--{if $showthreadclasscount['typeid'][$id]}--> {$showthreadclasscount['typeid'][$id]}<!--{/if}--></mdui-chip><!--{/loop}-->
+			<!--{/if}-->
+			<!--{if $_G['forum']['threadsorts']}-->
+				<!--{loop $_G['forum']['threadsorts']['types'] $id $name}--><mdui-chip clickable href="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=sortid&sortid=$id$forumdisplayadd['sortid']{if $_GET['archiveid']}&archiveid={$_GET['archiveid']}{/if}" <!--{if $_GET['sortid'] == $id}-->selected<!--{/if}-->>$name<!--{if $showthreadclasscount['sortid'][$id]}--> {$showthreadclasscount['sortid'][$id]}<!--{/if}--></mdui-chip><!--{/loop}-->
+			<!--{/if}-->
+		</div>
+	<!--{/if}-->
+
+	<!--{if $quicksearchlist && !$_GET['archiveid']}-->
+		<div style="padding:0 1rem .5rem">
+			<mdui-button variant="outlined" icon="tune" onclick="document.getElementById('fd_sortsearch').open = true">{lang search}</mdui-button>
+		</div>
+		<mdui-dialog id="fd_sortsearch" close-on-esc close-on-overlay-click headline="{lang search}">
+			<div id="fd_sortsearch_form" data-action="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=sortid&sortid={$_GET['sortid']}">
+				<!--{loop $quicksearchlist $optionid $option}-->
+					<div style="margin-bottom:1rem" data-optionid="$optionid" data-type="{$option['type']}">
+						<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">{$option['title']}</div>
+						<!--{if $option['type'] == 'checkbox'}-->
+							<!--{loop $option['choices'] $id $value}-->
+								<mdui-checkbox value="$id" <!--{if is_array($_GET['searchoption'][$optionid]) && $_GET['searchoption'][$optionid]['value'][$id]}-->checked<!--{/if}--> style="margin-right:.75rem">$value</mdui-checkbox>
+							<!--{/loop}-->
+						<!--{elseif in_array($option['type'], array('radio', 'select', 'range'))}-->
+							<mdui-select variant="outlined" value="{if is_array($_GET['searchoption'][$optionid])}$_GET['searchoption'][$optionid]['value']{/if}" placeholder="{lang please_select}">
+								<mdui-menu-item value="">{lang unlimited}</mdui-menu-item>
+								<!--{loop $option['choices'] $id $value}-->
+									<mdui-menu-item value="$id"><!--{if $option['type'] == 'select'}-->{$value['content']}<!--{else}-->$value<!--{/if}--></mdui-menu-item>
+								<!--{/loop}-->
+							</mdui-select>
+						<!--{else}-->
+							<mdui-text-field variant="outlined" <!--{if $option['type'] == 'number'}-->type="number"<!--{elseif $option['type'] == 'calendar'}-->type="date"<!--{/if}--> value="{if is_array($_GET['searchoption'][$optionid])}$_GET['searchoption'][$optionid]['value']{/if}" <!--{if $option['unit']}-->suffix="{$option['unit']}"<!--{/if}-->></mdui-text-field>
+						<!--{/if}-->
+					</div>
+				<!--{/loop}-->
+			</div>
+			<mdui-button slot="action" variant="text" onclick="document.getElementById('fd_sortsearch').open = false">{lang cancel}</mdui-button>
+			<mdui-button slot="action" variant="text" onclick="fd_sortsearch_submit()">{lang search}</mdui-button>
+		</mdui-dialog>
+		<script>
+			// mdui 的表单控件是自定义元素，FormData 收不全，提交前按条件分组手动拼查询串
+			function fd_sortsearch_submit() {
+				var scope = document.getElementById('fd_sortsearch_form');
+				var params = new URLSearchParams();
+
+				scope.querySelectorAll('[data-optionid]').forEach(function (group) {
+					var prefix = 'searchoption[' + group.dataset.optionid + ']';
+					var hit = false;
+
+					if (group.dataset.type == 'checkbox') {
+						group.querySelectorAll('mdui-checkbox').forEach(function (box) {
+							if (box.checked) {
+								hit = true;
+								params.append(prefix + '[value][' + box.value + ']', box.value);
+							}
+						});
+					} else {
+						var field = group.querySelector('mdui-select, mdui-text-field');
+
+						if (field && field.value !== '') {
+							hit = true;
+							params.append(prefix + '[value]', field.value);
+						}
+					}
+
+					// 只带上真正填了值的条件，避免后端把空条件也算进筛选
+					hit && params.append(prefix + '[type]', group.dataset.type);
+				});
+
+				params.append('searchsort', '1');
+
+				// 分类信息筛选由后端从 $_GET 读取，用 GET 跳转才能保留分页与可分享链接
+				location.href = scope.dataset.action + '&' + params.toString();
+			}
+		</script>
+	<!--{/if}-->
+	<!--{hook/forumdisplay_middle}-->
+
+	<!--{if $subexists && $_G['page'] == 1}-->
+	<mdui-list style="padding:0 1rem">
+		<mdui-list-item style="opacity:.7;font-size:.875rem">{lang forum_subforums}</mdui-list-item>
+		<!--{loop $sublist $sub}-->
+			<!--{eval $forumurl = !empty($sub['domain']) && !empty($_G['setting']['domain']['root']['forum']) ? $_G['scheme'].'://'.$sub['domain'].'.'.$_G['setting']['domain']['root']['forum'] : 'forum.php?mod=forumdisplay&fid='.$sub['fid'];}-->
+			<mdui-list-item href="$forumurl" rounded><!--{if $sub['icon']}--><mdui-avatar slot="icon" src="<!--{echo get_forumimg($sub['icon'])}-->"></mdui-avatar><!--{else}--><mdui-icon slot="icon" name="folder"></mdui-icon><!--{/if}--><!--{if $sub['permission'] == 1}-->{lang private_forum}<!--{else}-->{$sub['name']}<span slot="description">{lang index_threads}: {$sub['threads']} · {lang index_posts}: {$sub['posts']}</span><!--{/if}--></mdui-list-item>
+			<!--{hook/forumdisplay_subforum_extra_mobile $sub['fid']}-->
+		<!--{/loop}-->
+	</mdui-list>
+	<!--{/if}-->
+
+	<!--{if !$subforumonly}-->
+		<!--{if !empty($_G['forum']['sortmode'])}-->
+			<div style="margin:1rem;overflow-x:auto">{$sorttemplate['body']}</div>
+		<!--{elseif $_G['forum']['picstyle'] && empty($_G['cookie']['forumdefstyle'])}-->
+			<!-- 图片模式：后端已备好 coverpath，用双列封面卡片展示 -->
+			<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;padding:0 1rem">
+				<!--{if $_G['forum_threadcount']}-->
+					<!--{loop $_G['forum_threadlist'] $key $thread}-->
+						<!--{if $thread['moved']}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
+						<mdui-card variant="filled" clickable href="forum.php?mod=viewthread&tid=$thread['tid']&{if $_GET['archiveid']}archiveid={$_GET['archiveid']}&{/if}extra=$extra" style="display:block;overflow:hidden">
+							<!--{hook/forumdisplay_thread_mobile $key}-->
+							<!--{if $thread['cover']}--><img src="$thread['coverpath']" alt="{$thread['subject']}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block"><!--{else}--><div style="width:100%;aspect-ratio:1;display:grid;place-items:center;opacity:.35"><mdui-icon name="image" style="font-size:2rem"></mdui-icon></div><!--{/if}-->
+							<div style="padding:.5rem">
+								<div style="font-size:.875rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden" $thread['highlight']>{$thread['subject']}</div>
+								<div style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;opacity:.6;margin-top:.35rem">
+									<!--{if $thread['authorid'] && $thread['author']}--><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{$thread['author']}</span><!--{else}--><span style="flex:1;min-width:0">{$_G['setting']['anonymoustext']}</span><!--{/if}-->
+									<span>{lang views}: {$thread['views']}</span>
+								</div>
+							</div>
+							<!--{hook/forumdisplay_thread_foot_mobile $key}-->
+						</mdui-card>
+					<!--{/loop}-->
+				<!--{else}--><div style="grid-column:1/-1;padding:3rem 1rem;text-align:center;opacity:.6">{lang forum_nothreads}</div><!--{/if}-->
+			</div>
+		<!--{else}-->
+			<mdui-list style="padding:0 1rem">
+				<!--{if !empty($announcement)}--><mdui-list-item rounded icon="campaign" href="<!--{if empty($announcement['type'])}-->forum.php?mod=announcement&id=$announcement['id']#$announcement['id']<!--{else}-->$announcement['message']<!--{/if}-->">{$announcement['subject']}</mdui-list-item><!--{/if}-->
+				<!--{if $_G['forum_threadcount']}-->
+					<!--{loop $_G['forum_threadlist'] $key $thread}-->
+						<!--{if !$_G['setting']['mobile']['forum']['displayorder3'] && $thread['displayorder'] > 0}-->{eval continue;}<!--{/if}-->
+						<!--{if $thread['moved']}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
+						<mdui-card variant="filled" clickable href="forum.php?mod=viewthread&tid=$thread['tid']&extra=$extra" style="display:block;margin-bottom:.75rem;padding:.75rem">
+							<!--{hook/forumdisplay_thread_mobile $key}-->
+							<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+								<!--{if $thread['authorid'] && $thread['author']}--><mdui-avatar href="home.php?mod=space&uid={$thread['authorid']}" src="<!--{avatar($thread['authorid'], 'small', true)}-->" style="width:32px;height:32px"></mdui-avatar><!--{else}--><mdui-avatar src="<!--{avatar(0, 'small', true)}-->" style="width:32px;height:32px"></mdui-avatar><!--{/if}-->
+								<div style="flex:1;min-width:0"><div style="font-size:.875rem"><!--{if $thread['authorid'] && $thread['author']}--><a href="home.php?mod=space&uid={$thread['authorid']}">{$thread['author']}</a><!--{else}-->{$_G['setting']['anonymoustext']}<!--{/if}--></div><div style="font-size:.75rem;opacity:.6">{$thread['dateline']}</div></div>
+							</div>
+							<div style="font-weight:500;margin-bottom:.25rem">
+								<!--{if in_array($thread['displayorder'], array(1, 2, 3, 4))}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_sticky}</mdui-chip><!--{/if}-->
+								<!--{if $thread['digest'] > 0}--><span style="display:inline-block;margin-right:.25rem;padding:.0625rem .375rem;border-radius:.25rem;background:#f9a825;color:#fff;font-size:.75rem;font-weight:500;vertical-align:middle;line-height:1.4">{lang thread_digest}</span><!--{/if}-->
+								<!--{if $thread['folder'] == 'lock'}--><span style="display:inline-block;margin-right:.25rem;padding:.0625rem .375rem;border:1px solid #d32f2f;border-radius:.25rem;color:#d32f2f;font-size:.75rem;font-weight:500;vertical-align:middle;line-height:1.4">关闭</span><!--{elseif $thread['special'] == 1}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_poll}</mdui-chip><!--{elseif $thread['special'] == 2}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_trade}</mdui-chip><!--{elseif $thread['special'] == 3}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_reward}</mdui-chip><!--{elseif $thread['special'] == 4}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_activity}</mdui-chip><!--{elseif $thread['special'] == 5}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_debate}</mdui-chip><!--{/if}-->
+								<!--{if $thread['attachment'] == 2 && $_G['setting']['mobile']['mobilesimpletype'] == 1}--><mdui-icon name="image" style="font-size:1rem;vertical-align:middle"></mdui-icon><!--{/if}-->
+								<!--{if $thread['icon'] >= 0 && $_G['cache']['stamps'][$thread['icon']]}--><img src="{STATICURL}image/stamp/{$_G['cache']['stamps'][$thread['icon']]['url']}" alt="{$_G['cache']['stamps'][$thread['icon']]['text']}" style="vertical-align:middle;margin-right:.25rem"><!--{/if}--><span $thread['highlight']>{$thread['subject']}</span>
+								<!--{if $thread['price'] > 0}--><!--{eval $fd_credit = $_G['setting']['extcredits'][$_G['setting']['creditstransextra'][$thread['special'] == 3 ? 2 : 1]];}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem"><!--{if $thread['special'] == 3}-->{lang thread_reward}<!--{else}-->{lang price}<!--{/if}--> {$thread['price']}{$fd_credit['unit']}{$fd_credit['title']}</mdui-chip><!--{elseif $thread['special'] == 3 && $thread['price'] < 0}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang reward_solved}</mdui-chip><!--{/if}-->
+							</div>
+							<!--{if $threadlist_data[$thread['tid']]['message']}--><div style="font-size:.875rem;opacity:.7;margin-bottom:.5rem">{$threadlist_data[$thread['tid']]['message']}</div><!--{/if}-->
+							<!--{if $threadlist_data[$thread['tid']]['attachment']}--><!--{eval $attach_on = 0;}--><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:.5rem"><!--{loop $threadlist_data[$thread['tid']]['attachment'] $value}--><!--{eval $attach_on++; if($attach_on > 9) break;}--><div style="position:relative"><img src="$value" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px"><!--{if count($threadlist_data[$thread['tid']]['attachment']) > 9 && $attach_on == 9}--><span style="position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5);color:#fff">{echo count($threadlist_data[$thread['tid']]['attachment'])}{lang mobtu}</span><!--{/if}--></div><!--{/loop}--></div><!--{/if}-->
+							<!--{hook/forumdisplay_thread_content_mobile $key}--><div style="display:flex;gap:1rem;font-size:.75rem;opacity:.6"><!--{if $thread['typeid']}--><a href="forum.php?mod=forumdisplay&fid=$thread['fid']&filter=typeid&typeid=$thread['typeid']">#{$_G['forum']['threadtypes']['types'][$thread['typeid']]}</a><!--{/if}--><span>{lang views}: {$thread['views']}</span><span>{lang reply}: {$thread['allreplies']}</span><!--{if !empty($_G['setting']['recommendthread']['status']) && $thread['recommends']}--><span><mdui-icon name="thumb_up" style="font-size:.875rem;vertical-align:-2px"></mdui-icon> {$thread['recommends']}</span><!--{/if}--><!--{hook/forumdisplay_thread_foot_mobile $key}--></div>
+						</mdui-card>
+					<!--{/loop}-->
+				<!--{else}--><div style="padding:3rem 1rem;text-align:center;opacity:.6">{lang forum_nothreads}</div><!--{/if}-->
+			</mdui-list>
+		<!--{/if}-->
+		<!--{if $multipage}--><div style="padding:1rem;text-align:center">$multipage</div><!--{/if}-->
+	<!--{/if}-->
+</div>
+<!--{hook/forumdisplay_bottom_mobile}-->
+
+<!--{template common/footer}-->

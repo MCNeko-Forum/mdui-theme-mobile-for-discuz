@@ -1,0 +1,228 @@
+<!--{if $_GET['mycenter'] && !$_G['uid']}-->
+	<!--{eval dheader('Location:member.php?mod=logging&action=login');exit;}-->
+<!--{elseif $_GET['mycenter'] && $_G['uid'] != $space['uid']}-->
+	<!--{eval dheader('Location:home.php?mod=space&uid='.$_G['uid'].'&do=profile&mycenter=1');exit;}-->
+<!--{/if}-->
+<!--{if !$_GET['mycenter']}--><!--{eval $nofooter = 1;}--><!--{/if}-->
+<!--{template common/header}-->
+
+<mdui-top-app-bar<!--{if $_GET['mycenter']}--> class="mdui-mycenter-bar"<!--{/if}-->>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{if $_GET['mycenter']}-->{lang my}<!--{elseif $_G['uid'] == $space['uid']}-->{lang myprofile}<!--{else}-->$space['username']{lang otherprofile}<!--{/if}--></mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<!--{if $_GET['mycenter']}--><mdui-button-icon icon="settings" onclick="location.href='home.php?mod=spacecp'"></mdui-button-icon><!--{elseif $_G['uid'] == $space['uid']}--><mdui-button-icon icon="settings" onclick="location.href='home.php?mod=spacecp'"></mdui-button-icon><!--{/if}-->
+	<mdui-button-icon icon="home" onclick="location.href='portal.php?mod=index'"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<!--{if $_GET['mycenter']}-->
+<div class="mdui-mycenter">
+	<div class="mdui-mycenter-profile">
+		<mdui-avatar class="comiis_edit_avatar" src="<!--{avatar($space['uid'], 'middle', true)}-->" style="cursor:pointer" onclick="var f=document.getElementById('comiis_Clip_file_khnlmf');if(f)f.click();"></mdui-avatar>
+		<!--{eval $mdui_group_stars = intval($_G['cache']['usergroups'][$_G['groupid']]['stars']);$mdui_level_label = 'Lv.'.$mdui_group_stars;$mdui_uid_credits = 'UID：'.$space['uid'].'　积分：'.$space['credits'];$mdui_level_group = $mdui_level_label.'　'.$space['group']['grouptitle'];}-->
+		<div class="mdui-mycenter-user">
+			<div>$space['username']</div>
+			<div>$mdui_uid_credits</div>
+			<div><mdui-chip data-href="home.php?mod=spacecp&ac=usergroup&gid=$_G[groupid]">$mdui_level_group</mdui-chip></div>
+		</div>
+		<div class="mdui-mycenter-count" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread" style="cursor:pointer"><b>$space['threads']</b><span>{lang topic}</span></div>
+		<div class="mdui-mycenter-count" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=reply" style="cursor:pointer"><b>$space['posts']</b><span>{lang reply}</span></div>
+	</div>
+
+	<div class="mdui-mycenter-grid">
+		<div data-href="home.php?mod=space&do=profile"><mdui-button-icon icon="home"></mdui-button-icon><span>我的空间</span></div>
+		<!--{if helper_access::check_module('forum')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me"><mdui-button-icon icon="forum"></mdui-button-icon><span>{lang mythread}</span></div><!--{/if}-->
+		<!--{if helper_access::check_module('favorite')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=favorite&view=me&type=thread"><mdui-button-icon icon="star"></mdui-button-icon><span>{lang myfavorite}</span></div><!--{/if}-->
+		<!--{if helper_access::check_module('friend')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=friend"><mdui-button-icon icon="people"></mdui-button-icon><span>{lang my_friends}</span></div><!--{/if}-->
+		<!--{if helper_access::check_module('blog')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=me"><mdui-button-icon icon="article"></mdui-button-icon><span>{lang my}{lang blog}</span></div><!--{/if}-->
+		<!--{if helper_access::check_module('album')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=album&view=me"><mdui-button-icon icon="photo_library"></mdui-button-icon><span>{lang my}{lang album}</span></div><!--{/if}-->
+		<!--{if helper_access::check_module('doing')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=doing&view=me"><mdui-button-icon icon="edit_note"></mdui-button-icon><span>{lang doing}</span></div><!--{/if}-->
+		<!--{if helper_access::check_module('follow')}--><div data-href="home.php?mod=follow"><mdui-button-icon icon="rss_feed"></mdui-button-icon><span>{lang follow}</span></div><!--{/if}-->
+		<div data-href="home.php?mod=space&do=friend&view=visitor"><mdui-button-icon icon="location_on"></mdui-button-icon><span>{lang my_visitor}</span></div>
+	</div>
+
+	<mdui-list class="mdui-mycenter-list">
+		<mdui-list-item icon="notifications" data-href="home.php?mod=space&do=notice" rounded>{lang remind}<!--{if $_G['member']['newprompt']}--><mdui-badge slot="end-icon">NEW</mdui-badge><!--{/if}--></mdui-list-item>
+		<mdui-list-item icon="badge" data-href="home.php?mod=spacecp&ac=profile" rounded>{lang setup}</mdui-list-item>
+		<mdui-list-item icon="account_balance_wallet" data-href="home.php?mod=spacecp&ac=credit&op=base" rounded>{lang credits}</mdui-list-item>
+		<!--{if $_G['setting']['inviteconfig']['buyinvitecode'] && $_G['setting']['inviteconfig']['invitecodeprice'] && payment::enable()}--><mdui-list-item icon="confirmation_number" data-href="misc.php?mod=buyinvitecode" rounded>{lang invitecode_buycode}</mdui-list-item><!--{/if}-->
+		<!--{if helper_access::check_module('task')}--><mdui-list-item icon="task_alt" data-href="home.php?mod=task" rounded>{lang task}</mdui-list-item><!--{/if}-->
+		<mdui-list-item icon="workspace_premium" data-href="home.php?mod=medal" rounded>{lang medals}</mdui-list-item>
+		<!--{if $_G['group']['allowmagics']}--><mdui-list-item icon="auto_awesome" data-href="home.php?mod=magic" rounded>{lang magic}</mdui-list-item><!--{/if}-->
+		<mdui-list-item icon="help_outline" data-href="misc.php?mod=faq" rounded>{lang faq}</mdui-list-item>
+		<!--{if $_G['style']['mdui_my_diy']}-->
+			<!--{eval $mdui_my_diy = htmlspecialchars_decode($_G['style']['mdui_my_diy'], ENT_QUOTES);}-->
+			$mdui_my_diy
+		<!--{/if}-->
+	</mdui-list>
+	<div class="mdui-space-action"><mdui-button variant="tonal" href="member.php?mod=logging&action=logout&formhash={FORMHASH}" full-width>{lang logout_mobile}</mdui-button></div>
+</div>
+<!--{else}-->
+<div class="mdui-space-profile">
+	<div class="mdui-space-hero">
+		<mdui-avatar src="<!--{avatar($space['uid'], 'middle', true)}-->"></mdui-avatar>
+		<div class="mdui-space-identity"><div class="mdui-space-name">$space['username']</div><div class="mdui-space-meta"><span style="color:{$space['group']['color']}">{$space['group']['grouptitle']}</span><!--{if $_G['uid'] != $space['uid'] && $_G['ols'][$space['uid']]}--> · {lang online}<!--{/if}--> · UID {$space['uid']}</div></div>
+	</div>
+
+	<!--{if $_G['uid'] == $space['uid']}-->
+	<mdui-list class="mdui-space-shortcuts">
+		<mdui-list-item href="home.php?mod=space&uid={$space['uid']}&do=profile" icon="person" rounded>{lang memcp_profile}</mdui-list-item>
+		<mdui-list-item href="home.php?mod=spacecp&ac=credit&op=base" icon="account_balance_wallet" rounded>{lang credits}</mdui-list-item>
+		<mdui-list-item href="home.php?mod=spacecp&ac=profile" icon="settings" rounded>{lang setup}</mdui-list-item>
+		<mdui-list-item href="home.php?mod=space&do=notice" icon="notifications" rounded>{lang remind}<!--{if $_G['member']['newprompt']}--><mdui-badge slot="end-icon">NEW</mdui-badge><!--{/if}--></mdui-list-item>
+	</mdui-list>
+	<!--{else}-->
+	<mdui-list class="mdui-space-shortcuts">
+		<!--{if helper_access::check_module('follow')}-->
+			<!--{if ckfollow($space['uid'])}-->
+				<mdui-list-item href="home.php?mod=spacecp&ac=follow&op=del&fuid={$space['uid']}" icon="person_remove" rounded>{lang follow_del}</mdui-list-item>
+			<!--{else}-->
+				<mdui-list-item href="home.php?mod=spacecp&ac=follow&op=add&hash={FORMHASH}&fuid={$space['uid']}" icon="person_add" rounded>{lang follow_add}</mdui-list-item>
+			<!--{/if}-->
+		<!--{/if}-->
+		<!--{if helper_access::check_module('friend')}-->
+			<!--{eval require_once libfile('function/friend');$isfriend=friend_check($space['uid']);}-->
+			<mdui-list-item icon="people" rounded onclick="document.getElementById('mdui_space_friend_$space[uid]').open=true"><!--{if $isfriend}-->{lang ignore_friend}<!--{else}-->{lang add_friend}<!--{/if}--></mdui-list-item>
+			<!--{if !$isfriend}-->
+			<mdui-dialog id="mdui_space_friend_$space[uid]" close-on-esc close-on-overlay-click>
+				<div slot="headline">{lang add_friend}</div>
+				<form method="post" action="home.php?mod=spacecp&ac=friend&op=add&uid=$space['uid']">
+					<div slot="description"><mdui-text-field name="note" label="{lang add_friend_note}"></mdui-text-field></div>
+					<input type="hidden" name="referer" value="home.php?mod=space&uid=$space['uid']&do=profile"><input type="hidden" name="addsubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}">
+					<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_space_friend_$space[uid]').open=false">{lang cancel}</mdui-button>
+					<mdui-button slot="action" type="submit" variant="text" name="addsubmit_btn" value="true">{lang determine}</mdui-button>
+				</form>
+			</mdui-dialog>
+			<!--{else}-->
+			<mdui-dialog id="mdui_space_friend_$space[uid]" close-on-esc close-on-overlay-click>
+				<div slot="headline">{lang ignore_friend}</div><div slot="description">{lang determine_lgnore_friend}</div>
+				<form method="post" action="home.php?mod=spacecp&ac=friend&op=ignore&uid=$space['uid']&confirm=1&loc=1">
+					<input type="hidden" name="referer" value="home.php?mod=space&uid=$space['uid']&do=profile"><input type="hidden" name="friendsubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}">
+					<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_space_friend_$space[uid]').open=false">{lang cancel}</mdui-button>
+					<mdui-button slot="action" type="submit" variant="text" name="friendsubmit_btn" value="true">{lang determine}</mdui-button>
+				</form>
+			</mdui-dialog>
+			<!--{/if}-->
+		<!--{/if}-->
+		<!--{if $_G['uid'] && $_G['setting']['friendstatus']}-->
+			<!--{eval $mdui_space_in_blacklist = C::t('home_blacklist')->count_by_uid_buid($_G['uid'], $space['uid']);}-->
+			<mdui-list-item icon="block" rounded onclick="document.getElementById('mdui_space_blacklist_$space[uid]').open=true"><!--{if $mdui_space_in_blacklist}-->移除黑名单<!--{else}-->加入黑名单<!--{/if}--></mdui-list-item>
+			<mdui-dialog id="mdui_space_blacklist_$space[uid]" close-on-esc close-on-overlay-click>
+				<div slot="headline"><!--{if $mdui_space_in_blacklist}-->移除黑名单<!--{else}-->加入黑名单<!--{/if}--></div>
+				<div slot="description"><!--{if $mdui_space_in_blacklist}-->确定将 $space['username'] 移出黑名单吗？<!--{else}-->{lang blacklist_message}<!--{/if}--></div>
+				<!--{if $mdui_space_in_blacklist}-->
+				<mdui-button slot="action" variant="text" onclick="document.getElementById('mdui_space_blacklist_$space[uid]').open=false">{lang cancel}</mdui-button>
+				<mdui-button slot="action" variant="text" data-href="home.php?mod=spacecp&ac=friend&op=blacklist&subop=delete&uid=$space[uid]">{lang determine}</mdui-button>
+				<!--{else}-->
+				<form method="post" action="home.php?mod=spacecp&ac=friend&op=blacklist">
+					<input type="hidden" name="username" value="$space['username']" />
+					<input type="hidden" name="blacklistsubmit" value="true" />
+					<input type="hidden" name="formhash" value="{FORMHASH}" />
+					<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_space_blacklist_$space[uid]').open=false">{lang cancel}</mdui-button>
+					<mdui-button slot="action" type="submit" variant="text" name="blacklistsubmit_btn" value="true">{lang determine}</mdui-button>
+				</form>
+				<!--{/if}-->
+			</mdui-dialog>
+		<!--{/if}-->
+		<!--{if $_G['uid'] && $_G['setting']['friendstatus'] && $_G['group']['allowpoke']}-->
+		<mdui-list-item icon="waving_hand" rounded onclick="document.getElementById('mdui_space_poke_$space[uid]').open=true">{lang say_hi}</mdui-list-item>
+		<mdui-dialog id="mdui_space_poke_$space[uid]" close-on-esc close-on-overlay-click>
+			<div slot="headline">{lang say_hi}</div>
+			<form method="post" action="home.php?mod=spacecp&ac=poke&op=send&uid=$space['uid']">
+				<div slot="description">
+					<mdui-radio-group name="iconid" value="3" label="选择动作">
+						<mdui-radio value="0">{lang poke_0}</mdui-radio>
+						<mdui-radio value="1">{lang poke_1}</mdui-radio>
+						<mdui-radio value="2">{lang poke_2}</mdui-radio>
+						<mdui-radio value="3">{lang poke_3}</mdui-radio>
+						<mdui-radio value="4">{lang poke_4}</mdui-radio>
+						<mdui-radio value="5">{lang poke_5}</mdui-radio>
+						<mdui-radio value="6">{lang poke_6}</mdui-radio>
+						<mdui-radio value="7">{lang poke_7}</mdui-radio>
+						<mdui-radio value="8">{lang poke_8}</mdui-radio>
+						<mdui-radio value="9">{lang poke_9}</mdui-radio>
+						<mdui-radio value="10">{lang poke_10}</mdui-radio>
+						<mdui-radio value="11">{lang poke_11}</mdui-radio>
+						<mdui-radio value="12">{lang poke_12}</mdui-radio>
+						<mdui-radio value="13">{lang poke_13}</mdui-radio>
+					</mdui-radio-group>
+					<mdui-text-field name="note" label="{lang say}" maxlength="30"></mdui-text-field>
+				</div>
+				<input type="hidden" name="referer" value="home.php?mod=space&uid=$space['uid']&do=profile">
+				<input type="hidden" name="pokesubmit" value="true">
+				<input type="hidden" name="formhash" value="{FORMHASH}">
+				<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_space_poke_$space[uid]').open=false">{lang cancel}</mdui-button>
+				<mdui-button slot="action" type="submit" variant="text" name="pokesubmit_btn" value="true">{lang send}</mdui-button>
+			</form>
+		</mdui-dialog>
+		<!--{/if}-->
+		<mdui-list-item href="home.php?mod=space&do=pm&subop=view&touid={$space['uid']}" icon="mail" rounded>{lang mobfa}{lang pm}</mdui-list-item>
+	</mdui-list>
+	<!--{/if}-->
+	<!--{hook/space_profile_top_mobile}-->
+
+	<!--{if $_G['uid'] == $space['uid']}-->
+	<div class="mdui-space-credits">
+		<div class="mdui-space-section-title">{lang credits}</div>
+		<div class="mdui-space-stats">
+			<div data-href="home.php?mod=spacecp&ac=credit&op=base"><b>$space['credits']</b><span>{lang credits}</span></div>
+			<!--{loop $_G['setting']['extcredits'] $key $value}-->
+			<!--{if $value['title']}-->
+			<div data-href="home.php?mod=spacecp&ac=credit&op=base"><b>{$space["extcredits$key"]}$value['unit']</b><span>$value['title']</span></div>
+			<!--{/if}-->
+			<!--{/loop}-->
+		</div>
+	</div>
+	<!--{else}-->
+	<div class="mdui-space-credits">
+		<div class="mdui-space-section-title">{lang credits}</div>
+		<div class="mdui-space-stats">
+			<div><b>$space['credits']</b><span>{lang credits}</span></div>
+			<!--{loop $_G['setting']['extcredits'] $key $value}-->
+			<!--{if $value['title']}--><div><b>{$space["extcredits$key"]}$value['unit']</b><span>$value['title']</span></div><!--{/if}-->
+			<!--{/loop}-->
+		</div>
+	</div>
+	<!--{/if}-->
+
+	<mdui-tabs class="mdui-space-tabs" value="profile">
+		<mdui-tab value="profile" data-href="home.php?mod=space&uid={$space['uid']}&do=profile">{lang memcp_profile}</mdui-tab>
+		<!--{if $_G['setting']['allowviewuserthread'] !== false && helper_access::check_module('forum')}-->
+		<mdui-tab value="thread" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread">{lang topic}</mdui-tab>
+		<mdui-tab value="reply" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=reply">{lang reply}</mdui-tab>
+		<!--{/if}-->
+		<!--{if helper_access::check_module('blog')}--><mdui-tab value="blog" data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=me">{lang blog}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('album')}--><mdui-tab value="album" data-href="home.php?mod=space&uid={$space['uid']}&do=album&view=me">{lang album}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('doing')}--><mdui-tab value="doing" data-href="home.php?mod=space&uid={$space['uid']}&do=doing&view=me">{lang doing}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('wall')}--><mdui-tab value="wall" data-href="home.php?mod=space&uid={$space['uid']}&do=wall">{lang message_board}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('follow')}--><mdui-tab value="follow" data-href="home.php?mod=follow&uid={$space['uid']}&do=view">{lang follow}</mdui-tab><!--{/if}-->
+		<!--{if $_G['uid'] == $space['uid']}--><mdui-tab value="setup" data-href="home.php?mod=spacecp&ac=profile">{lang setup}</mdui-tab><!--{/if}-->
+	</mdui-tabs>
+
+	<!--{if $space['group']['maxsigsize'] && $space['sightml']}--><mdui-card variant="filled" class="mdui-space-card"><div class="mdui-space-section-title">{lang personal_signature}</div><div class="mdui-prose">$space['sightml']</div></mdui-card><!--{/if}-->
+
+	<div class="mdui-space-section"><div class="mdui-space-section-title">{lang memcp_profile}<!--{if $_G['uid'] == $space['uid']}--><mdui-button variant="text" href="home.php?mod=spacecp&ac=profile">{lang setup}</mdui-button><!--{/if}--></div><mdui-card variant="filled" class="mdui-space-card mdui-space-details">
+		<!--{hook/space_profile_baseinfo_top_mobile}-->
+		<div><span>UID</span><b>$space['uid']</b></div><div><span>{lang usergroup}</span><b style="color:{$space['group']['color']}">{$space['group']['grouptitle']}</b></div>
+		<!--{if $space['adminid']}--><div><span>{lang management_team}</span><b style="color:{$space['admingroup']['color']}">{$space['admingroup']['grouptitle']}</b></div><!--{/if}-->
+		<!--{loop $profiles $value}-->
+		<div><span>$value['title']</span><b>$value['value']</b></div>
+		<!--{/loop}-->
+		<!--{if $space['spacenote']}--><div><span>{lang spacenote}</span><b>$space['spacenote']</b></div><!--{/if}-->
+		<div><span>{lang regdate}</span><b>$space['regdate']</b></div>
+		<div><span>{lang last_visit}</span><b>$space['lastvisit']</b></div>
+		<!--{hook/space_profile_baseinfo_bottom_mobile}-->
+	</mdui-card></div>
+
+	<div class="mdui-space-section"><div class="mdui-space-section-title">{lang stat_info}</div><mdui-card variant="filled" class="mdui-space-card mdui-space-details"><div><span>{lang friends_num}</span><b>$space['friends']</b></div><!--{if helper_access::check_module('blog')}--><div><span>{lang blogs_num}</span><b>$space['blogs']</b></div><!--{/if}--><!--{if helper_access::check_module('forum')}--><div><span>{lang threads_num}</span><b>$space['threads']</b></div><!--{/if}--><div><span>{lang used_space}</span><b>$space['attachsize']</b></div></mdui-card></div>
+
+	<!--{if $space['medals']}--><div class="mdui-space-section"><div class="mdui-space-section-title">{lang medals}</div><mdui-card variant="filled" class="mdui-space-card mdui-space-medals"><!--{loop $space['medals'] $medal}--><a href="home.php?mod=medal"><img src="$medal['image']" alt="$medal['name']" title="$medal['name']"></a><!--{/loop}--></mdui-card></div><!--{/if}-->
+	<!--{if $_G['setting']['verify']['enabled']}--><!--{eval $showverify = false;}--><!--{loop $_G['setting']['verify'] $vid $verify}--><!--{if $verify['available'] && $space['verify'.$vid] == 1}--><!--{if !$showverify}--><div class="mdui-space-section"><div class="mdui-space-section-title">{lang profile_verify}</div><mdui-card variant="filled" class="mdui-space-card mdui-space-badges"><!--{eval $showverify = true;}--><!--{/if}--><span><!--{if $verify['icon']}--><img src="$verify['icon']" alt="$verify['title']"><!--{/if}-->$verify['title']</span><!--{/if}--><!--{/loop}--><!--{if $showverify}--></mdui-card></div><!--{/if}--><!--{/if}-->
+	<!--{if $count}--><div class="mdui-space-section"><div class="mdui-space-section-title">{lang manage_forums}</div><mdui-card variant="filled" class="mdui-space-card mdui-space-links"><!--{loop $manage_forum $key $value}--><a href="forum.php?mod=forumdisplay&fid=$key">$value</a><!--{/loop}--></mdui-card></div><!--{/if}-->
+	<!--{if !empty($groupcount)}--><div class="mdui-space-section"><div class="mdui-space-section-title">{lang joined_group}</div><mdui-card variant="filled" class="mdui-space-card mdui-space-links"><!--{loop $usergrouplist $key $value}--><a href="forum.php?mod=group&fid={$value['fid']}">$value['name']</a><!--{/loop}--></mdui-card></div><!--{/if}-->
+	<div class="mdui-space-section"><div class="mdui-space-section-title">{lang active_profile}</div><mdui-card variant="filled" class="mdui-space-card mdui-space-details"><!--{if $space['oltime'] && !$_G['setting']['sessionclose']}--><div><span>{lang online_time}</span><b>$space['oltime'] {lang hours}</b></div><!--{/if}--><div><span>{lang regdate}</span><b>$space['regdate']</b></div><div><span>{lang last_visit}</span><b>$space['lastvisit']</b></div><!--{if $space['lastactivity']}--><div><span>{lang last_activity_time}</span><b>$space['lastactivity']</b></div><!--{/if}--></mdui-card></div>
+	<!--{hook/space_profile_extrainfo_mobile}-->
+	<!--{if $_G['uid'] && getstatus($_G['member']['allowadmincp'], 1)}--><div class="mdui-space-action"><mdui-button variant="outlined" href="admin.php" full-width>{lang admincp_mobile}</mdui-button></div><!--{/if}-->
+	<!--{if $space['uid'] == $_G['uid']}--><div class="mdui-space-action"><mdui-button variant="tonal" href="member.php?mod=logging&action=logout&formhash={FORMHASH}" full-width>{lang logout_mobile}</mdui-button></div><!--{/if}-->
+</div>
+<!--{/if}-->
+<!--{template common/footer}-->

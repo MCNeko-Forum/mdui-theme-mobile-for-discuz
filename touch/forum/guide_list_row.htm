@@ -1,0 +1,43 @@
+<!--{if $list['threadcount']}-->
+	<!--{eval $guide_attach = get_attach($list['threadlist'], true, true);}-->
+	<!--{loop $list['threadlist'] $key $thread}-->
+		<mdui-card class="mdui-guide-thread" variant="filled">
+			<a class="mdui-guide-thread-main" href="forum.php?mod=viewthread&tid=$thread['tid']&extra=$extra">
+				<mdui-avatar class="mdui-guide-thread-avatar" src="<!--{avatar($thread['authorid'], 'middle', true)}-->"></mdui-avatar>
+				<div class="mdui-guide-thread-content">
+					<div class="mdui-guide-thread-title">
+						<!--{if $thread['folder'] == 'lock'}--><mdui-icon name="lock" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
+						<!--{elseif $thread['special'] == 1}--><mdui-icon name="poll" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
+						<!--{elseif $thread['special'] == 2}--><mdui-icon name="storefront" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
+						<!--{elseif $thread['special'] == 3}--><mdui-icon name="workspace_premium" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
+						<!--{elseif $thread['special'] == 4}--><mdui-icon name="event" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
+						<!--{elseif $thread['special'] == 5}--><mdui-icon name="forum" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
+						<!--{/if}-->
+						<span $thread['highlight']>{$thread['subject']}</span>
+					</div>
+					<!--{if $guide_attach[$thread['tid']]['message']}--><div class="mdui-guide-thread-summary">$guide_attach[$thread['tid']]['message']</div><!--{/if}-->
+					<div class="mdui-guide-thread-meta">
+						<span>{$thread['author']}</span>
+						<span>{$thread['dateline']}</span>
+						<span><mdui-icon name="visibility" style="font-size:.875rem;vertical-align:-.15rem"></mdui-icon> {$thread['views']}</span>
+						<span><mdui-icon name="chat_bubble" style="font-size:.875rem;vertical-align:-.15rem"></mdui-icon> {$thread['replies']}</span>
+						<!--{if $_G['cache']['forums'][$thread['fid']]['name']}--><span>{$_G['cache']['forums'][$thread['fid']]['name']}</span><!--{/if}-->
+					</div>
+				</div>
+			</a>
+			<!--{if $guide_attach[$thread['tid']]['attachment']}-->
+				<div class="mdui-guide-thread-images">
+					<!--{eval $guide_attach_count = 0;}-->
+					<!--{loop $guide_attach[$thread['tid']]['attachment'] $image}-->
+						<!--{eval $guide_attach_count++; if($guide_attach_count > 3) break;}-->
+						<img src="$image" alt="">
+					<!--{/loop}-->
+				</div>
+			<!--{elseif $guide_attach[$thread['tid']]['media']}-->
+				<div style="padding:0 .875rem .875rem">$guide_attach[$thread['tid']]['media']</div>
+			<!--{/if}-->
+		</mdui-card>
+	<!--{/loop}-->
+<!--{else}-->
+	<div class="mdui-guide-empty">{lang guide_nothreads}</div>
+<!--{/if}-->

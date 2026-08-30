@@ -1,0 +1,78 @@
+<!--{template common/header}-->
+<script src="data/cache/common_smilies_var.js?{VERHASH}" charset="{CHARSET}"></script>
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang message_board}</mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="home" href="portal.php?mod=index"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<div style="padding:0 1rem 9rem">
+	<div class="mdui-space-hero">
+		<mdui-avatar src="<!--{avatar($space['uid'], 'middle', true)}-->"></mdui-avatar>
+		<div class="mdui-space-identity"><div class="mdui-space-name">$space['username']</div><div class="mdui-space-meta">UID {$space['uid']}</div></div>
+	</div>
+	<mdui-tabs class="mdui-space-tabs" value="wall">
+		<mdui-tab value="profile" data-href="home.php?mod=space&uid={$space['uid']}&do=profile">{lang memcp_profile}</mdui-tab>
+		<!--{if $_G['setting']['allowviewuserthread'] !== false && helper_access::check_module('forum')}--><mdui-tab value="thread" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread">{lang topic}</mdui-tab><mdui-tab value="reply" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=reply">{lang reply}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('blog')}--><mdui-tab value="blog" data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=me">{lang blog}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('album')}--><mdui-tab value="album" data-href="home.php?mod=space&uid={$space['uid']}&do=album&view=me">{lang album}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('doing')}--><mdui-tab value="doing" data-href="home.php?mod=space&uid={$space['uid']}&do=doing&view=me">{lang doing}</mdui-tab><!--{/if}-->
+		<mdui-tab value="wall">{lang message_board}</mdui-tab>
+		<!--{if helper_access::check_module('follow')}--><mdui-tab value="follow" data-href="home.php?mod=follow&uid={$space['uid']}&do=view">{lang follow}</mdui-tab><!--{/if}-->
+	</mdui-tabs>
+
+	<!--{if $cid}--><mdui-card variant="outlined" style="display:block;margin:.75rem 0;padding:1rem">{lang view_one_operation_message} <a href="home.php?mod=space&uid=$space['uid']&do=wall">{lang click_view_message}</a></mdui-card><!--{/if}-->
+	<div id="div_main_content" style="display:grid;gap:.75rem">
+		<!--{if $list}-->
+		<!--{loop $list $k $value}-->
+		<!--{template home/space_comment_li}-->
+		<!--{/loop}-->
+		<!--{else}--><mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.65">还没有留言</mdui-card><!--{/if}-->
+	</div>
+	<!--{if $multi}--><div style="padding:1rem;text-align:center">$multi</div><!--{/if}-->
+</div>
+
+<!--{if helper_access::check_module('wall')}-->
+<form id="quickcommentform_{$space['uid']}" action="home.php?mod=spacecp&ac=comment" method="post" autocomplete="off" onsubmit="ajaxpost('quickcommentform_{$space['uid']}', 'return_qcwall_{$space['uid']}');return false;" style="position:fixed;z-index:101;left:0;right:0;bottom:0;display:flex;gap:.25rem;align-items:end;padding:.5rem;box-sizing:border-box;background:rgb(var(--mdui-color-surface-container));border-top:1px solid rgb(var(--mdui-color-outline-variant))">
+	<!--{if $_G['uid'] || $_G['group']['allowcomment']}-->
+	<mdui-button-icon icon="sentiment_satisfied" type="button" onclick="document.getElementById('mdui_wall_faces').open=true"></mdui-button-icon>
+	<textarea id="comment_message" name="message" rows="1" placeholder="{lang leave_comments}" style="flex:1;min-height:40px;max-height:96px;resize:none;box-sizing:border-box;padding:.6rem .75rem;border:1px solid rgb(var(--mdui-color-outline));border-radius:1.25rem;background:transparent;color:inherit;font:inherit"></textarea>
+	<mdui-button type="submit">{lang leave_comments}</mdui-button>
+	<!--{elseif $_G['connectguest']}-->
+	<div style="flex:1;text-align:center;font-size:.875rem">{lang connect_fill_profile_to_comment}</div>
+	<!--{else}-->
+	<div style="flex:1;text-align:center;font-size:.875rem">{lang login_to_wall}</div><mdui-button href="member.php?mod=logging&action=login">{lang login}</mdui-button>
+	<!--{/if}-->
+	<input type="hidden" name="referer" value="home.php?mod=space&uid=$space['uid']&do=wall">
+	<input type="hidden" name="id" value="$space['uid']">
+	<input type="hidden" name="idtype" value="uid">
+	<input type="hidden" name="handlekey" value="qcwall_{$space['uid']}">
+	<input type="hidden" name="commentsubmit" value="true">
+	<input type="hidden" name="quickcomment" value="true">
+	<input type="hidden" name="formhash" value="{FORMHASH}">
+	<span id="return_qcwall_{$space['uid']}"></span>
+</form>
+
+<mdui-dialog id="mdui_wall_faces" close-on-esc close-on-overlay-click>
+	<div slot="headline">{lang insert_emoticons}</div>
+	<div id="mdui_wall_faces_list" class="mdui-wall-faces"></div>
+</mdui-dialog>
+<script>
+(function () {
+	var list = document.getElementById('mdui_wall_faces_list'), html = '';
+	for (var i = 1; i <= 30; i++) html += '<mdui-button-icon type="button" data-face="[em:' + i + ':]"><img src="{STATICURL}image/smiley/comcom/' + i + '.gif" alt="[em:' + i + ':]" style="width:28px;height:28px;object-fit:contain"></mdui-button-icon>';
+	list.innerHTML = html;
+	list.addEventListener('click', function (e) {
+		var button = e.target.closest && e.target.closest('[data-face]');
+		if (!button && e.composedPath) button = e.composedPath().find(function (node) { return node && node.matches && node.matches('[data-face]'); });
+		if (!button) return;
+		var field = document.getElementById('comment_message');
+		field.value += button.dataset.face;
+		field.focus();
+		document.getElementById('mdui_wall_faces').open = false;
+	});
+})();
+</script>
+<!--{/if}-->
+<!--{template common/footer}-->

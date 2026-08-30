@@ -1,0 +1,241 @@
+<!--{template common/header}-->
+<!--{eval $adveditor = $isfirstpost && $special || $special == 2 && ($_GET['action'] == 'newthread' || $_GET['action'] == 'reply' && !empty($_GET['addtrade']) || $_GET['action'] == 'edit' && $thread['special'] == 2);}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>
+		<!--{if $_GET['action'] == 'edit'}-->{lang edit}<!--{elseif $_GET['action'] == 'reply'}-->{lang join_thread}<!--{else}-->{lang send_threads}<!--{/if}-->
+		· <!--{echo strip_tags($_G['forum']['name']);}-->
+	</mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<!--{if $_G['uid'] && $_G['group']['allowsave'] && ($_GET['action'] == 'newthread' && empty($modnewthreads) || $_GET['action'] == 'edit' && $isfirstpost && empty($modnewreplies) && $thread['displayorder'] == -4)}-->
+		<mdui-button id="mdui_save_draft" variant="text" style="margin-right:.5rem">{lang save_draft}</mdui-button>
+	<!--{/if}-->
+	<mdui-button id="postsubmit" variant="filled" style="margin-right:.5rem">
+		<!--{if $_GET['action'] == 'newthread'}-->
+			<!--{if $special == 0}-->{lang send_thread}
+			<!--{elseif $special == 1}-->{lang post_newthreadpoll}
+			<!--{elseif $special == 2}-->{lang post_newthreadtrade}
+			<!--{elseif $special == 3}-->{lang post_newthreadreward}
+			<!--{elseif $special == 4}-->{lang post_newthreadactivity}
+			<!--{elseif $special == 5}-->{lang post_newthreaddebate}
+			<!--{elseif $special == 127}--><!--{if $buttontext}-->$buttontext<!--{else}-->{lang post_newthread}<!--{/if}-->
+			<!--{/if}-->
+		<!--{elseif $_GET['action'] == 'reply' && !empty($_GET['addtrade'])}-->{lang trade_add_post}
+		<!--{elseif $_GET['action'] == 'reply'}-->{lang send_thread}
+		<!--{elseif $_GET['action'] == 'edit' && $isfirstpost && $thread['displayorder'] == -4}-->{lang post_newthread}
+		<!--{elseif $_GET['action'] == 'edit'}-->{lang edit_save}
+		<!--{/if}-->
+	</mdui-button>
+</mdui-top-app-bar>
+
+<style>
+	/* 发帖与编辑的下拉菜单统一限制高度，选项过多时可上下滑动。 */
+	#postform mdui-select::part(menu) {
+		max-height: min(50dvh, 22rem);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+	#postform select.sort_sel {
+		max-height: min(50dvh, 22rem);
+	}
+</style>
+<script src="{STATICURL}js/mobile/ajaxfileupload.js?{VERHASH}"></script>
+<script src="{STATICURL}js/mobile/buildfileupload.js?{VERHASH}"></script>
+<form method="post" id="postform"
+	<!--{if $_GET['action'] == 'newthread'}-->action="forum.php?mod=post&action={if $special != 2}newthread{else}newtrade{/if}&fid=$_G['fid']&extra=$extra&topicsubmit=yes&mobile=2"
+	<!--{elseif $_GET['action'] == 'reply'}-->action="forum.php?mod=post&action=reply&fid=$_G['fid']&tid=$_G['tid']&extra=$extra&replysubmit=yes&mobile=2"
+	<!--{elseif $_GET['action'] == 'edit'}-->action="forum.php?mod=post&action=edit&extra=$extra&editsubmit=yes&mobile=2" $enctype
+	<!--{/if}-->>
+	<input type="hidden" name="formhash" id="formhash" value="{FORMHASH}">
+	<input type="hidden" name="posttime" id="posttime" value="{TIMESTAMP}">
+	<input type="hidden" id="mdui_postsave" name="save" value="">
+	<!--{if !empty($_GET['modthreadkey'])}--><input type="hidden" name="modthreadkey" id="modthreadkey" value="$_GET['modthreadkey']"><!--{/if}-->
+	<!--{if $_GET['action'] == 'reply'}-->
+		<input type="hidden" name="noticeauthor" value="$noticeauthor">
+		<input type="hidden" name="noticetrimstr" value="$noticetrimstr">
+		<input type="hidden" name="noticeauthormsg" value="$noticeauthormsg">
+		<!--{if $reppid}--><input type="hidden" name="reppid" value="$reppid"><!--{/if}-->
+		<!--{if $_GET['reppost']}--><input type="hidden" name="reppost" value="$_GET['reppost']">
+		<!--{elseif $_GET['repquote']}--><input type="hidden" name="reppost" value="$_GET['repquote']"><!--{/if}-->
+	<!--{/if}-->
+	<!--{if $_GET['action'] == 'edit'}-->
+		<input type="hidden" name="fid" id="fid" value="$_G['fid']">
+		<input type="hidden" name="tid" value="$_G['tid']">
+		<input type="hidden" name="pid" value="$pid">
+		<input type="hidden" name="page" value="$_GET['page']">
+	<!--{/if}-->
+	<!--{if $special}--><input type="hidden" name="special" value="$special"><!--{/if}-->
+	<!--{if $specialextra}--><input type="hidden" name="specialextra" value="$specialextra"><!--{/if}-->
+	<input type="hidden" name="{if $_GET['action'] == 'newthread'}topicsubmit{elseif $_GET['action'] == 'reply'}replysubmit{elseif $_GET['action'] == 'edit'}editsubmit{/if}" value="yes">
+
+	<!--{hook/post_top_mobile}-->
+
+	<!--{if $_GET['action'] == 'newthread' && ($_G['group']['allowpostpoll'] || $_G['group']['allowpostreward'] || $_G['group']['allowpostdebate'] || $_G['group']['allowpostactivity'] || $_G['group']['allowposttrade'] || $_G['setting']['threadplugins'] || $_G['forum']['threadsorts']['types'])}-->
+		<!-- 发帖类型切换：整页跳转换 special/sortid，后端据此渲染不同的附加表单。 -->
+		<!--{eval $pt_types = array();}-->
+		<!--{eval $pt_cur = 'normal';}-->
+		<!--{if empty($_G['forum']['threadsorts']['required']) && !$_G['forum']['allowspecialonly']}--><!--{eval $pt_types[] = array('normal', '发表帖子', '');}--><!--{/if}-->
+		<!--{loop $_G['forum']['threadsorts']['types'] $tsortid $tsortname}-->
+			<!--{eval $pt_types[] = array('sort'.$tsortid, strip_tags($tsortname), '&sortid='.$tsortid);}-->
+			<!--{if $sortid == $tsortid}--><!--{eval $pt_cur = 'sort'.$tsortid;}--><!--{/if}-->
+		<!--{/loop}-->
+		<!--{if $_G['group']['allowpostpoll']}--><!--{eval $pt_types[] = array('s1', '发投票', '&special=1');}--><!--{/if}-->
+		<!--{if $_G['group']['allowpostreward']}--><!--{eval $pt_types[] = array('s3', '发悬赏', '&special=3');}--><!--{/if}-->
+		<!--{if $_G['group']['allowpostdebate']}--><!--{eval $pt_types[] = array('s5', '发辩论', '&special=5');}--><!--{/if}-->
+		<!--{if $_G['group']['allowpostactivity']}--><!--{eval $pt_types[] = array('s4', '发起活动', '&special=4');}--><!--{/if}-->
+		<!--{if $_G['group']['allowposttrade']}--><!--{eval $pt_types[] = array('s2', '出售商品', '&special=2');}--><!--{/if}-->
+		<!--{loop $_G['forum']['threadplugin'] $tpid}-->
+			<!--{if array_key_exists($tpid, $_G['setting']['threadplugins']) && is_array($_G['group']['allowthreadplugin']) && in_array($tpid, $_G['group']['allowthreadplugin'])}-->
+				<!--{eval $pt_types[] = array('p'.$tpid, $_G['setting']['threadplugins'][$tpid]['name'], '&specialextra='.$tpid);}-->
+				<!--{if $specialextra == $tpid}--><!--{eval $pt_cur = 'p'.$tpid;}--><!--{/if}-->
+			<!--{/if}-->
+		<!--{/loop}-->
+		<!--{if !$sortid && !$specialextra && $special}--><!--{eval $pt_cur = 's'.$special;}--><!--{/if}-->
+		<!--{eval $pt_baseurl = 'forum.php?mod=post&action=newthread&fid='.$_G['fid'].'&cedit=yes'.(!empty($_G['tid']) ? '&tid='.$_G['tid'] : '').(!empty($modelid) ? '&modelid='.$modelid : '').'&extra='.$extra;}-->
+		<mdui-tabs value="$pt_cur" style="position:sticky;top:64px;z-index:10">
+			<!--{loop $pt_types $pt_type}-->
+				<mdui-tab value="{$pt_type[0]}" data-href="{$pt_baseurl}{$pt_type[2]}">{$pt_type[1]}</mdui-tab>
+			<!--{/loop}-->
+		</mdui-tabs>
+	<!--{/if}-->
+
+	<div style="padding:1rem 1rem 96px">
+		<!--{if $_GET['action'] == 'reply' && !empty($_GET['addtrade']) || $_GET['action'] == 'edit' && $thread['special'] == 2 && !$postinfo['first']}-->
+			<input name="subject" type="hidden" value="">
+		<!--{elseif $_GET['action'] != 'reply'}-->
+			<mdui-text-field id="needsubject" name="subject" variant="outlined" autocomplete="off" maxlength="80" counter label="{lang thread_subject}" value="$postinfo['subject']"></mdui-text-field>
+		<!--{else}-->
+			<!-- 回帖时标题由后端自动生成，这里只展示回复对象 -->
+			<mdui-card variant="filled" style="display:block;padding:.75rem;font-size:.875rem">
+				<div style="opacity:.6">RE: {$thread['subject']}</div>
+				<!--{if $quotemessage}--><div style="margin-top:.5rem;opacity:.8;white-space:pre-wrap">$quotemessage</div><!--{/if}-->
+			</mdui-card>
+		<!--{/if}-->
+
+		<!--{if $isfirstpost && !empty($_G['forum']['threadtypes']['types'])}-->
+			<mdui-select id="typeid" name="typeid" variant="outlined" placeholder="主题分类" value="{if $thread['typeid']}$thread['typeid']{elseif $_GET['typeid']}$_GET['typeid']{else}0{/if}" style="margin-top:1rem">
+				<mdui-menu-item value="0">未选择</mdui-menu-item>
+				<!--{loop $_G['forum']['threadtypes']['types'] $typeid $name}-->
+					<!--{if empty($_G['forum']['threadtypes']['moderators'][$typeid]) || $_G['forum']['ismoderator']}-->
+						<mdui-menu-item value="$typeid"><!--{echo strip_tags($name);}--></mdui-menu-item>
+					<!--{/if}-->
+				<!--{/loop}-->
+			</mdui-select>
+		<!--{/if}-->
+
+		<!--{template forum/post_editor_extra}-->
+
+		<mdui-text-field id="needmessage" name="$editor['textarea']" variant="outlined" autocomplete="off" rows="8" autosize min-rows="8" max-rows="24" label="{lang thread_content}" style="margin-top:1rem" value="<!--{if $special != 127}-->$postinfo['message']<!--{/if}-->"></mdui-text-field>
+
+		<!--{if $_GET['action'] == 'edit' && $isorigauthor && ($isfirstpost && $thread['replies'] < 1 || !$isfirstpost) && !$rushreply && $_G['setting']['editperdel']}-->
+			<mdui-checkbox name="delete" value="1" style="margin-top:.75rem">{lang post_delpost}</mdui-checkbox>
+		<!--{/if}-->
+
+		<!--{hook/post_middle_mobile}-->
+		<!--{subtemplate forum/post_editor_attribute}-->
+
+		<!--{if $_GET['action'] != 'edit' && ($secqaacheck || $seccodecheck)}-->
+			<mdui-card variant="outlined" style="display:block;padding:.75rem;margin-top:1rem">
+				<ul style="list-style:none;margin:0;padding:0"><!--{subtemplate common/seccheck}--></ul>
+			</mdui-card>
+		<!--{/if}-->
+		<!--{hook/post_bottom_mobile}-->
+	</div>
+	<!--{hook/post_btn_extra_mobile}-->
+</form>
+
+<script>
+// 附件上传返回码文案，下标即后端 uploadmsg 的 statusid
+var STATUSMSG = {
+	'-1': '{lang uploadstatusmsgnag1}', '0': '{lang uploadstatusmsg0}', '1': '{lang uploadstatusmsg1}',
+	'2': '{lang uploadstatusmsg2}', '3': '{lang uploadstatusmsg3}', '4': '{lang uploadstatusmsg4}',
+	'5': '{lang uploadstatusmsg5}', '6': '{lang uploadstatusmsg6}', '7': '{lang uploadstatusmsg7}({$imgexts})',
+	'8': '{lang uploadstatusmsg8}', '9': '{lang uploadstatusmsg9}', '10': '{lang uploadstatusmsg10}',
+	'11': '{lang uploadstatusmsg11}', '12': '{lang uploadstatusmsg12}', '13': '{lang uploadstatusmsg13}'
+};
+var POSTUPLOAD = {
+	uid: '{$_G['uid']}',
+	hash: '<!--{eval echo md5(substr(md5($_G['config']['security']['authkey']), 8).$_G['uid'])}-->',
+	imgurl: 'misc.php?mod=swfupload&operation=upload&type=image&inajax=yes&infloat=yes&simple=2',
+	atturl: 'misc.php?mod=swfupload&operation=upload&fid={$_G['fid']}&inajax=yes&infloat=yes&simple=2',
+	attachurl: '{$_G['setting']['attachurl']}' .replace(/\/$/, '') + '/forum/',
+	tid: '{$postinfo['tid']}',
+	pid: '{$postinfo['pid']}'
+};
+
+// mdui-text-field 不暴露 selectionStart，但 shadowRoot 里的原生 textarea 有，
+// 配合组件自带的 setRangeText 就能在光标处插入而不是简单追加
+window.postInsert = function (code) {
+	var box = document.getElementById('needmessage');
+	var inner = box.shadowRoot && box.shadowRoot.querySelector('textarea, input');
+
+	if (inner) {
+		inner.focus();
+		box.setRangeText(code, inner.selectionStart, inner.selectionEnd, 'end');
+	} else {
+		box.value += code;
+	}
+	box.dispatchEvent(new Event('input'));
+};
+
+(function () {
+	var form = document.getElementById('postform');
+	var btn = document.getElementById('postsubmit');
+	var draftBtn = document.getElementById('mdui_save_draft');
+	var save = document.getElementById('mdui_postsave');
+	var subject = document.getElementById('needsubject');
+	var message = document.getElementById('needmessage');
+
+	// 标题和内容都有值才放开正常发表，草稿按钮不复用这个限制
+	function refresh() {
+		btn.disabled = !(message.value.trim() && (!subject || subject.value.trim()));
+	}
+	message.addEventListener('input', refresh);
+	subject && subject.addEventListener('input', refresh);
+	refresh();
+
+	// 拦截表单默认提交，避免表单内其他按钮误发半成品
+	form.addEventListener('submit', function (e) { e.preventDefault(); });
+
+	function submitPost(button, isDraft) {
+		if (button.disabled || button.loading) return;
+		<!--{if $showthreadsorts}-->
+		if (!isDraft && typeof validateextra == 'function' && !validateextra()) return;
+		<!--{/if}-->
+		save.value = isDraft ? '1' : '';
+		button.loading = true;
+		fetch(form.getAttribute('action') + '&handlekey=postform&inajax=1&ajaxdata=json', {
+			method: 'POST',
+			body: new FormData(form),
+			credentials: 'same-origin'
+		}).then(function (r) {
+			return r.json();
+		}).then(function (j) {
+			mduiTip(j.message);
+			if (j.data && j.data.tid && !isDraft) {
+				setTimeout(function () {
+					var isReply = '{$_GET['action']}' === 'reply';
+					location.href = isReply && j.data.pid
+						? 'forum.php?mod=redirect&goto=findpost&ptid=' + j.data.tid + '&pid=' + j.data.pid
+						: 'forum.php?mod=viewthread&tid=' + j.data.tid + (j.data.pid ? '&pid=' + j.data.pid + '#pid' + j.data.pid : '');
+				}, 1000);
+			} else if (isDraft && j.data && j.data.tid) {
+				setTimeout(function () {
+					location.href = 'home.php?mod=space&uid={$_G['uid']}&do=thread&view=me&type=thread&filter=save';
+				}, 1000);
+			} else {
+				button.loading = false;
+			}
+		}).catch(function () {
+			button.loading = false;
+			form.submit();
+		});
+	}
+
+	btn.addEventListener('click', function () { submitPost(btn, false); });
+	draftBtn && draftBtn.addEventListener('click', function () { submitPost(draftBtn, true); });
+})();
+</script>
+<!--{eval $nofooter = true;}-->
+<!--{template common/footer}-->

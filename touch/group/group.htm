@@ -1,0 +1,52 @@
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{if $action == 'create'}-->{lang group_create}<!--{else}--><!--{echo strip_tags($_G['forum']['name']);}--><!--{/if}--></mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<!--{if $action == 'index' || $action == 'list'}--><mdui-button-icon icon="edit" href="forum.php?mod=post&action=newthread&fid={$_G['fid']}" title="{lang send_posts}"></mdui-button-icon><!--{/if}-->
+</mdui-top-app-bar>
+
+<!--{if $action != 'create'}-->
+<mdui-card variant="filled" style="display:block;margin:.75rem;overflow:hidden">
+	<div style="display:flex;align-items:center;gap:.75rem;padding:1rem">
+		<!--{if $_G['forum']['icon'] && !strstr($_G['forum']['icon'], 'groupicon.gif')}--><mdui-avatar src="{$_G['forum']['icon']}" style="width:3.5rem;height:3.5rem"></mdui-avatar><!--{else}--><mdui-icon name="groups" style="font-size:3.5rem;color:rgb(var(--mdui-color-primary))"></mdui-icon><!--{/if}-->
+		<div style="min-width:0;flex:1"><div style="font-size:1.15rem;font-weight:600">{$_G['forum']['name']}</div><div style="font-size:.75rem;opacity:.68;margin-top:.35rem">{lang threads} {$_G['forum']['threads']} · {lang member} {$_G['forum']['membernum']}</div></div>
+	</div>
+	<!--{if $_G['forum']['description']}--><div style="padding:0 1rem 1rem;opacity:.75">{$_G['forum']['description']}</div><!--{/if}-->
+	<div style="display:flex;border-top:1px solid rgb(var(--mdui-color-outline-variant))">
+		<!--{if $status == 'isgroupuser'}--><div style="flex:1;min-width:0"><mdui-button type="button" variant="text" full-width onclick="document.getElementById('mdui_group_exit_dialog').open=true">{lang group_exit}</mdui-button></div><!--{elseif $status != 2 && $status != 3 && $status != 5}--><div style="flex:1;min-width:0"><form method="post" action="forum.php?mod=group&action=join&fid={$_G['fid']}"><input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="groupjoin" value="1"><mdui-button type="submit" variant="text" full-width>{lang group_join_group}</mdui-button></form></div><!--{/if}-->
+		<div style="flex:1;min-width:0"><mdui-button href="forum.php?mod=group&action=memberlist&fid={$_G['fid']}" variant="text" full-width>{lang group_member_list}</mdui-button></div>
+	</div>
+</mdui-card>
+<!--{if $status == 'isgroupuser'}-->
+<mdui-dialog id="mdui_group_exit_dialog" headline="{lang group_exit}">
+	<div>{lang group_exit_confirm}</div>
+	<mdui-button slot="action" variant="text" type="button" onclick="document.getElementById('mdui_group_exit_dialog').open=false">{lang cancel}</mdui-button>
+	<form id="mdui_group_exit_form" slot="action" method="post" action="forum.php?mod=group&action=out&fid={$_G['fid']}">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<input type="hidden" name="groupexit" value="1">
+		<mdui-button type="submit" variant="tonal">{lang confirms}</mdui-button>
+	</form>
+</mdui-dialog>
+<!--{/if}-->
+<mdui-tabs value="{if $action == 'memberlist'}member{elseif $action == 'manage'}manage{else}threads{/if}" full-width>
+	<mdui-tab value="threads" data-href="forum.php?mod=forumdisplay&action=list&fid={$_G['fid']}" icon="forum">{lang forum_viewall}</mdui-tab>
+	<mdui-tab value="member" data-href="forum.php?mod=group&action=memberlist&fid={$_G['fid']}" icon="people">{lang group_member_list}</mdui-tab>
+	<!--{if $_G['forum']['ismoderator']}--><mdui-tab value="manage" data-href="forum.php?mod=group&action=manage&fid={$_G['fid']}" icon="settings">{lang group_admin}</mdui-tab><!--{/if}-->
+</mdui-tabs>
+<!--{/if}-->
+
+<!--{if $action == 'index'}-->
+<div style="padding:.75rem 0 88px">
+	<!--{if $newthreadlist['dateline']['data']}-->
+	<mdui-card variant="filled" style="display:block;margin:.75rem;overflow:hidden"><mdui-list>
+	<!--{loop $newthreadlist['dateline']['data'] $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid={$thread['tid']}" rounded><mdui-icon slot="icon" name="<!--{if $thread['folder'] == 'lock'}-->lock<!--{elseif $thread['folder'] == 'new'}-->fiber_new<!--{else}-->article<!--{/if}-->"></mdui-icon>{$thread['subject']}<span slot="description">{$thread['author']} · {$thread['dateline']} · {$thread['views']} / {$thread['allreplies']}</span><mdui-icon slot="end-icon" name="chevron_right"></mdui-icon></mdui-list-item><!--{/loop}-->
+	</mdui-list></mdui-card>
+	<!--{else}--><div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang group_no_latest_feeds}</div><!--{/if}-->
+</div>
+<!--{elseif $action == 'list'}--><!--{template group/group_list}-->
+<!--{elseif $action == 'memberlist'}--><!--{template group/group_memberlist}-->
+<!--{elseif $action == 'create'}--><!--{template group/group_create}-->
+<!--{elseif $action == 'manage'}--><!--{template group/group_manage}-->
+<!--{/if}-->
+<!--{template common/footer}-->

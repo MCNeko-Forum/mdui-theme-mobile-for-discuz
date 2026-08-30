@@ -1,0 +1,743 @@
+<!-- 上传图片区：独立在功能区之上，对齐 bygsjw_sj 的 .byg_editor_upimg -->
+<!--{if $allowpostimg}-->
+<div class="mdui-post-upimg">
+	<!-- input[type=file] 铺满按钮，点按钮即唤起相册 -->
+	<mdui-button variant="tonal" icon="image" style="position:relative;overflow:hidden">
+		{lang e_img_attach}
+		<input type="file" id="filedata" multiple accept=".jpg,.jpeg,.gif,.png,.bmp,image/jpeg,image/gif,image/png,image/bmp" style="position:absolute;inset:0;opacity:0;font-size:0">
+	</mdui-button>
+
+	<!-- 已上传图片：缩略图 + 点击插入 [attachimg]，左上角叉删除 -->
+	<div id="imglist" style="display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem">
+	<!--{loop $imgattachs['used'] $temp}-->
+		<!-- data-aid 放在外层项上，删除时移除整项而不是只移除按钮 -->
+		<div data-aid="{$temp['aid']}" data-up="1" style="position:relative;width:72px;height:72px">
+			<img src="{$temp['url']}/$temp['attachment']" onclick="postInsert('[attachimg]{$temp['aid']}[/attachimg]')" style="width:72px;height:72px;object-fit:cover;border-radius:.5rem">
+			<!-- 删除按钮缩进图片内部左上角；type=button 防止误触表单提交 -->
+			<mdui-button-icon type="button" icon="cancel" class="mdui-img-del" style="position:absolute;top:3px;left:3px"></mdui-button-icon>
+			<!-- 点击图片插入正文的提示，叠在图片内部下方 -->
+			<div class="mdui-post-ins-tip">点击插入图片</div>
+			<input type="hidden" name="attachnew[{$temp['aid']}][description]" value="">
+			<input type="hidden" name="attachnew[{$temp['aid']}][readperm]" value="">
+			<input type="hidden" name="attachnew[{$temp['aid']}][price]" value="">
+		</div>
+	<!--{/loop}-->
+	</div>
+</div>
+<!--{/if}-->
+
+<!-- 表情数据：mdui-tabs 的默认 slot 只认 mdui-tab，script 要放在外面 -->
+<!--{if $_G['forum']['allowsmilies']}--><script src="data/cache/common_smilies_var.js?{VERHASH}" charset="{CHARSET}"></script><!--{/if}-->
+
+<!-- 编辑器功能区：一条横向 tab + 内联展开的面板，对齐 bygsjw_sj 的 .byg_editor_fun_box。
+     tab 与 panel 靠 slot 分发，DOM 里可以成对写在一起，条件判断只写一次 -->
+<mdui-tabs id="mdui_fun_tabs" class="mdui-post-fun">
+	<!--{if $_G['forum']['allowsmilies']}-->
+		<!-- 表情：二级分类由脚本按 smilies_type 填充 -->
+		<mdui-tab value="fun_face">{lang smilies}</mdui-tab>
+		<mdui-tab-panel slot="panel" value="fun_face">
+			<mdui-tabs id="mdui_face_tabs"></mdui-tabs>
+		</mdui-tab-panel>
+	<!--{/if}-->
+
+	<!--{if $_G['group']['allowpostattach']}-->
+		<mdui-tab value="fun_att">{lang attachment}</mdui-tab>
+		<mdui-tab-panel slot="panel" value="fun_att">
+			<div style="display:flex;align-items:center;gap:.5rem;padding:.5rem">
+				<mdui-button variant="tonal" icon="attach_file" style="position:relative;overflow:hidden">
+					{lang upload_attach}
+					<input type="file" id="attfiledata" multiple style="position:absolute;inset:0;opacity:0;font-size:0">
+				</mdui-button>
+				<span style="font-size:.75rem;opacity:.6">大小限制 {$maxattachsize_mb}</span>
+			</div>
+			<!-- 已上传附件：可填说明、权限、售价 -->
+			<div id="attlist">
+				<!--{loop $attachs['used'] $temp}-->
+					<mdui-card data-aid="{$temp['aid']}" data-up="1" variant="outlined" style="display:block;padding:.5rem;margin-bottom:.5rem">
+						<!--{if $temp['pid']}--><input type="hidden" name="attachupdate[{$temp['aid']}]" value="{$temp['aid']}"><!--{/if}-->
+						<div style="display:flex;align-items:center;gap:.25rem">
+							<span style="flex-grow:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{$temp['filetype']} {$temp['filename']}</span>
+							<!--{if $_G['setting']['allowattachurl'] && $temp['ext'] == 'mp3'}-->
+								<mdui-button variant="text" onclick="postInsert('[audio]attach://{$temp['aid']}.mp3[/audio]')">{lang e_audio}</mdui-button>
+							<!--{elseif $_G['setting']['allowattachurl'] && $temp['ext'] == 'mp4'}-->
+								<mdui-button variant="text" onclick="postInsert('[media=x,500,375]attach://{$temp['aid']}.mp4[/media]')">{lang e_video}</mdui-button>
+							<!--{/if}-->
+							<mdui-button variant="text" onclick="postInsert('[attach]{$temp['aid']}[/attach]')">{lang forum_post_insert}</mdui-button>
+							<mdui-button-icon type="button" icon="delete" class="mdui-att-del"></mdui-button-icon>
+						</div>
+						<mdui-text-field name="attachnew[{$temp['aid']}][description]" variant="outlined" label="{lang description}" value="{$temp['description']}" style="margin-top:.5rem"></mdui-text-field>
+						<!--{if $_G['group']['allowsetattachperm'] && $_G['cache']['groupreadaccess']}-->
+							<mdui-select name="attachnew[{$temp['aid']}][readperm]" variant="outlined" label="{lang forum_post_perm}" value="{$temp['readperm']}" style="margin-top:.5rem">
+								<mdui-menu-item value="">{lang unlimited}</mdui-menu-item>
+								<!--{loop $_G['cache']['groupreadaccess'] $val}-->
+									<mdui-menu-item value="$val['readaccess']">$val['grouptitle']</mdui-menu-item>
+								<!--{/loop}-->
+								<mdui-menu-item value="255">{lang highest_right}</mdui-menu-item>
+							</mdui-select>
+						<!--{/if}-->
+						<!--{if $_G['group']['maxprice']}-->
+							<mdui-text-field name="attachnew[{$temp['aid']}][price]" type="number" variant="outlined" label="{lang price}" value="{$temp['price']}" suffix="{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['title']}" style="margin-top:.5rem"></mdui-text-field>
+						<!--{/if}-->
+					</mdui-card>
+				<!--{/loop}-->
+			</div>
+		</mdui-tab-panel>
+	<!--{/if}-->
+
+<!--{if $_G['forum']['allowbbcode']}-->
+	<!-- 插入：各类 BBCode 由 mduiInsert 拼装后写入正文 -->
+	<mdui-tab value="fun_ins">{lang forum_post_insert}</mdui-tab>
+	<mdui-tab-panel slot="panel" value="fun_ins">
+		<mdui-tabs value="ins_url" class="mdui-post-ins">
+
+			<mdui-tab value="ins_url">{lang e_url}</mdui-tab>
+			<!--{if $_G['forum']['allowimgcode']}--><mdui-tab value="ins_img">{lang e_img_www}</mdui-tab><!--{/if}-->
+			<!--{if $_G['group']['allowmediacode']}-->
+				<mdui-tab value="ins_audio">{lang e_audio}</mdui-tab>
+				<mdui-tab value="ins_media">{lang e_video}</mdui-tab>
+			<!--{/if}-->
+			<mdui-tab value="ins_quote">{lang e_quote}</mdui-tab>
+			<mdui-tab value="ins_code">{lang e_code}</mdui-tab>
+			<!--{if $isfirstpost}--><mdui-tab value="ins_free">{lang e_free}</mdui-tab><!--{/if}-->
+			<!--{if $isfirstpost && $_G['group']['allowhidecode']}--><mdui-tab value="ins_hide">{lang e_hide}</mdui-tab><!--{/if}-->
+
+			<mdui-tab-panel slot="panel" value="ins_url" style="padding:.75rem">
+				<mdui-text-field id="ins_url_1" variant="outlined" type="url" label="链接地址"></mdui-text-field>
+				<mdui-text-field id="ins_url_2" variant="outlined" label="显示文字（可留空）" style="margin-top:.5rem"></mdui-text-field>
+				<mdui-button full-width onclick="mduiInsert('url')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
+			</mdui-tab-panel>
+			<!--{if $_G['forum']['allowimgcode']}-->
+				<mdui-tab-panel slot="panel" value="ins_img" style="padding:.75rem">
+					<mdui-text-field id="ins_img_1" variant="outlined" type="url" label="图片地址"></mdui-text-field>
+					<mdui-button full-width onclick="mduiInsert('img')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
+				</mdui-tab-panel>
+			<!--{/if}-->
+			<!--{if $_G['group']['allowmediacode']}-->
+				<mdui-tab-panel slot="panel" value="ins_audio" style="padding:.75rem">
+					<mdui-text-field id="ins_audio_1" variant="outlined" type="url" label="音乐地址"></mdui-text-field>
+					<mdui-button full-width onclick="mduiInsert('audio')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
+				</mdui-tab-panel>
+				<mdui-tab-panel slot="panel" value="ins_media" style="padding:.75rem">
+					<mdui-text-field id="ins_media_1" variant="outlined" type="url" label="视频地址"></mdui-text-field>
+					<div style="display:flex;gap:.5rem;margin-top:.5rem">
+						<mdui-text-field id="ins_media_2" variant="outlined" type="number" label="宽" value="500"></mdui-text-field>
+						<mdui-text-field id="ins_media_3" variant="outlined" type="number" label="高" value="375"></mdui-text-field>
+					</div>
+					<mdui-button full-width onclick="mduiInsert('media')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
+				</mdui-tab-panel>
+			<!--{/if}-->
+			<mdui-tab-panel slot="panel" value="ins_quote" style="padding:.75rem">
+				<mdui-text-field id="ins_quote_1" variant="outlined" rows="3" label="{lang e_quote}"></mdui-text-field>
+				<mdui-button full-width onclick="mduiInsert('quote')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
+			</mdui-tab-panel>
+			<mdui-tab-panel slot="panel" value="ins_code" style="padding:.75rem">
+				<mdui-text-field id="ins_code_1" variant="outlined" rows="3" label="{lang e_code}"></mdui-text-field>
+				<mdui-button full-width onclick="mduiInsert('code')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
+			</mdui-tab-panel>
+			<!--{if $isfirstpost}-->
+				<mdui-tab-panel slot="panel" value="ins_free" style="padding:.75rem">
+					<mdui-text-field id="ins_free_1" variant="outlined" rows="3" label="{lang e_free}" helper="出售主题时，这部分内容对所有人免费可见"></mdui-text-field>
+					<mdui-button full-width onclick="mduiInsert('free')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
+				</mdui-tab-panel>
+			<!--{/if}-->
+			<!--{if $isfirstpost && $_G['group']['allowhidecode']}-->
+				<mdui-tab-panel slot="panel" value="ins_hide" style="padding:.75rem">
+					<mdui-text-field id="ins_hide_1" variant="outlined" rows="3" label="{lang e_hide}"></mdui-text-field>
+					<mdui-checkbox id="ins_hide_4" style="margin-top:.5rem">仅积分高于下列数值时可见</mdui-checkbox>
+					<mdui-text-field id="ins_hide_2" variant="outlined" type="number" label="积分下限" style="margin-top:.5rem"></mdui-text-field>
+					<mdui-text-field id="ins_hide_3" variant="outlined" type="number" label="有效天数（可留空）" style="margin-top:.5rem"></mdui-text-field>
+					<mdui-button full-width onclick="mduiInsert('hide')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
+				</mdui-tab-panel>
+			<!--{/if}-->
+		</mdui-tabs>
+	</mdui-tab-panel>
+<!--{/if}-->
+
+	<!-- 附加：基本属性 + 文本特性，对齐 bygsjw_sj 的「附加」页 -->
+	<mdui-tab value="fun_extra">附加</mdui-tab>
+	<mdui-tab-panel slot="panel" value="fun_extra" style="padding:.75rem">
+		<div style="font-size:.8125rem;opacity:.6">{lang basic_attr}</div>
+				<!--{if $_G['group']['allowanonymous'] || ($_GET['action'] == 'edit' && $orig['anonymous'])}-->
+					<mdui-checkbox name="isanonymous" value="1" <!--{if $_GET['action'] == 'edit' && $orig['anonymous']}-->checked<!--{/if}-->>{lang post_anonymous}</mdui-checkbox>
+				<!--{/if}-->
+				<!--{if $_GET['action'] == 'newthread' || $_GET['action'] == 'edit' && $isfirstpost}-->
+					<mdui-checkbox name="hiddenreplies" value="1" <!--{if $thread['hiddenreplies']}-->checked<!--{/if}-->>{lang hiddenreplies}</mdui-checkbox>
+				<!--{/if}-->
+				<!--{if $_G['uid'] && ($_GET['action'] == 'newthread' || $_GET['action'] == 'edit' && $isfirstpost) && $special != 3}-->
+					<mdui-checkbox name="ordertype" value="1" <!--{if $ordertypecheck}-->checked<!--{/if}-->>{lang post_descviewdefault}</mdui-checkbox>
+				<!--{/if}-->
+				<!--{if $_GET['action'] == 'newthread' || $_GET['action'] == 'edit' && $isfirstpost}-->
+					<mdui-checkbox name="allownoticeauthor" value="1" <!--{if $allownoticeauthor}-->checked<!--{/if}-->>{lang post_noticeauthor}</mdui-checkbox>
+				<!--{/if}-->
+				<!--{if $_GET['action'] != 'edit' && helper_access::check_module('feed') && $_G['forum']['allowfeed']}-->
+					<mdui-checkbox name="addfeed" value="1" <!--{if $addfeedcheck}-->checked<!--{/if}-->>{lang addfeed}</mdui-checkbox>
+				<!--{/if}-->
+				<!--{if $_GET['action'] != 'edit' && helper_access::check_module('follow')}-->
+					<mdui-checkbox name="adddynamic" value="true" <!--{if $_G['forum']['allowfeed'] && !$_G['tid'] && empty($_G['forum']['viewperm'])}-->checked<!--{/if}-->>{lang post_relay}</mdui-checkbox>
+				<!--{/if}-->
+		<mdui-checkbox name="usesig" value="1" <!--{if !$_G['group']['maxsigsize']}-->disabled<!--{elseif $usesigcheck}-->checked<!--{/if}-->>{lang post_show_sig}</mdui-checkbox>
+
+		<mdui-divider style="margin:.75rem 0"></mdui-divider>
+		<div style="font-size:.8125rem;opacity:.6">{lang text_feature}</div>
+		<!--{if ($_G['forum']['allowhtml'] || ($_GET['action'] == 'edit' && ($orig['htmlon'] & 1))) && $_G['group']['allowhtml']}-->
+			<mdui-checkbox name="htmlon" value="1" <!--{if $htmloncheck}-->checked<!--{/if}-->>{lang post_html}</mdui-checkbox>
+		<!--{else}-->
+			<mdui-checkbox disabled>{lang post_html}</mdui-checkbox>
+		<!--{/if}-->
+		<mdui-checkbox disabled <!--{if $_G['forum']['allowimgcode']}-->checked<!--{/if}-->>{lang post_imgcode}</mdui-checkbox>
+		<mdui-checkbox name="parseurloff" value="1" <!--{if $urloffcheck}-->checked<!--{/if}-->>{lang disable}{lang post_parseurl}</mdui-checkbox>
+		<mdui-checkbox name="smileyoff" value="1" <!--{if $smileyoffcheck}-->checked<!--{/if}-->>{lang disable}{lang smilies}</mdui-checkbox>
+		<mdui-checkbox name="bbcodeoff" value="1" <!--{if $codeoffcheck}-->checked<!--{/if}-->>{lang disable}{lang discuzcode}</mdui-checkbox>
+		<!--{if $_G['group']['allowimgcontent']}-->
+			<mdui-checkbox name="imgcontent" value="1" <!--{if $imgcontentcheck}-->checked<!--{/if}-->>{lang content_to_pic}</mdui-checkbox>
+		<!--{else}-->
+			<mdui-checkbox disabled>{lang content_to_pic}</mdui-checkbox>
+		<!--{/if}-->
+
+		<!--{if $_GET['action'] == 'newthread' && $_G['forum']['ismoderator'] && ($_G['group']['allowdirectpost'] || !$_G['forum']['modnewposts']) && ($_G['group']['allowstickthread'] || $_G['group']['allowdigestthread'])}-->
+			<mdui-divider style="margin:.75rem 0"></mdui-divider>
+			<div style="font-size:.8125rem;opacity:.6">{lang manage_operation}</div>
+			<!--{if $_G['group']['allowstickthread']}-->
+				<mdui-checkbox name="sticktopic" value="1" <!--{if $stickcheck}-->checked<!--{/if}-->>{lang post_stick_thread}</mdui-checkbox>
+			<!--{/if}-->
+			<!--{if $_G['group']['allowdigestthread']}-->
+				<mdui-checkbox name="addtodigest" value="1" <!--{if $digestcheck}-->checked<!--{/if}-->>{lang post_digest_thread}</mdui-checkbox>
+			<!--{/if}-->
+		<!--{elseif $_GET['action'] == 'edit' && $_G['forum_auditstatuson']}-->
+			<mdui-divider style="margin:.75rem 0"></mdui-divider>
+			<div style="font-size:.8125rem;opacity:.6">{lang manage_operation}</div>
+			<mdui-checkbox name="audit" value="1">{lang auditstatuson}</mdui-checkbox>
+		<!--{/if}-->
+		<!--{hook/post_attribute_extra_mobile}-->
+		<!--{hook/post_attribute_extra_body_mobile}-->
+	</mdui-tab-panel>
+
+	<!--{if $_GET['action'] == 'newthread' || $_GET['action'] == 'edit' && $isfirstpost}-->
+		<!--{if $_G['group']['allowsetreadperm']}-->
+			<mdui-tab value="fun_perm">权限</mdui-tab>
+			<mdui-tab-panel slot="panel" value="fun_perm" style="padding:.75rem">
+				<mdui-select name="readperm" variant="outlined" label="{lang readperm}" value="{$thread['readperm']}">
+					<mdui-menu-item value="">{lang unlimited}</mdui-menu-item>
+					<!--{loop $_G['cache']['groupreadaccess'] $val}-->
+						<mdui-menu-item value="$val['readaccess']">$val['grouptitle']（{lang readperm} $val['readaccess']）</mdui-menu-item>
+					<!--{/loop}-->
+					<mdui-menu-item value="255">{lang highest_right}</mdui-menu-item>
+				</mdui-select>
+				<div style="font-size:.75rem;opacity:.6;margin-top:.5rem">{lang post_select_usergroup_readacces}</div>
+			</mdui-tab-panel>
+		<!--{/if}-->
+
+			<!--{if $_G['group']['allowreplycredit'] && !in_array($special, array(2, 3))}-->
+				<!--{if $_GET['action'] == 'newthread'}-->
+					<!--{eval $extcreditstype = $_G['setting']['creditstransextra'][10];}-->
+				<!--{else}-->
+					<!--{eval $extcreditstype = !empty($replycredit_rule['extcreditstype']) ? $replycredit_rule['extcreditstype'] : $_G['setting']['creditstransextra'][10];}-->
+				<!--{/if}-->
+				<!--{eval $userextcredit = getuserprofile('extcredits'.$extcreditstype);}-->
+				<!--{if ($_GET['action'] == 'newthread' && $userextcredit > 0) || ($_GET['action'] == 'edit' && $isorigauthor && $isfirstpost)}-->
+					<mdui-tab value="fun_credit">奖励</mdui-tab>
+					<mdui-tab-panel slot="panel" value="fun_credit" style="padding:.75rem">
+							<mdui-text-field id="replycredit_times" name="replycredit_times" type="number" variant="outlined" label="{lang replycredit_reward}" suffix="{lang replycredit_time}" value="{if !empty($replycredit_rule['lasttimes'])}{$replycredit_rule['lasttimes']}{else}1{/if}"></mdui-text-field>
+							<mdui-text-field id="replycredit_extcredits" name="replycredit_extcredits" type="number" variant="outlined" label="{lang replycredit_once}" suffix="{$_G['setting']['extcredits'][$extcreditstype]['unit']}{$_G['setting']['extcredits'][$extcreditstype]['title']}" helper="{lang replycredit_empty}" value="{if !empty($replycredit_rule['extcredits']) && $thread['replycredit'] > 0}{$replycredit_rule['extcredits']}{else}0{/if}" style="margin-top:.5rem"></mdui-text-field>
+							<mdui-select name="replycredit_membertimes" variant="outlined" label="{lang replycredit_member}" value="{if isset($replycredit_rule['membertimes'])}{$replycredit_rule['membertimes']}{else}1{/if}" style="margin-top:.5rem">
+								<!--{eval for($i = 1; $i < 11; $i++) {;}-->
+									<mdui-menu-item value="$i">$i {lang replycredit_time}</mdui-menu-item>
+								<!--{eval };}-->
+							</mdui-select>
+							<mdui-select name="replycredit_random" variant="outlined" label="{lang replycredit_rate}" value="{if isset($replycredit_rule['random'])}{$replycredit_rule['random']}{else}100{/if}" style="margin-top:.5rem">
+								<!--{eval for($i = 100; $i > 9; $i = $i - 10) {;}-->
+									<mdui-menu-item value="$i">$i %</mdui-menu-item>
+								<!--{eval };}-->
+							</mdui-select>
+							<div style="font-size:.75rem;opacity:.7;margin-top:.5rem">
+								{lang replycredit_total} <span id="replycredit_sum"><!--{if !empty($thread['replycredit'])}-->{$thread['replycredit']}<!--{else}-->0<!--{/if}--></span> {$_G['setting']['extcredits'][$extcreditstype]['unit']}{$_G['setting']['extcredits'][$extcreditstype]['title']}，
+								<span id="replycredit">{lang replycredit_revenue} {$_G['setting']['extcredits'][$extcreditstype]['title']} 0</span> {$_G['setting']['extcredits'][$extcreditstype]['unit']}，
+								{lang you_have} {$_G['setting']['extcredits'][$extcreditstype]['title']} $userextcredit {$_G['setting']['extcredits'][$extcreditstype]['unit']}
+						</div>
+					</mdui-tab-panel>
+					<script>
+					// 与 forum_post.js 的 getreplycredit 同算法：总额 = 单次 × 次数，税后额外扣税
+					(function () {
+						var have = <!--{if !empty($thread['replycredit'])}-->{$thread['replycredit']}<!--{else}-->0<!--{/if}-->;
+						var tax = {$_G['setting']['creditstax']};
+						var own = $userextcredit;
+						var prefix = '{lang replycredit_revenue}{$_G['setting']['extcredits'][$extcreditstype]['title']} ';
+
+						function calc() {
+							var once = Math.max(parseInt(getID('replycredit_extcredits').value) || 0, 0);
+							var times = Math.max(parseInt(getID('replycredit_times').value) || 0, 0);
+							var sum = Math.ceil(once * times);
+							var real = sum - have;
+							real = Math.ceil(real > 0 ? real + real * tax : real);
+							getID('replycredit_sum').innerHTML = sum > 0 ? sum : 0;
+							if (real > own) {
+								getID('replycredit').innerHTML = '<b style="color:var(--mdui-color-error)">回帖奖励积分总额过大(' + real + ')</b>';
+							} else if (have > 0 && real < 0) {
+								getID('replycredit').innerHTML = '返还' + Math.abs(real);
+							} else {
+								getID('replycredit').innerHTML = prefix + (real > 0 ? real : 0);
+							}
+						}
+						getID('replycredit_times').addEventListener('input', calc);
+						getID('replycredit_extcredits').addEventListener('input', calc);
+					})();
+					</script>
+				<!--{/if}-->
+			<!--{/if}-->
+
+			<!--{if ($_GET['action'] == 'newthread' && $_G['group']['allowpostrushreply'] && $special != 2) || ($_GET['action'] == 'edit' && getstatus($thread['status'], 3))}-->
+				<mdui-tab value="fun_rush">抢楼</mdui-tab>
+				<mdui-tab-panel slot="panel" value="fun_rush" style="padding:.75rem" id="rushreply_box">
+						<mdui-checkbox name="rushreply" id="rushreply" value="1" <!--{if $_GET['action'] == 'edit' && getstatus($thread['status'], 3)}-->disabled checked<!--{/if}-->>{lang rushreply_change}</mdui-checkbox>
+						<mdui-text-field name="rushreplyfrom" type="datetime-local" variant="outlined" label="{lang thread_rushreply_start}" value="<!--{echo str_replace(' ', 'T', $postinfo['rush']['starttimefrom']);}-->" style="margin-top:.5rem"></mdui-text-field>
+						<mdui-text-field name="rushreplyto" type="datetime-local" variant="outlined" label="{lang thread_rushreply_over}" value="<!--{echo str_replace(' ', 'T', $postinfo['rush']['starttimeto']);}-->" style="margin-top:.5rem"></mdui-text-field>
+						<mdui-text-field name="rewardfloor" variant="outlined" label="{lang rushreply_rewardfloor}" helper="{lang rushreply_rewardfloor_comment}" value="{$postinfo['rush']['rewardfloor'] or ''}" style="margin-top:.5rem"></mdui-text-field>
+						<mdui-text-field name="replylimit" type="number" variant="outlined" label="{lang stopfloor}" helper="{lang replylimit}" value="{$postinfo['rush']['replylimit'] or ''}" style="margin-top:.5rem"></mdui-text-field>
+						<mdui-text-field name="stopfloor" type="number" variant="outlined" label="{lang rushreply_end}" value="{$postinfo['rush']['stopfloor'] or ''}" style="margin-top:.5rem"></mdui-text-field>
+						<mdui-text-field name="creditlimit" type="number" variant="outlined" label="<!--{if !empty($_G['setting']['creditstransextra'][11])}-->{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][11]]['title']}<!--{else}-->{lang credits}<!--{/if}-->{lang min_limit}" helper="{lang post_rushreply_credit}" value="{$postinfo['rush']['creditlimit'] or ''}" style="margin-top:.5rem"></mdui-text-field>
+				</mdui-tab-panel>
+				<script>
+				// 改任一抢楼参数就自动勾上开关，跟 bygsjw_sj 的 onkeyup 一个效果
+				getID('rushreply_box').addEventListener('input', function (e) {
+					var box = getID('rushreply');
+					e.target !== box && !box.disabled && (box.checked = true);
+				});
+				</script>
+			<!--{/if}-->
+
+			<!--{if $_G['group']['maxprice'] && !$special}-->
+				<mdui-tab value="fun_price">售价</mdui-tab>
+				<mdui-tab-panel slot="panel" value="fun_price" style="padding:.75rem">
+					<mdui-text-field name="price" type="number" variant="outlined" label="{lang price}" suffix="{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['unit']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['title']}" helper="{lang post_price_comment}" value="$thread['pricedisplay']"></mdui-text-field>
+					<!--{if $_G['setting']['maxincperthread']}--><div style="font-size:.75rem;opacity:.6;margin-top:.5rem">{lang post_price_income_comment}</div><!--{/if}-->
+					<!--{if $_G['setting']['maxchargespan']}--><div style="font-size:.75rem;opacity:.6;margin-top:.25rem">{lang post_price_charge_comment}<!--{if $_GET['action'] == 'edit' && $freechargehours}-->{lang post_price_free_chargehours}<!--{/if}--></div><!--{/if}-->
+				</mdui-tab-panel>
+			<!--{/if}-->
+
+			<!--{if $_G['group']['allowposttag']}-->
+				<mdui-tab value="fun_tag">标签</mdui-tab>
+				<mdui-tab-panel slot="panel" value="fun_tag" style="padding:.75rem">
+					<mdui-text-field id="tags" name="tags" variant="outlined" label="{lang post_tag}" helper="{lang posttag_comment}" value="{$postinfo['tag'] or ''}"></mdui-text-field>
+				</mdui-tab-panel>
+			<!--{/if}-->
+
+			<!--{if $_G['group']['allowsetpublishdate'] && ($_GET['action'] == 'newthread' || ($_GET['action'] == 'edit' && $isfirstpost && $thread['displayorder'] == -4))}-->
+				<mdui-tab value="fun_pubdate">定时</mdui-tab>
+				<mdui-tab-panel slot="panel" value="fun_pubdate" style="padding:.75rem" id="cronpublish_box">
+					<mdui-checkbox name="cronpublish" id="cronpublish" value="true" <!--{if $cronpublish}-->checked<!--{/if}-->>{lang post_timer}</mdui-checkbox>
+					<mdui-text-field name="cronpublishdate" type="datetime-local" variant="outlined" label="{lang post_timer}" value="<!--{echo str_replace(' ', 'T', $cronpublishdate);}-->" style="margin-top:.5rem"></mdui-text-field>
+				</mdui-tab-panel>
+				<script>
+				// 填了时间就视为要定时，省一次勾选
+				getID('cronpublish_box').addEventListener('input', function (e) {
+					e.target !== getID('cronpublish') && e.target.value && (getID('cronpublish').checked = true);
+				});
+				</script>
+			<!--{/if}-->
+		<!--{/if}-->
+</mdui-tabs>
+
+<!-- 附件权限下拉模板：真模板循环生成避免在 JS 字符串里写模板指令，JS 克隆后填 aid -->
+<!--{if $_G['group']['allowsetattachperm'] && $_G['cache']['groupreadaccess']}-->
+<template id="mdui_att_perm">
+	<mdui-select name="attachnew[__AID__][readperm]" variant="outlined" label="{lang forum_post_perm}" value="">
+		<mdui-menu-item value="">{lang unlimited}</mdui-menu-item>
+		<!--{loop $_G['cache']['groupreadaccess'] $val}-->
+			<mdui-menu-item value="$val['readaccess']">$val['grouptitle']</mdui-menu-item>
+		<!--{/loop}-->
+		<mdui-menu-item value="255">{lang highest_right}</mdui-menu-item>
+	</mdui-select>
+</template>
+<!--{/if}-->
+<!--{if $_G['group']['maxprice']}-->
+	<span id="mdui_price_title" style="display:none">{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['title']}</span>
+<!--{/if}-->
+
+<style>
+/* 上传图片区：独立成块置于功能区之上 */
+.mdui-post-upimg {
+	padding: .75rem;
+	margin-top: 1rem;
+	border: 1px solid var(--mdui-color-outline-variant);
+	border-radius: .5rem .5rem 0 0;
+	border-bottom: 0;
+}
+/* 编辑器功能区：外框跟上传区连成一体 */
+.mdui-post-fun {
+	display: block;
+	border: 1px solid var(--mdui-color-outline-variant);
+	border-radius: 0 0 .5rem .5rem;
+	background: var(--mdui-color-surface-container-low);
+}
+/* 内联面板给个高度上限，内容多了自己滚，不把提交按钮顶出屏幕 */
+.mdui-post-fun > mdui-tab-panel[active],
+.mdui-post-ins > mdui-tab-panel[active] {
+	display: block;
+	max-height: 45vh;
+	overflow-y: auto;
+}
+/* 功能区里的复选框逐行排列，避免长文案挤在一起 */
+.mdui-post-fun mdui-checkbox {
+	display: flex;
+	margin-top: .25rem;
+}
+/* 插入面板的二级 tab 用次要配色跟一级区分 */
+.mdui-post-ins {
+	display: block;
+	background: var(--mdui-color-surface);
+}
+/* mdui-tabs 自身不撑高，必须显式给高度，否则面板高度为 0 什么都看不到 */
+#mdui_face_tabs {
+	display: block;
+	height: 40vh;
+}
+/* 表情合集标签页始终固定在表情区域顶部 */
+#mdui_face_tabs > mdui-tab {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	background: var(--mdui-color-surface-container-low);
+}
+/* 表情按 5 列铺开，超出一屏就滚动。
+   必须限定 [active]：MDUI 靠 display:none 隐藏非激活面板，
+   无条件写 display:flex 会把三个分类的面板同时显示出来 */
+#mdui_face_tabs mdui-tab-panel[active] {
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	gap: .5rem;
+	padding: .75rem;
+	height: 100%;
+	overflow-y: auto;
+}
+#mdui_face_tabs img {
+	width: 26px;
+	height: 26px;
+	max-width: 26px;
+	max-height: 26px;
+	padding: 0;
+	box-sizing: border-box;
+	vertical-align: middle;
+	cursor: pointer;
+}
+/* 上传中的文件显示名称和实时进度 */
+.mdui-upload-progress {
+	display: block;
+	padding: .5rem;
+	margin-bottom: .5rem;
+	border: 1px solid var(--mdui-color-outline-variant);
+	border-radius: .5rem;
+}
+.mdui-upload-progress span {
+	display: block;
+	margin-bottom: .35rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: .8125rem;
+}
+/* 已上传附件的删除按钮等样式 */
+.mdui-att-del {
+	--mdui-comp-button-icon-size: 20px;
+	--mdui-color-on-surface: var(--mdui-color-error);
+}
+/* 图片内部左上角的小号删除角标：半透明深底 + 白图标，缩进 3px 不贴边 */
+.mdui-img-del {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, .55);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	--mdui-comp-button-icon-size: 16px;
+	--mdui-color-on-surface: #fff;
+}
+/* 图片内部下方「点击插入图片」提示条，跟缩略图圆角一致 */
+.mdui-post-ins-tip {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	font-size: 10px;
+	text-align: center;
+	color: #fff;
+	background: rgba(0, 0, 0, .45);
+	border-radius: 0 0 .5rem .5rem;
+	padding: 2px 0;
+	pointer-events: none;
+	line-height: 1.4;
+}
+</style>
+
+<script>
+// 手机版 common.js 不提供桌面版的 getID，先补齐兼容函数，避免上传监听初始化中断
+var getID = function (id) { return document.getElementById(id); };
+
+// 功能区首个 tab 是条件渲染的，默认选中值只能运行时取
+(function () {
+	var tabs = getID('mdui_fun_tabs');
+	var first = tabs.querySelector('mdui-tab');
+	first && (tabs.value = first.value);
+})();
+
+// 插入 BBCode：与 bygsjw_sj 的 byg_post_insert 规则一致
+window.mduiInsert = function (type) {
+	var v = function (n) {
+		var el = getID('ins_' + type + '_' + n);
+		return el ? String(el.value).trim() : '';
+	};
+	var main = v(1);
+
+	if (!main) {
+		mduiTip('请输入要插入的内容');
+		return;
+	}
+	var code;
+	if (type == 'url') {
+		code = '[url=' + main + ']' + (v(2) || main) + '[/url]';
+	} else if (type == 'media') {
+		code = '[media=x,' + (v(2) || 500) + ',' + (v(3) || 375) + ']' + main + '[/media]';
+	} else if (type == 'hide') {
+		// [hide=d天数,积分]，天数与积分都可单独省略
+		var credit = getID('ins_hide_4').checked ? v(2) : '';
+		var days = v(3);
+		var arg = (days ? 'd' + days : '') + (days && credit ? ',' : '') + credit;
+		code = '[hide' + (arg ? '=' + arg : '') + ']' + main + '[/hide]';
+	} else {
+		code = '[' + type + ']' + main + '[/' + type + ']';
+	}
+	postInsert(code);
+};
+
+<!--{if $_G['forum']['allowsmilies']}-->
+// 表情面板：smilies_type 的键是 _1/_2，而 smilies_array 用的是数字 1/2
+(function () {
+	if (typeof smilies_type != 'object') return;
+	var tabs = getID('mdui_face_tabs');
+	var html = '';
+	var panels = '';
+	var first = '';
+
+	for (var k in smilies_type) {
+		var id = k.replace('_', '');
+		var dir = smilies_type[k][1];
+		first || (first = 'sm' + id);
+		html += '<mdui-tab value="sm' + id + '">' + smilies_type[k][0] + '</mdui-tab>';
+		panels += '<mdui-tab-panel slot="panel" value="sm' + id + '">';
+		for (var page in smilies_array[id]) {
+			for (var n = 0; n < smilies_array[id][page].length; n++) {
+				var sm = smilies_array[id][page][n];
+				panels += '<img src="static/image/smiley/' + dir + '/' + sm[2] + '" data-code="' + sm[1].replace(/"/g, '&quot;') + '">';
+			}
+		}
+		panels += '</mdui-tab-panel>';
+	}
+	tabs.innerHTML = html + panels;
+	tabs.value = first;
+	tabs.addEventListener('click', function (e) {
+		e.target.dataset.code && postInsert(e.target.dataset.code);
+	});
+})();
+<!--{/if}-->
+
+// 上传接口由 post.htm 注入 POSTUPLOAD / STATUSMSG，change 是用户操作时才触发，
+// 此时这些全局变量早已赋值，所以这里直接用事件委托挂在 document 上
+(function () {
+	var extIcon = function (name) {
+		// 按扩展名分组映射到 static/image/filetype/ 下的图标，对齐 bygsjw_sj 的分类
+		var ext = String(name).split('.').pop().toLowerCase();
+		var groups = {
+			torrent: /^(bittorrent|torrent)$/,
+			pdf: /^pdf$/,
+			image: /^(jpg|jpeg|gif|png|bmp)$/,
+			flash: /^(swf|fla|flv|swi)$/,
+			av: /^(wav|mid|mp3|m3u|wma|asf|asx|vqf|mpg|mpeg|avi|wmv|mp4|ogv|webm|ogg)$/,
+			real: /^(ra|rm|rv)$/,
+			html: /^(php|js|pl|cgi|asp|htm|html|xml)$/,
+			text: /^(txt|rtf|wri|chm)$/,
+			msoffice: /^(doc|docx|ppt|pptx|xls|xlsx)$/,
+			rar: /^rar$/,
+			zip: /^(zip|arj|arc|cab|lzh|lha|tar|gz)$/,
+			binary: /^(exe|com|bat|dll)$/
+		};
+		for (var k in groups) {
+			if (groups[k].test(ext)) return 'static/image/filetype/' + k + '.gif';
+		}
+		return 'static/image/filetype/unknown.gif';
+	};
+	var sizelimitText = function (d) {
+		// d[7] 是 error_sizelimit，可能是 'ban'/'perday'/字节数
+		if (d[7] == 'ban') return '{lang uploadpicatttypeban}';
+		if (d[7] == 'perday') return '{lang donotcross}' + Math.ceil((d[8] || 0) / 1024) + 'K)';
+		if (d[7] > 0) return '{lang donotcross}' + Math.ceil(d[7] / 1024) + 'K)';
+		return '';
+	};
+	// 统一删除附件：up=1 表示已入库，走后端删库；新建的只移除列表项
+	document.addEventListener('click', function (e) {
+		// 图片角标 mdui-img-del 与附件删除 mdui-att-del 共用同一委托
+		var btn = e.target.closest('.mdui-img-del, .mdui-att-del');
+		if (!btn) return;
+		// 阻止按钮默认行为，防止 form 内删除按钮误触提交
+		e.preventDefault();
+		var box = btn.closest('[data-aid]');
+		var aid = box.getAttribute('data-aid');
+		var up = box.getAttribute('data-up');
+		var url = 'forum.php?mod=ajax&action=deleteattach&inajax=yes&aids[]=' + aid +
+			(up == '1' ? '&tid={$postinfo['tid']}&pid={$postinfo['pid']}&formhash={FORMHASH}' : '');
+		fetch(url, {credentials: 'same-origin'})
+			.then(function () { box.parentNode.removeChild(box); })
+			.catch(function () { mduiTip('{lang networkerror}', true); });
+	});
+
+	// 附件权限下拉取自模板元素；售价单位取自隐藏 span，避免在 JS 字符串里写模板指令
+	var permTpl = getID('mdui_att_perm') ? getID('mdui_att_perm').innerHTML : '';
+	var priceTitle = getID('mdui_price_title') ? getID('mdui_price_title').textContent : '';
+	var allowPerm = !!permTpl;
+	var allowPrice = !!priceTitle;
+	var postForm = getID('postform');
+
+	function addUploadFields(aid) {
+		var fields = document.createElement('span');
+		fields.className = 'mdui-new-fields';
+		fields.setAttribute('data-aid', aid);
+		fields.innerHTML =
+			'<input type="hidden" name="attachnew[' + aid + '][description]" value="">' +
+			'<input type="hidden" name="attachnew[' + aid + '][readperm]" value="">' +
+			'<input type="hidden" name="attachnew[' + aid + '][price]" value="">';
+		postForm.appendChild(fields);
+	}
+
+	// 图片与附件共用同一套上传流程，只有 URL 与落地容器不同
+	document.addEventListener('change', function (e) {
+		var input = e.target;
+		if (input.id !== 'filedata' && input.id !== 'attfiledata') return;
+		if (!input.files.length) return;
+		var isImage = input.id === 'filedata';
+		var url = isImage ? POSTUPLOAD.imgurl : POSTUPLOAD.atturl;
+
+		[].forEach.call(input.files, function (file) {
+			// 显示上传进度提示
+			var uploadingTip = mduiTip('正在上传 ' + file.name + '...', false, 0);
+			
+			var progress = document.createElement('div');
+			progress.className = 'mdui-upload-progress';
+			progress.innerHTML = '<span>' + file.name + '</span><mdui-linear-progress value="0"></mdui-linear-progress>';
+			getID(isImage ? 'imglist' : 'attlist').appendChild(progress);
+			var progressBar = progress.querySelector('mdui-linear-progress');
+			var fd = new FormData();
+			fd.append('uid', POSTUPLOAD.uid);
+			fd.append('hash', POSTUPLOAD.hash);
+			fd.append('Filedata', file);
+			var uploadsuccess = function (data) {
+				progress.parentNode && progress.parentNode.removeChild(progress);
+				if (!data) {
+					uploadingTip && uploadingTip.open && (uploadingTip.open = false);
+					mduiTip('{lang uploadpicfailed}', true);
+					return;
+				}
+				// 关闭上传中提示
+					uploadingTip && uploadingTip.open && (uploadingTip.open = false);
+					
+					if (!data) { mduiTip('{lang uploadpicfailed}', true); return; }
+					var d = String(data).replace(/^\s+|\s+$/g, '').split('|');
+				if (d[0] !== 'DISCUZUPLOAD' || d[2] != 0 || !/^\d+$/.test(d[3])) {
+						mduiTip(STATUSMSG[d[2]] + sizelimitText(d), true);
+						return;
+					}
+					var aid = d[3];
+					// Discuz 返回格式：DISCUZUPLOAD|类型|状态|aid|isimage|路径|文件名|限制，第四段就是 aid。
+					// X5 返回的 d[4] 在不同补丁中可能为空；上传入口本身是最可靠的类型来源
+					// 按上传入口分流：attfiledata 始终进入附件列表，和 bygsjw_sj 一致
+					var isImg = isImage;
+					
+					// 显示上传成功提示
+					mduiTip((isImg ? '图片' : '附件') + '上传成功', false);
+					
+					// 图片始终进图库；附件按返回标志判定，非图进附件列表
+					if (isImg) {
+						var node = document.createElement('div');
+						node.setAttribute('data-aid', aid);
+						node.style.cssText = 'position:relative;width:72px;height:72px';
+						node.innerHTML =
+							'<img src="' + POSTUPLOAD.attachurl + d[5] + '" onclick="postInsert(\'[attachimg]' + aid + '[/attachimg]\')" style="width:72px;height:72px;object-fit:cover;border-radius:.5rem">' +
+							'<button type="button" class="mdui-img-del" style="position:absolute;top:3px;left:3px;padding:0;border:0;cursor:pointer;color:#fff">' +
+							'<mdui-icon name="cancel"></mdui-icon></button>' +
+							'<div class="mdui-post-ins-tip">点击插入图片</div>';
+						var imglist = getID('imglist');
+						if (imglist) {
+							imglist.appendChild(node);
+							addUploadFields(aid);
+						}
+						else mduiTip('{lang uploadpicfailed}', true);
+					} else {
+						var card = document.createElement('div');
+						card.setAttribute('data-aid', aid);
+						card.setAttribute('data-up', '0');
+						card.className = 'mdui-uploaded-attachment';
+						card.style.cssText = 'display:block;border:1px solid var(--mdui-color-outline-variant);border-radius:12px;padding:.5rem;margin-bottom:.5rem';
+						// mp3/mp4 额外给一个按媒体形式插入的入口，跟已入库附件的处理保持一致
+						var name = d[6] || '';
+						var media = /\.mp3$/i.test(name)
+							? '<mdui-button variant="text" onclick="postInsert(\'[audio]attach://' + aid + '.mp3[/audio]\')">{lang e_audio}</mdui-button>'
+							: (/\.mp4$/i.test(name)
+								? '<mdui-button variant="text" onclick="postInsert(\'[media=x,500,375]attach://' + aid + '.mp4[/media]\')">{lang e_video}</mdui-button>'
+								: '');
+						var head =
+							'<div style="display:flex;align-items:center;gap:.25rem">' +
+							'<img src="' + extIcon(name) + '" style="width:16px;height:16px">' +
+							'<span style="flex-grow:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</span>' +
+							media +
+							'<mdui-button variant="text" onclick="postInsert(\'[attach]' + aid + '[/attach]\')">{lang forum_post_insert}</mdui-button>' +
+							'<button type="button" class="mdui-att-del" style="all:unset;cursor:pointer"><mdui-icon name="delete"></mdui-icon></button>' +
+							'</div>' +
+							'<mdui-text-field variant="outlined" label="{lang description}"></mdui-text-field>' +
+							(allowPerm ? permTpl.replace(/__AID__/g, aid) : '') +
+							(allowPrice
+								? '<mdui-text-field type="number" variant="outlined" label="{lang price}" suffix="' + priceTitle + '" style="margin-top:.5rem"></mdui-text-field>'
+								: '');
+						card.innerHTML = head;
+						// 按 bygsjw_sj：普通 li 直接 prepend 到附件列表，不交给 mdui-card 生命周期
+						var attlist = getID('attlist');
+						if (attlist) {
+							attlist.insertBefore(card, attlist.firstChild);
+							addUploadFields(aid);
+							if (typeof customElements !== 'undefined' && customElements.whenDefined) customElements.whenDefined('mdui-card');
+						} else mduiTip('{lang uploadpicfailed}', true);
+					}
+			};
+			if (!isImage && typeof $ !== 'undefined' && $.ajaxfileupload) {
+				$.ajaxfileupload({
+					url: url,
+					data: {uid: POSTUPLOAD.uid, hash: POSTUPLOAD.hash},
+					dataType: 'text',
+					fileElementId: 'attfiledata',
+					success: uploadsuccess,
+					error: function () { uploadsuccess(''); }
+				});
+			} else if (typeof $ !== 'undefined' && $.buildfileupload) {
+				$.buildfileupload({
+					uploadurl: url,
+					files: [file],
+					uploadformdata: {uid: POSTUPLOAD.uid, hash: POSTUPLOAD.hash},
+					uploadinputname: 'Filedata',
+					maxfilesize: '{$swfconfig['max']}',
+					success: uploadsuccess,
+					error: function () { uploadsuccess(''); }
+				});
+			} else {
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', url + '&uid=' + encodeURIComponent(POSTUPLOAD.uid) + '&hash=' + encodeURIComponent(POSTUPLOAD.hash), true);
+				xhr.withCredentials = true;
+				xhr.upload.onprogress = function (event) {
+					if (event.lengthComputable) progressBar.value = event.loaded / event.total;
+				};
+				xhr.onload = function () { uploadsuccess(xhr.status >= 200 && xhr.status < 300 ? xhr.responseText : ''); };
+				xhr.onerror = function () { uploadsuccess(''); };
+				xhr.send(fd);
+			}
+		});
+		input.value = '';
+	});
+})();
+</script>

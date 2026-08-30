@@ -1,0 +1,35 @@
+<div style="padding-bottom:88px">
+	<!--{if $_G['forum']['threadtypes']}-->
+	<mdui-chip-set style="padding:.5rem .75rem;overflow-x:auto;white-space:nowrap">
+		<mdui-chip href="forum.php?mod=forumdisplay&action=list&fid={$_G['fid']}"{if !$_GET['typeid']} selected{/if}>{lang forum_viewall}</mdui-chip>
+		<!--{loop $_G['forum']['threadtypes']['types'] $id $name}--><mdui-chip href="forum.php?mod=forumdisplay&action=list&fid={$_G['fid']}&filter=typeid&typeid={$id}"{if $_GET['typeid'] == $id} selected{/if}>{$name}</mdui-chip><!--{/loop}-->
+	</mdui-chip-set>
+	<!--{/if}-->
+	<form method="post" action="search.php?mod=group&srchfid={$_G['fid']}" style="display:flex;gap:.5rem;padding:.5rem .75rem">
+		<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="searchsubmit" value="yes">
+		<mdui-text-field name="srchtxt" value="{$keyword}" label="{lang mobsearchtxt}" icon="search" style="flex:1"></mdui-text-field>
+		<mdui-button type="submit">{lang search}</mdui-button>
+	</form>
+	<mdui-card variant="filled" style="display:block;margin:.75rem;overflow:hidden">
+		<!--{if $_G['forum_threadcount']}-->
+		<mdui-list>
+		<!--{eval $threadlist_data = get_attach($_G['forum_threadlist']);}-->
+		<!--{loop $_G['forum_threadlist'] $key $thread}-->
+		<!--{if !$_G['setting']['mobile']['forum']['displayorder3'] && $thread['displayorder'] > 0}-->{eval continue;}<!--{/if}-->
+		<mdui-list-item href="forum.php?mod=viewthread&tid={$thread['tid']}&extra={$extra}" rounded>
+			<!--{if $thread['authorid']}--><mdui-avatar slot="icon" src="<!--{avatar($thread['authorid'], 'small', true)}-->"></mdui-avatar><!--{else}--><mdui-icon slot="icon" name="person"></mdui-icon><!--{/if}-->
+			<div style="white-space:normal">
+				<!--{if $thread['displayorder'] > 0}--><mdui-badge>{lang thread_sticky}</mdui-badge><!--{/if}-->
+				<!--{if $thread['folder'] == 'lock'}--><mdui-badge>{lang closed_thread}</mdui-badge><!--{elseif $thread['special'] == 1}--><mdui-badge>{lang thread_poll}</mdui-badge><!--{elseif $thread['special'] == 2}--><mdui-badge>{lang thread_trade}</mdui-badge><!--{elseif $thread['special'] == 3}--><mdui-badge>{lang thread_reward}</mdui-badge><!--{elseif $thread['special'] == 4}--><mdui-badge>{lang thread_activity}</mdui-badge><!--{elseif $thread['special'] == 5}--><mdui-badge>{lang thread_debate}</mdui-badge><!--{/if}-->
+				{$thread['subject']}
+				<!--{if $threadlist_data[$thread['tid']]['attachment']}--><div style="display:flex;gap:.35rem;overflow:hidden;margin-top:.45rem"><!--{loop $threadlist_data[$thread['tid']]['attachment'] $image}--><img src="{$image}" style="width:3.5rem;height:3.5rem;object-fit:cover;border-radius:.25rem"><!--{/loop}--></div><!--{/if}-->
+			</div>
+			<span slot="description">{$thread['author']} · {$thread['dateline']} · {$thread['views']} / {$thread['replies']}</span>
+			<mdui-icon slot="end-icon" name="chevron_right"></mdui-icon>
+		</mdui-list-item>
+		<!--{/loop}-->
+		</mdui-list>
+		<!--{else}--><div style="padding:2.5rem 1rem;text-align:center;opacity:.6">{lang forum_nothreads}</div><!--{/if}-->
+	</mdui-card>
+	<!--{if $multipage}--><div style="padding:1rem">{$multipage}</div><!--{/if}-->
+</div>

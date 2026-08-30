@@ -1,0 +1,88 @@
+<!--{template common/header}-->
+<!--{template home/spacecp_header}-->
+<!--{template home/spacecp_usergroup_header}-->
+<!--{hook/spacecp_usergroup_top}-->
+<!--{if in_array($do, array('buy', 'exit'))}-->
+<mdui-card variant="filled" style="display:block;padding:1rem">
+	<div style="font-size:1.25rem;margin-bottom:1rem"><!--{if $join}-->{lang memcp_usergroups_joinbuy}<!--{else}-->{lang memcp_usergroups_joinexit}<!--{/if}--></div>
+	<form id="buygroupform_{$groupid}" method="post" autocomplete="off" action="home.php?mod=spacecp&ac=usergroup&do=$do&groupid=$groupid"<!--{if !empty($_GET['inajax'])}--> onsubmit="ajaxpost('buygroupform_{$groupid}', 'return_$_GET['handlekey']', 'return_$_GET['handlekey']', 'onerror');return false;"<!--{/if}-->>
+		<input type="hidden" name="referer" value="{echo dreferer()}"><input type="hidden" name="buysubmit" value="true"><input type="hidden" name="gid" value="$_GET[gid]"><!--{if $_G[inajax]}--><input type="hidden" name="handlekey" value="$_GET[handlekey]"><!--{/if}--><input type="hidden" name="formhash" value="{FORMHASH}">
+		<!--{if $join && $group['dailyprice']}-->
+		<mdui-list><mdui-list-item>{lang memcp_usergroups_dailyprice}<span slot="end-icon">$group[dailyprice] {$_G[setting][extcredits][$_G[setting][creditstrans]][unit]}{$_G[setting][extcredits][$_G[setting][creditstrans]][title]}</span></mdui-list-item><mdui-list-item>{lang memcp_usergroups_credit}<span slot="end-icon">$usermaxdays {lang days}</span></mdui-list-item></mdui-list>
+		<mdui-text-field name="days" type="number" value="$group[minspan]" label="{lang memcp_usergroups_span}" required></mdui-text-field>
+		<!--{elseif $join}--><mdui-card variant="outlined" style="display:block;padding:1rem">{lang memcp_usergroups_explain}: {lang memcp_usergroups_free_comment}</mdui-card><!--{/if}-->
+		<!--{if $join && $group['dailyprice']}--><mdui-card variant="outlined" style="display:block;padding:1rem;margin-top:1rem">{lang memcp_usergroups_explain}: {lang memcp_usergroups_join_comment}</mdui-card><!--{/if}-->
+		<!--{if !$join}--><mdui-card variant="outlined" style="display:block;padding:1rem">{lang memcp_usergroups_explain}: <!--{if $group[type] != 'special' || $group[system]=='private'}-->{lang memcp_usergroups_admin_exit_comment}<!--{elseif $group['dailyprice']}-->{lang memcp_usergroups_exit_comment}<!--{else}-->{lang memcp_usergroups_open_exit_comment}<!--{/if}--></mdui-card><!--{/if}-->
+		<mdui-button type="submit" name="editsubmit_btn" value="true" variant="filled" full-width>{lang submit}</mdui-button>
+	</form>
+</mdui-card>
+<!--{elseif $do == 'switch'}-->
+<mdui-card variant="filled" style="display:block;padding:1rem"><div style="font-size:1.25rem;margin-bottom:1rem">{lang memcp_usergroups_switch}</div><form id="switchgroupform_{$groupid}" method="post" autocomplete="off" action="home.php?mod=spacecp&ac=usergroup&do=switch&groupid=$groupid"><input type="hidden" name="referer" value="{echo dreferer()}"><input type="hidden" name="groupsubmit" value="true"><input type="hidden" name="gid" value="$_GET[gid]"><input type="hidden" name="formhash" value="{FORMHASH}"><mdui-list><mdui-list-item>{lang memcp_usergroups_main_old}<span slot="end-icon">$_G[group][grouptitle]</span></mdui-list-item><mdui-list-item>{lang memcp_usergroups_main_new}<span slot="end-icon">$group[grouptitle]</span></mdui-list-item></mdui-list><mdui-button type="submit" name="editsubmit_btn" value="true" variant="filled" full-width>{lang submit}</mdui-button></form></mdui-card>
+<!--{elseif $do == 'forum'}-->
+<mdui-card variant="filled" style="display:block;padding:1rem;overflow:auto">
+	<table class="mdui-credit-rules">
+		<thead>
+			<tr>
+				<th>{lang forum_name}</th>
+				<!--{loop $perms $perm}-->
+					<th>$permlang['perms_'.$perm]</th>
+				<!--{/loop}-->
+			</tr>
+		</thead>
+		<tbody>
+			<!--{loop $_G['cache']['forums'] $fid $forum}-->
+				<!--{if $forum['status']}-->
+				<tr>
+					<td><a href="forum.php?mod=forumdisplay&fid=$forum[fid]">$forum[name]</a></td>
+					<!--{loop $perms $perm}-->
+						<td>
+							<!--{if !empty($verifyperm[$fid][$perm])}-->$verifyperm[$fid][$perm]<!--{/if}-->
+							<!--{if $myverifyperm[$fid][$perm] || $forumperm[$fid][$perm]}-->✓<!--{else}-->×<!--{/if}-->
+						</td>
+					<!--{/loop}-->
+				</tr>
+				<!--{/if}-->
+			<!--{/loop}-->
+		</tbody>
+	</table>
+</mdui-card>
+<!--{elseif $do == 'expiry' || $do == 'list'}-->
+<mdui-card variant="filled" style="display:block;padding:1rem;overflow:auto"><p>{lang yourusergroup}: $_G['cache']['usergroups'][$_G[groupid]]['grouptitle']<span style="float:right">{lang youhave} <b>$usermoney</b> {$_G[setting][extcredits][$_G[setting][creditstrans]][title]}</span></p><!--{if $do == 'expiry'}--><mdui-card variant="outlined" style="display:block;padding:1rem">{lang usergroup_expired}</mdui-card><!--{/if}--><!--{if $expirylist}--><table class="mdui-credit-rules"><thead><tr><th>{lang usergroup}</th><th>{lang memcp_usergroups_dailyprice}</th><th>{lang memcp_usergroups_credit}</th><th>{lang group_expiry_time}</th><th></th></tr></thead><tbody><!--{loop $expirylist $groupid $group}--><tr><td>$group[grouptitle]</td><td><!--{if $_G['cache']['usergroups'][$groupid]['pubtype'] == 'buy' && $group[dailyprice]}-->$group[dailyprice]<!--{elseif $_G['cache']['usergroups'][$groupid]['pubtype'] == 'free'}-->{lang free}<!--{/if}--></td><td><!--{if $group[usermaxdays]}-->$group[usermaxdays] {lang days}<!--{/if}--></td><td>$group[time]</td><td><!--{if (is_array($extgroupids) && in_array($groupid, $extgroupids)) || $groupid == $_G['groupid']}--><!--{if $groupid != $_G['groupid']}--><!--{if !$group[noswitch]}--><a href="home.php?mod=spacecp&ac=usergroup&do=switch&groupid=$groupid&handlekey=switchgrouphk">{lang memcp_usergroups_set_main}</a><!--{/if}--><!--{if !$group['maingroup']}--><!--{if $_G['cache']['usergroups'][$groupid]['pubtype'] == 'buy'}--><a href="home.php?mod=spacecp&ac=usergroup&do=buy&groupid=$groupid&handlekey=buygrouphk">{lang renew}</a><!--{/if}--><a href="home.php?mod=spacecp&ac=usergroup&do=exit&groupid=$groupid&handlekey=exitgrouphk">{lang memcp_usergroups_exit}</a><!--{/if}--><!--{else}--><!--{if $_G['cache']['usergroups'][$groupid]['pubtype'] == 'buy'}--><a href="home.php?mod=spacecp&ac=usergroup&do=buy&groupid=$groupid&handlekey=buygrouphk">{lang renew}</a><!--{/if}-->{lang main_usergroup}<!--{/if}--><!--{elseif $_G['cache']['usergroups'][$groupid]['pubtype'] == 'free'}--><mdui-button href="home.php?mod=spacecp&ac=usergroup&do=buy&groupid=$groupid&handlekey=buygrouphk" variant="text" size="small">{lang free_buy}</mdui-button><!--{elseif $_G['cache']['usergroups'][$groupid]['pubtype'] == 'buy'}--><mdui-button href="home.php?mod=spacecp&ac=usergroup&do=buy&groupid=$groupid&handlekey=buygrouphk" variant="text" size="small">{lang memcp_usergroups_buy}</mdui-button><!--{/if}--></td></tr><!--{/loop}--></tbody></table><!--{else}--><p>{lang memcp_usergroup_unallow}</p><!--{/if}--></mdui-card>
+<!--{else}-->
+<!--{eval $mdui_compare = $group ? $group : $maingroup;}-->
+<mdui-card variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">
+	<mdui-select label="选择要对比的用户组" value="$mdui_compare[groupid]" style="width:100%">
+		<!--{loop $_G['cache']['usergroups'] $mdui_gid $mdui_option}-->
+			<mdui-menu-item value="$mdui_gid" data-href="home.php?mod=spacecp&ac=usergroup&gid=$mdui_gid">$mdui_option[grouptitle]</mdui-menu-item>
+		<!--{/loop}-->
+	</mdui-select>
+</mdui-card>
+<mdui-card variant="filled" style="display:block;padding:1rem;overflow:auto">
+	<p>{lang credits}: $space[credits]</p>
+	<table class="mdui-credit-rules">
+		<thead><tr><th>{lang user_level}</th><th>$maingroup[grouptitle]</th><th>$mdui_compare[grouptitle]</th></tr></thead>
+		<tbody>
+			<tr><th>{lang permission_menu_normaloptions}</th><td>$maingroup[creditshigher] / $maingroup[readaccess] / $maingroup[maxpmnum]</td><td>$mdui_compare[creditshigher] / $mdui_compare[readaccess] / $mdui_compare[maxpmnum]</td></tr>
+			<!--{loop $bperms $key $perm}-->
+			<tr><th>$permlang['perms_'.$perm]</th><td><!--{if $perm == 'allowsearch'}--><!--{if $maingroup['allowsearch'] == '0'}-->{lang permission_basic_disable_sarch}<!--{elseif $maingroup['allowsearch'] == '1'}-->{lang permission_basic_search_title}<!--{else}-->{lang permission_basic_search_content}<!--{/if}--><!--{elseif $maingroup[$perm] >= 1}-->✓<!--{else}-->×<!--{/if}--></td><td><!--{if $perm == 'allowsearch'}--><!--{if $mdui_compare['allowsearch'] == '0'}-->{lang permission_basic_disable_sarch}<!--{elseif $mdui_compare['allowsearch'] == '1'}-->{lang permission_basic_search_title}<!--{else}-->{lang permission_basic_search_content}<!--{/if}--><!--{elseif $mdui_compare[$perm] >= 1}-->✓<!--{else}-->×<!--{/if}--></td></tr>
+			<!--{/loop}-->
+			<tr><th colspan="3">{lang permission_menu_post}</th></tr>
+			<!--{loop $pperms $key $perm}-->
+			<tr><th>$permlang['perms_'.$perm]</th><td><!--{if in_array($perm, array('maxsigsize', 'maxbiosize'))}-->$maingroup[$perm] {lang bytes}<!--{elseif $perm == 'allowrecommend'}--><!--{if $maingroup[allowrecommend] > 0}-->+$maingroup[allowrecommend]<!--{else}-->×<!--{/if}--><!--{elseif in_array($perm, array('allowat', 'allowcreatecollection'))}--><!--{echo intval($maingroup[$perm])}--><!--{elseif $maingroup[$perm] == 1 || (in_array($perm, array('raterange', 'allowcommentpost')) && !empty($maingroup[$perm]))}-->✓<!--{else}-->×<!--{/if}--></td><td><!--{if in_array($perm, array('maxsigsize', 'maxbiosize'))}-->$mdui_compare[$perm] {lang bytes}<!--{elseif $perm == 'allowrecommend'}--><!--{if $mdui_compare[allowrecommend] > 0}-->+$mdui_compare[allowrecommend]<!--{else}-->×<!--{/if}--><!--{elseif in_array($perm, array('allowat', 'allowcreatecollection'))}--><!--{echo intval($mdui_compare[$perm])}--><!--{elseif $mdui_compare[$perm] == 1 || (in_array($perm, array('raterange', 'allowcommentpost')) && !empty($mdui_compare[$perm]))}-->✓<!--{else}-->×<!--{/if}--></td></tr>
+			<!--{/loop}-->
+			<tr><th colspan="3">{lang about_space}</th></tr>
+			<!--{loop $sperms $key $perm}-->
+			<tr><th>$permlang['perms_'.$perm]</th><td><!--{if in_array($perm, array('maxspacesize', 'maximagesize'))}--><!--{if $maingroup[$perm]}-->$maingroup[$perm]<!--{else}-->{lang permission_attachment_nopermission}<!--{/if}--><!--{else}--><!--{if $maingroup[$perm] == 1}-->✓<!--{else}-->×<!--{/if}--><!--{/if}--></td><td><!--{if in_array($perm, array('maxspacesize', 'maximagesize'))}--><!--{if $mdui_compare[$perm]}-->$mdui_compare[$perm]<!--{else}-->{lang permission_attachment_nopermission}<!--{/if}--><!--{else}--><!--{if $mdui_compare[$perm] == 1}-->✓<!--{else}-->×<!--{/if}--><!--{/if}--></td></tr>
+			<!--{/loop}-->
+			<tr><th colspan="3">{lang permission_menu_attachment}</th></tr>
+			<!--{loop $aperms $key $perm}-->
+			<tr><th>$permlang['perms_'.$perm]</th><td><!--{if in_array($perm, array('maxattachsize', 'maxsizeperday', 'maxattachnum'))}--><!--{if $maingroup[$perm]}-->$maingroup[$perm]<!--{else}-->{lang permission_attachment_nopermission}<!--{/if}--><!--{elseif $perm == 'attachextensions'}--><!--{if $maingroup[allowpostattach] == 1}--><!--{if $maingroup[attachextensions]}-->$maingroup[attachextensions]<!--{else}-->{lang permission_attachment_nopermission}<!--{/if}--><!--{else}-->×<!--{/if}--><!--{elseif $maingroup[$perm] == 1}-->✓<!--{else}-->×<!--{/if}--></td><td><!--{if in_array($perm, array('maxattachsize', 'maxsizeperday', 'maxattachnum'))}--><!--{if $mdui_compare[$perm]}-->$mdui_compare[$perm]<!--{else}-->{lang permission_attachment_nopermission}<!--{/if}--><!--{elseif $perm == 'attachextensions'}--><!--{if $mdui_compare[allowpostattach] == 1}--><!--{if $mdui_compare[attachextensions]}-->$mdui_compare[attachextensions]<!--{else}-->{lang permission_attachment_nopermission}<!--{/if}--><!--{else}-->×<!--{/if}--><!--{elseif $mdui_compare[$perm] == 1}-->✓<!--{else}-->×<!--{/if}--></td></tr>
+			<!--{/loop}-->
+		</tbody>
+	</table>
+</mdui-card>
+<mdui-card variant="outlined" style="display:block;padding:1rem">{lang usergroup_right_message1}：✓　{lang usergroup_right_message2}：×</mdui-card>
+<!--{/if}-->
+<!--{hook/spacecp_usergroup_bottom}-->
+</div>
+<!--{template common/footer}-->

@@ -1,0 +1,95 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+<!--{subtemplate home/spacecp_credit_header}-->
+<!--{hook/spacecp_credit_top}-->
+
+<!--{if $_GET['op'] == 'exchange'}-->
+	<!--{if $_G['setting']['exchangestatus'] && ($_G['setting']['extcredits'] || $_CACHE['creditsettings'])}-->
+	<mdui-card variant="filled" class="mdui-credit-exchange-card">
+		<div class="mdui-credit-exchange-title">{lang exchange_credits}</div>
+		<form id="exchangeform" method="post" action="home.php?mod=spacecp&ac=credit&op=exchange">
+			<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="operation" value="exchange"><input type="hidden" name="exchangesubmit" value="true"><input type="hidden" name="outi" value="">
+			<mdui-text-field id="exchangeamount" name="exchangeamount" type="number" value="0" label="{lang memcp_credits_exchange}" required></mdui-text-field>
+			<label class="mdui-credit-field-label">兑换为</label>
+			<select id="tocredits" name="tocredits" class="mdui-credit-select">
+			<!--{loop $_G['setting']['extcredits'] $id $ecredits}-->
+			<!--{if $ecredits['allowexchangein'] && $ecredits['ratio']}--><option value="$id" unit="$ecredits['unit']" title="$ecredits['title']" ratio="$ecredits['ratio']">$ecredits['title']</option><!--{/if}-->
+			<!--{/loop}-->
+			</select>
+			<label class="mdui-credit-field-label">{lang credits_need}</label>
+			<select id="fromcredits_0" name="fromcredits" class="mdui-credit-select">
+			<!--{loop $_G['setting']['extcredits'] $id $credit}-->
+			<!--{if $credit['allowexchangeout'] && $credit['ratio']}--><option value="$id" unit="$credit['unit']" title="$credit['title']" ratio="$credit['ratio']">$credit['title']</option><!--{/if}-->
+			<!--{/loop}-->
+			</select>
+			<mdui-text-field id="exchangedesamount" label="预计扣除" disabled></mdui-text-field>
+			<mdui-text-field name="password" type="password" label="{lang transfer_login_password}" required></mdui-text-field>
+			<div class="mdui-credit-exchange-hint">{lang memcp_credits_exchange_min_balance} $_G['setting']['exchangemincredits']<span id="taxpercent"><!--{if intval($taxpercent) > 0}--> · {lang credits_tax} $taxpercent<!--{/if}--></span></div>
+			<mdui-button type="submit" variant="filled" full-width>{lang memcp_credits_exchange}</mdui-button>
+		</form>
+	</mdui-card>
+	<script>
+	(function(){var amount=document.getElementById('exchangeamount'),to=document.getElementById('tocredits'),from=document.getElementById('fromcredits_0'),result=document.getElementById('exchangedesamount');function calc(){var a=parseInt(amount.value,10)||0,t=to.options[to.selectedIndex],f=from.options[from.selectedIndex];if(!t||!f||t.value===f.value||!a){result.value='';return}var n=parseFloat(t.getAttribute('ratio'))/parseFloat(f.getAttribute('ratio'))*a*(1+$_G['setting']['creditstax']);result.value=(parseFloat(t.getAttribute('ratio'))<parseFloat(f.getAttribute('ratio'))?Math.ceil(n):Math.floor(n))}amount.addEventListener('input',calc);to.addEventListener('change',calc);from.addEventListener('change',calc);calc();})();
+	</script>
+	<!--{else}--><mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">积分兑换暂未开启</mdui-card><!--{/if}-->
+<!--{elseif $_GET['op'] == 'rule'}-->
+	<!--{eval $_TPL['cycletype'] = array('0' => '{lang one_time}', '1' => '{lang everyday}', '2' => '{lang the_time}', '3' => '{lang interval_minutes}', '4' => '{lang open_cycle}');}-->
+	<mdui-card variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">{lang activity_award_message}</mdui-card>
+	<div style="overflow:auto">
+		<table class="mdui-credit-rules">
+			<thead>
+			<tr>
+				<th>{lang action_name}</th><th>{lang cycle_range}</th><th>{lang max_award_per_week}</th>
+				<!--{loop $_G['setting']['extcredits'] $key $credit}-->
+				<th>$credit['title']</th>
+				<!--{/loop}-->
+			</tr>
+			</thead>
+			<tbody>
+			<!--{loop $list $key $value}-->
+			<tr>
+				<td>$value['rulename']</td>
+				<td>$_TPL['cycletype'][$value['cycletype']]</td>
+				<td><!--{if $value['rewardnum']}-->$value['rewardnum']<!--{else}-->{lang unlimited_time}<!--{/if}--></td>
+				<!--{loop $_G['setting']['extcredits'] $key $credit}-->
+				<!--{eval $creditkey = 'extcredits'.$key;}-->
+				<td><!--{if $value[$creditkey] > 0}-->+<!--{/if}-->$value[$creditkey]</td>
+				<!--{/loop}-->
+			</tr>
+			<!--{/loop}-->
+			</tbody>
+		</table>
+	</div>
+<!--{else}-->
+	<mdui-card variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">
+		<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem">
+			<div><div style="font-size:.75rem;opacity:.7">{lang credits}</div><div style="font-size:1.5rem;font-weight:600">$_G['member']['credits']</div></div>
+			<!--{loop $_G['setting']['extcredits'] $id $credit}-->
+			<div>
+				<div style="font-size:.75rem;opacity:.7">$credit['title']</div>
+				<div style="font-size:1.25rem;font-weight:600"><!--{eval echo getuserprofile('extcredits'.$id);}-->$credit['unit']</div>
+			</div>
+			<!--{/loop}-->
+		</div>
+	</mdui-card>
+
+	<!--{if $loglist}-->
+<div style="display:flex;align-items:center;margin:1rem 0 .5rem"><span style="font-size:.875rem;opacity:.7">{lang memcp_credits_log}</span><div style="flex:1"></div><mdui-button variant="text" data-href="home.php?mod=spacecp&ac=credit&op=log">{lang viewmore}</mdui-button></div>
+<mdui-list style="padding:0">
+	<!--{loop $loglist $value}-->
+	<!--{eval $value = makecreditlog($value, $otherinfo);}-->
+	<mdui-list-item rounded>
+		<!--{if $value['operation']}-->$value['optype']<!--{else}-->$value['title']<!--{/if}-->
+		<span slot="description"><!--{if $value['operation']}-->$value['opinfo']<!--{else}-->$value['text']<!--{/if}--> · $value['dateline']</span>
+		<span slot="end-icon">$value['credit']</span>
+	</mdui-list-item>
+	<!--{/loop}-->
+</mdui-list>
+<!--{else}-->
+<mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">{lang memcp_credits_log_none}</mdui-card>
+	<!--{/if}-->
+<!--{/if}-->
+<!--{hook/spacecp_credit_bottom}-->
+</div>
+<!--{template common/footer}-->

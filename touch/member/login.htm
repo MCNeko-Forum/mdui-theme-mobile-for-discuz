@@ -1,0 +1,76 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+<!--{eval $loginhash = 'L'.random(4);}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{if !isset($_GET['viewlostpw'])}-->{lang login}<!--{else}-->{lang getpassword}<!--{/if}--></mdui-top-app-bar-title>
+</mdui-top-app-bar>
+<!--{hook/logging_top_mobile}-->
+
+<div style="padding:2rem 1.5rem;max-width:480px;margin:0 auto">
+<!--{if !isset($_GET['viewlostpw'])}-->
+	<form id="loginform" method="post" action="member.php?mod=logging&action=login&loginsubmit=yes&loginhash=$loginhash&mobile=2" onsubmit="{if $_G['setting']['pwdsafety']}pwmd5('password3_$loginhash');{/if}">
+		<input type="hidden" name="formhash" id="formhash" value="{FORMHASH}" />
+		<input type="hidden" name="referer" id="referer" value="<!--{if dreferer()}-->{echo dreferer()}<!--{else}-->forum.php?mobile=2<!--{/if}-->" />
+		<input type="hidden" name="fastloginfield" value="username">
+		<input type="hidden" name="cookietime" value="2592000">
+		<!--{if $auth}--><input type="hidden" name="auth" value="$auth" /><!--{/if}-->
+
+		<mdui-text-field name="username" label="{lang inputyourname}" icon="person" autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
+		<mdui-text-field name="password" type="password" label="{lang login_password}" icon="lock" toggle-password style="margin-bottom:1rem"></mdui-text-field>
+		<mdui-select id="questionid_{$loginhash}" name="questionid" value="0" label="{lang security_question}" style="margin-bottom:1rem">
+			<mdui-menu-item value="0">{lang security_question}</mdui-menu-item>
+			<mdui-menu-item value="1">{lang security_question_1}</mdui-menu-item>
+			<mdui-menu-item value="2">{lang security_question_2}</mdui-menu-item>
+			<mdui-menu-item value="3">{lang security_question_3}</mdui-menu-item>
+			<mdui-menu-item value="4">{lang security_question_4}</mdui-menu-item>
+			<mdui-menu-item value="5">{lang security_question_5}</mdui-menu-item>
+			<mdui-menu-item value="6">{lang security_question_6}</mdui-menu-item>
+			<mdui-menu-item value="7">{lang security_question_7}</mdui-menu-item>
+		</mdui-select>
+		<mdui-text-field name="answer" id="answer_{$loginhash}" label="{lang security_a}" style="margin-bottom:1rem;display:none"></mdui-text-field>
+
+		<!--{if $seccodecheck || $secqaacheck}-->
+		<!--{block sectpl}--><div class="rfm"><sec><br /><sec>: <sec><br /><sec></div><!--{/block}-->
+		<div style="margin-bottom:1rem"><!--{subtemplate common/seccheck}--></div>
+	<!--{/if}-->
+
+		<mdui-button type="submit" name="loginsubmit" value="true" full-width>{lang login}</mdui-button>
+	</form>
+
+	<!--{if $_G['setting']['connect']['allow'] && !$_G['setting']['bbclosed']}-->
+		<mdui-button variant="outlined" full-width href="$_G['connect']['login_url']&statfrom=login_simple" style="margin-top:.75rem">{lang qqconnect:connect_mobile_login}</mdui-button>
+	<!--{/if}-->
+	<!--{if $_G['setting']['regstatus']}-->
+	<div style="display:flex;justify-content:space-between;margin-top:1.5rem">
+		<mdui-button variant="text" href="member.php?mod=logging&action=login&lostpasswd=yes&viewlostpw=1">{lang getpassword}</mdui-button>
+		<mdui-button variant="text" href="member.php?mod={$_G['setting']['regname']}">{lang noregister}</mdui-button>
+	</div>
+	<!--{/if}-->
+
+	<script>
+	(function () {
+		var sel = document.querySelector('#questionid_{$loginhash}');
+		var ans = document.querySelector('#answer_{$loginhash}');
+		sel && sel.addEventListener('change', function () {
+			ans.style.display = this.value == 0 ? 'none' : 'block';
+		});
+	})();
+	</script>
+<!--{else}-->
+	<form id="lostpwform" method="post" action="member.php?mod=lostpasswd&lostpwsubmit=yes&infloat=yes&mobile=2" autocomplete="off">
+		<input type="hidden" name="formhash" value="{FORMHASH}" />
+		<input type="hidden" name="handlekey" value="lostpwform" />
+		<mdui-text-field name="email" label="{lang email}" icon="mail" style="margin-bottom:1rem"></mdui-text-field>
+		<mdui-text-field name="username" label="{lang inputyourname}" icon="person" autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
+		<mdui-button type="submit" name="lostpwsubmit" value="true" full-width>{lang submit}</mdui-button>
+	</form>
+<!--{/if}-->
+	<!--{hook/logging_bottom_mobile}-->
+</div>
+
+<!--{if $_G['setting']['pwdsafety']}-->
+	<script src="{$_G['setting']['jspath']}md5.js?{VERHASH}" reload="1"></script>
+<!--{/if}-->
+<!--{template common/footer}-->

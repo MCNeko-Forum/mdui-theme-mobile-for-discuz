@@ -1,0 +1,10 @@
+<!--{template common/header}-->
+<mdui-top-app-bar><mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon><mdui-top-app-bar-title>{lang ranklist_forum}</mdui-top-app-bar-title></mdui-top-app-bar>
+<!--{subtemplate ranklist/side_top}-->
+<div class="mdui-rank-page">
+	<div class="mdui-rank-tabs"><mdui-tabs value="$_GET['view']"><mdui-tab value="threads" data-href="misc.php?mod=ranklist&type=forum&view=threads">{lang ranklist_post}</mdui-tab><mdui-tab value="posts" data-href="misc.php?mod=ranklist&type=forum&view=posts">{lang ranklist_reply}</mdui-tab><mdui-tab value="today" data-href="misc.php?mod=ranklist&type=forum&view=today">{lang ranklist_post_day}</mdui-tab></mdui-tabs></div>
+	<!--{if $forumsrank}--><div class="mdui-rank-list">
+	<!--{loop $forumsrank $forum}--><mdui-card variant="filled"><a class="mdui-rank-item" href="forum.php?mod=forumdisplay&fid=$forum['fid']"><span class="mdui-rank-no<!--{if $forum['rank'] <= 3}--> mdui-rank-no-top<!--{/if}-->">$forum['rank']</span><mdui-icon name="forum"></mdui-icon><div class="mdui-rank-body"><div class="mdui-rank-title">$forum['name']</div><div class="mdui-rank-meta">$forum['posts']</div></div></a></mdui-card><!--{/loop}-->
+	</div><!--{else}--><div class="mdui-rank-empty">{lang none_data}</div><!--{/if}-->
+</div>
+<!--{template common/footer}-->

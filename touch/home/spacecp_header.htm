@@ -1,0 +1,12 @@
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{template home/spacecp_header_name}--></mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<mdui-button-icon icon="home" onclick="location.href='portal.php?mod=index'"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<mdui-tabs value="{if $actives['avatar']}avatar{elseif $actives['profile']}profile{elseif $actives['verify']}verify{elseif $actives['credit']}credit{elseif $actives['payment']}payment{elseif $actives['usergroup']}usergroup{elseif $actives['privacy']}privacy{elseif $actives['sendmail']}sendmail{elseif $actives['password']}password{elseif $actives['promotion']}promotion{else}none{/if}" style="position:sticky;top:64px;z-index:9">
+	<!--{template home/spacecp_footer}-->
+</mdui-tabs>
+
+<div style="padding:1rem">

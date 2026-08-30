@@ -1,0 +1,27 @@
+<!--{template common/header}-->
+<!--{if $op != ''}-->
+	<mdui-top-app-bar>
+		<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+		<mdui-top-app-bar-title>{lang send_pm}</mdui-top-app-bar-title>
+	</mdui-top-app-bar>
+	<div style="padding:1rem"><mdui-card variant="filled" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">{lang user_mobile_pm_error}</mdui-card></div>
+<!--{else}-->
+	<mdui-top-app-bar>
+		<mdui-button-icon icon="arrow_back" data-href="home.php?mod=space&do=pm"></mdui-button-icon>
+		<mdui-top-app-bar-title>{lang send_pm}</mdui-top-app-bar-title>
+	</mdui-top-app-bar>
+	<form id="pmform_{$pmid}" name="pmform_{$pmid}" method="post" autocomplete="off" action="home.php?mod=spacecp&ac=pm&op=send&touid=$touid&pmid=$pmid&mobile=2">
+		<div style="padding:1rem 1rem 5.5rem">
+			<mdui-card variant="outlined" style="display:grid;gap:1rem;padding:1rem">
+				<!--{if !$touid}--><mdui-text-field id="username" name="username" autocomplete="off" label="{lang addressee}"></mdui-text-field><!--{/if}-->
+				<mdui-text-field id="sendmessage" name="message" autocomplete="off" textarea rows="8" label="{lang thread_content}"></mdui-text-field>
+				<!--{if $secqaacheck || $seccodecheck}--><div><!--{subtemplate common/seccheck}--></div><!--{/if}-->
+				<input type="hidden" name="referer" value="{echo dreferer();}" />
+				<input type="hidden" name="pmsubmit" value="true" />
+				<input type="hidden" name="formhash" value="{FORMHASH}" />
+				<mdui-button id="pmsubmit_btn" type="submit" full-width>{lang sendpm}</mdui-button>
+			</mdui-card>
+		</div>
+	</form>
+<!--{/if}-->
+<!--{template common/footer}-->

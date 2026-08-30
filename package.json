@@ -1,0 +1,15 @@
+{
+  "name": "discuz-template-mdui",
+  "version": "1.0.0",
+  "description": "Discuz! X3.5 MDUI 风格手机版主题",
+  "private": false,
+  "scripts": {
+    "postinstall": "node sync-assets.js",
+    "sync": "node sync-assets.js",
+    "check": "node check.js"
+  },
+  "dependencies": {
+    "material-icons": "^1.13.14",
+    "mdui": "^2.1.5"
+  }
+}

@@ -1,0 +1,44 @@
+<!--{if $thread['freemessage']}-->
+	<div id="postmessage_$pid" class="mdui-prose">$thread['freemessage']</div>
+<!--{/if}-->
+
+<mdui-card variant="filled" style="display:block;margin:.75rem 0;padding:1rem">
+	<div style="display:flex;gap:.75rem;align-items:flex-start">
+		<mdui-icon name="lock" style="font-size:1.5rem;color:rgb(var(--mdui-color-primary))"></mdui-icon>
+		<div style="min-width:0;flex:1">
+			<div style="font-weight:600">{lang pay_threads}</div>
+			<div style="margin-top:.375rem;font-size:.875rem;opacity:.75">{lang pay_comment}</div>
+			<!--{if $thread['payers']}--><div style="margin-top:.375rem;font-size:.8125rem;opacity:.65">{lang have} $thread['payers'] {lang people_buy}</div><!--{/if}-->
+			<!--{if $thread['endtime']}--><div style="margin-top:.25rem;font-size:.8125rem;opacity:.65">{lang pay_free_time}</div><!--{/if}-->
+		</div>
+	</div>
+	<mdui-button id="mdui_thread_pay_open" variant="filled" full-width style="margin-top:1rem">{lang pay}</mdui-button>
+</mdui-card>
+
+<mdui-dialog id="mdui_thread_pay" close-on-esc close-on-overlay-click headline="{lang pay}">
+	<form id="mdui_thread_pay_form" method="post" action="forum.php?mod=misc&action=pay&paysubmit=yes&infloat=yes{if !empty($_GET['from'])}&from=$_GET['from']{/if}">
+		<div slot="description" style="display:grid;gap:.75rem">
+			<div style="display:flex;justify-content:space-between;gap:1rem"><span>{lang author}</span><span>$thread['author']</span></div>
+			<div style="display:flex;justify-content:space-between;gap:1rem"><span>{lang price}</span><strong>$thread['price'] {$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['unit']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['title']}</strong></div>
+			<div style="display:flex;justify-content:space-between;gap:1rem"><span>{lang pay_author_income}</span><span>$thread['netprice'] {$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['unit']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['title']}</span></div>
+			<div style="display:flex;justify-content:space-between;gap:1rem"><span>{lang pay_balance}</span><span>$balance {$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['unit']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['title']}</span></div>
+		</div>
+		<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="referer" value="{echo dreferer()}"><input type="hidden" name="tid" value="$_G['tid']"><input type="hidden" name="paysubmit" value="true">
+		<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_thread_pay').open=false">{lang cancel}</mdui-button>
+		<mdui-button slot="action" type="submit" variant="tonal">{lang submit}</mdui-button>
+	</form>
+</mdui-dialog>
+<script>
+(function () {
+	var dialog = document.getElementById('mdui_thread_pay');
+	document.getElementById('mdui_thread_pay_open').addEventListener('click', function () { dialog.open = true; });
+	document.getElementById('mdui_thread_pay_form').addEventListener('submit', function (event) {
+		event.preventDefault();
+		var form = this;
+		mduiPost(form.action, Object.fromEntries(new FormData(form)), function () {
+			dialog.open = false;
+			setTimeout(function () { location.reload(); }, 1000);
+		});
+	});
+})();
+</script>

@@ -1,0 +1,11 @@
+<!--{template common/header}-->
+<mdui-dialog open close-on-esc close-on-overlay-click>
+	<div slot="headline">$medal['name']</div>
+	<form method="post" action="home.php?mod=medal&action=apply&medalsubmit=yes">
+		<div slot="description"><div style="display:flex;gap:1rem;align-items:center"><mdui-avatar src="$medal['image']"></mdui-avatar><div>$medal['description']</div></div><div style="margin-top:1rem"><!--{if $medal['expiration']}-->{lang expire} $medal['expiration'] {lang days}<br><!--{/if}--><!--{if $medal['permission']}-->$medal['permission']<br><!--{/if}--><!--{if $medal['price']}-->{$_G['setting']['extcredits'][$medal['credit']]['title']}：$medal['price'] {$_G['setting']['extcredits'][$medal['credit']]['unit']}<!--{/if}--></div></div>
+		<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="medalid" value="$medal['medalid']"><input type="hidden" name="operation" value="">
+		<mdui-button slot="action" type="button" variant="text" onclick="history.back()">{lang cancel}</mdui-button>
+		<mdui-button slot="action" type="submit" variant="text" name="medalsubmit" value="true"><!--{if $medal['price']}-->{lang space_medal_buy}<!--{else}-->{lang medals_apply}<!--{/if}--></mdui-button>
+	</form>
+</mdui-dialog>
+<!--{template common/footer}-->

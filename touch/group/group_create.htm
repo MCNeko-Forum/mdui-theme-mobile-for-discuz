@@ -1,0 +1,63 @@
+<mdui-card variant="filled" style="display:block;margin:.75rem;padding:1rem 0 0">
+	<form method="post" autocomplete="off" action="forum.php?mod=group&action=create">
+		<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="referer" value="{echo dreferer()}"><input type="hidden" name="handlekey" value="creategroup">
+		<mdui-text-field name="name" label="{lang group_name}" required></mdui-text-field>
+		<mdui-select id="mdui_group_parent" name="parentid" label="{lang group_category}" value="0" required></mdui-select>
+		<div id="mdui_group_parent_options" hidden>{$groupselect[first]}</div>
+		<div id="mdui_secondgroup" style="display:none"></div>
+		<mdui-text-field name="descriptionnew" label="{lang group_description}" rows="4"></mdui-text-field>
+		<div style="padding:.75rem 1rem 0;font-size:.875rem;font-weight:600;opacity:.75">{lang group_perm_visit}</div>
+		<mdui-radio-group name="gviewperm" value="1" style="padding:0 .75rem"><mdui-radio value="1">{lang group_perm_all_user}</mdui-radio><mdui-radio value="0">{lang group_perm_member_only}</mdui-radio></mdui-radio-group>
+		<div style="padding:.75rem 1rem 0;font-size:.875rem;font-weight:600;opacity:.75">{lang group_join_type}</div>
+		<mdui-radio-group name="jointype" value="0" style="padding:0 .75rem"><mdui-radio value="0">{lang group_join_type_free}</mdui-radio><mdui-radio value="2">{lang group_join_type_moderate}</mdui-radio><mdui-radio value="1">{lang group_join_type_invite}</mdui-radio></mdui-radio-group>
+		<div style="padding:1rem"><mdui-button type="submit" full-width>{lang create}</mdui-button></div>
+		<input type="hidden" name="createsubmit" value="true">
+	</form>
+</mdui-card>
+<script>
+function mduiGroupOptions(root) {
+	if (!root) return;
+	root.querySelectorAll('option').forEach(function (option) {
+		var item = document.createElement('mdui-menu-item');
+		item.value = option.value;
+		item.textContent = option.textContent;
+		if (option.selected) item.setAttribute('selected', '');
+		option.replaceWith(item);
+	});
+}
+function mduiGroupAjaxHtml(text) {
+	var xml = new DOMParser().parseFromString(text, 'text/xml');
+	return xml.documentElement && xml.documentElement.nodeName === 'root' ? xml.documentElement.textContent : text;
+}
+function mduiGroupSelect(id) {
+	var wrapper = document.getElementById('mdui_secondgroup');
+	wrapper.innerHTML = '';
+	wrapper.style.display = 'none';
+	if (!id || id === '0') return;
+	fetch('forum.php?mod=ajax&action=secondgroup&fupid=' + id + '&inajax=1').then(function (r) { return r.text(); }).then(function (text) {
+		wrapper.innerHTML = mduiGroupAjaxHtml(text);
+		var select = wrapper.querySelector('select[name="fup"]');
+		if (select) {
+			var field = document.createElement('mdui-select');
+			field.name = 'fup';
+			field.label = '{lang group_category}';
+			field.innerHTML = select.innerHTML;
+			select.replaceWith(field);
+			mduiGroupOptions(field);
+			wrapper.style.display = 'block';
+		} else {
+			wrapper.innerHTML = '';
+		}
+	});
+}
+var mduiGroupParent = document.getElementById('mdui_group_parent');
+var mduiGroupParentOptions = document.getElementById('mdui_group_parent_options');
+mduiGroupParent.innerHTML = '<mdui-menu-item value="0" selected>{lang choose_please}</mdui-menu-item>' + mduiGroupParentOptions.innerHTML;
+mduiGroupOptions(mduiGroupParent);
+customElements.whenDefined('mdui-select').then(function () {
+	mduiGroupParent.value = '0';
+});
+mduiGroupParent.addEventListener('change', function () {
+	mduiGroupSelect(this.value);
+});
+</script>

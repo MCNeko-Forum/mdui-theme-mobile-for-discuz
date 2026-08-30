@@ -1,0 +1,97 @@
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+<div class="mdui-spacecp-page">
+	<!--{hook/spacecp_privacy_top}-->
+	<mdui-tabs value="$operation" style="margin-bottom:1rem;overflow:auto">
+		<mdui-tab value="base" data-href="home.php?mod=spacecp&ac=privacy&op=base">{lang personal_privacy_settings}</mdui-tab>
+		<!--{if helper_access::check_module('feed')}-->
+		<mdui-tab value="feed" data-href="home.php?mod=spacecp&ac=privacy&op=feed">{lang personal_feed_settings}</mdui-tab>
+		<mdui-tab value="filter" data-href="home.php?mod=spacecp&ac=privacy&op=filter">{lang feed_filter}</mdui-tab>
+		<!--{/if}-->
+		<!--{if helper_access::check_module('friend') || helper_access::check_module('follow')}-->
+		<mdui-tab value="other" data-href="home.php?mod=spacecp&ac=privacy&op=other">{lang personal_other_settings}</mdui-tab>
+		<!--{/if}-->
+	</mdui-tabs>
+	<form method="post" autocomplete="off" action="home.php?mod=spacecp&ac=privacy&op=$operation">
+		<input type="hidden" name="formhash" value="{FORMHASH}" />
+	<!--{if $operation == 'base'}-->
+		<p style="opacity:.7">{lang you_control_see_content}</p>
+		<mdui-card variant="filled" style="display:block;padding:1rem">
+			<!--{if helper_access::check_module('friend')}-->
+			<mdui-select name="privacy[view][friend]" label="{lang friend_list}" style="width:100%;margin-bottom:1rem">
+				<mdui-menu-item value="0"$sels[view][friend][0]>{lang open_privacy}</mdui-menu-item><mdui-menu-item value="1"$sels[view][friend][1]>{lang friend_privacy}</mdui-menu-item><mdui-menu-item value="2"$sels[view][friend][2]>{lang secrecy}</mdui-menu-item><mdui-menu-item value="3"$sels[view][friend][3]>{lang privacy_register}</mdui-menu-item>
+			</mdui-select>
+			<!--{/if}-->
+			<!--{if helper_access::check_module('wall')}-->
+			<mdui-select name="privacy[view][wall]" label="{lang message_board}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$sels[view][wall][0]>{lang open_privacy}</mdui-menu-item><mdui-menu-item value="1"$sels[view][wall][1]>{lang friend_privacy}</mdui-menu-item><mdui-menu-item value="2"$sels[view][wall][2]>{lang secrecy}</mdui-menu-item><mdui-menu-item value="3"$sels[view][wall][3]>{lang privacy_register}</mdui-menu-item></mdui-select>
+			<!--{/if}-->
+			<!--{if helper_access::check_module('feed')}--><mdui-select name="privacy[view][home]" label="{lang personal_feed}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$sels[view][home][0]>{lang open_privacy}</mdui-menu-item><mdui-menu-item value="1"$sels[view][home][1]>{lang friend_privacy}</mdui-menu-item><mdui-menu-item value="3"$sels[view][home][3]>{lang privacy_register}</mdui-menu-item></mdui-select><!--{/if}-->
+			<!--{if helper_access::check_module('doing')}--><mdui-select name="privacy[view][doing]" label="{lang doing}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$sels[view][doing][0]>{lang open_privacy}</mdui-menu-item><mdui-menu-item value="1"$sels[view][doing][1]>{lang friend_privacy}</mdui-menu-item><mdui-menu-item value="3"$sels[view][doing][3]>{lang privacy_register}</mdui-menu-item></mdui-select><!--{/if}-->
+			<!--{if helper_access::check_module('blog')}--><mdui-select name="privacy[view][blog]" label="{lang blog}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$sels[view][blog][0]>{lang open_privacy}</mdui-menu-item><mdui-menu-item value="1"$sels[view][blog][1]>{lang friend_privacy}</mdui-menu-item><mdui-menu-item value="3"$sels[view][blog][3]>{lang privacy_register}</mdui-menu-item></mdui-select><!--{/if}-->
+			<!--{if helper_access::check_module('album')}--><mdui-select name="privacy[view][album]" label="{lang album}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$sels[view][album][0]>{lang open_privacy}</mdui-menu-item><mdui-menu-item value="1"$sels[view][album][1]>{lang friend_privacy}</mdui-menu-item><mdui-menu-item value="3"$sels[view][album][3]>{lang privacy_register}</mdui-menu-item></mdui-select><!--{/if}-->
+			<!--{if helper_access::check_module('share')}--><mdui-select name="privacy[view][share]" label="{lang share}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$sels[view][share][0]>{lang open_privacy}</mdui-menu-item><mdui-menu-item value="1"$sels[view][share][1]>{lang friend_privacy}</mdui-menu-item><mdui-menu-item value="3"$sels[view][share][3]>{lang privacy_register}</mdui-menu-item></mdui-select><!--{/if}-->
+			<!--{hook/spacecp_privacy_base_extra}-->
+			<mdui-button type="submit" name="privacysubmit" value="true" full-width>{lang save}</mdui-button>
+		</mdui-card>
+	<!--{elseif $operation == 'feed'}-->
+		<p style="opacity:.7">{lang system_depend_action_message}</p>
+		<mdui-card variant="filled" style="display:block;padding:1rem">
+			<mdui-checkbox name="privacy[feed][doing]" value="1"$sels[feed][doing] style="display:block;margin-bottom:.5rem">{lang doing}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][blog]" value="1"$sels[feed][blog] style="display:block;margin-bottom:.5rem">{lang write_blog}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][upload]" value="1"$sels[feed][upload] style="display:block;margin-bottom:.5rem">{lang upload_pic}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][share]" value="1"$sels[feed][share] style="display:block;margin-bottom:.5rem">{lang add_share}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][friend]" value="1"$sels[feed][friend] style="display:block;margin-bottom:.5rem">{lang friend_add}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][comment]" value="1"$sels[feed][comment] style="display:block;margin-bottom:.5rem">{lang publish_comment_reply}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][show]" value="1"$sels[feed][show] style="display:block;margin-bottom:.5rem">{lang bidding_rank}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][credit]" value="1"$sels[feed][credit] style="display:block;margin-bottom:.5rem">{lang credit_consumption}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][invite]" value="1"$sels[feed][invite] style="display:block;margin-bottom:.5rem">{lang invite_friend}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][task]" value="1"$sels[feed][task] style="display:block;margin-bottom:.5rem">{lang complete_task}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][profile]" value="1"$sels[feed][profile] style="display:block;margin-bottom:.5rem">{lang update_presonal_profile}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][click]" value="1"$sels[feed][click] style="display:block;margin-bottom:.5rem">{lang pic_blog_position}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][newthread]" value="1"$sels[feed][newthread] style="display:block;margin-bottom:.5rem">{lang forum_post}</mdui-checkbox>
+			<mdui-checkbox name="privacy[feed][newreply]" value="1"$sels[feed][newreply] style="display:block;margin-bottom:.5rem">{lang forum_reply}</mdui-checkbox>
+			<!--{hook/spacecp_privacy_feed_extra}-->
+			<mdui-button type="submit" name="privacysubmit" value="true" full-width>{lang save}</mdui-button>
+		</mdui-card>
+	<!--{elseif $operation == 'other'}-->
+		<p style="opacity:.7">{lang you_control_other_operation}</p>
+		<mdui-card variant="filled" style="display:block;padding:1rem">
+			<!--{if helper_access::check_module('friend')}--><mdui-select name="allowasfriend" label="{lang add_friends}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$arr['allowasfriend'][0]>{lang no}</mdui-menu-item><mdui-menu-item value="1"$arr['allowasfriend'][1]>{lang yes}</mdui-menu-item></mdui-select><!--{/if}-->
+			<!--{if helper_access::check_module('follow')}--><mdui-select name="allowasfollow" label="{lang add_follow}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$arr['allowasfollow'][0]>{lang no}</mdui-menu-item><mdui-menu-item value="1"$arr['allowasfollow'][1]>{lang yes}</mdui-menu-item></mdui-select><!--{/if}-->
+			<!--{hook/spacecp_privacy_other_extra}--><mdui-button type="submit" name="privacy3submit" value="true" full-width>{lang save}</mdui-button>
+		</mdui-card>
+	<!--{else}-->
+		<!--{eval $iconnames['wall'] = '{lang message}';$iconnames['piccomment'] = '{lang pic_comment}';$iconnames['blogcomment'] = '{lang blog_comment}';$iconnames['sharecomment'] = '{lang share_comment}';$iconnames['magic'] = '{lang magics_title}';$iconnames['sharenotice'] = '{lang share_notification}';$iconnames['clickblog'] = '{lang blog_position}';$iconnames['clickpic'] = '{lang pic_position}';$iconnames['credit'] = '{lang credits}';$iconnames['doing'] = '{lang doing}';$iconnames['pcomment'] = '{lang topic_comment}';$iconnames['post'] = '{lang topic_reply}';$iconnames['show'] = '{lang friend_top}';$iconnames['task'] = '{lang task}';$iconnames['goods'] = '{lang trade}';$iconnames['group'] = $_G['setting']['navs'][3]['navname'];$iconnames['thread'] = '{lang theme}';$iconnames['system'] = '{lang system}';$iconnames['friend'] = '{lang friends}';$iconnames['debate'] = '{lang debate}';$iconnames['album'] = '{lang album}';$iconnames['blog'] = '{lang blog}';$iconnames['poll'] = '{lang poll}';$iconnames['activity'] = '{lang activity}';$iconnames['reward'] = '{lang reward}';$iconnames['share'] = '{lang share}';$iconnames['profile'] = '{lang update_presonal_profile}';$iconnames['pusearticle'] = '{lang article_push}';}-->
+		<mdui-card variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">
+			<div style="font-size:1.05rem;margin-bottom:.375rem">{lang filtering_rules_title_1}</div>
+			<p style="opacity:.7">{lang filtering_rules_message_1}</p>
+			<!--{loop $groups $key $value}-->
+			<mdui-checkbox name="privacy[filter_gid][$key]" value="$key"{if isset($space['privacy']['filter_gid'][$key])} checked{/if} style="display:block;margin-bottom:.5rem">$value</mdui-checkbox>
+			<!--{/loop}-->
+			<mdui-button type="submit" name="privacy2submit" value="true" full-width>{lang save}</mdui-button>
+		</mdui-card>
+		<mdui-card variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">
+			<div style="font-size:1.05rem;margin-bottom:.375rem">{lang filtering_rules_title_2}</div>
+			<p style="opacity:.7">{lang filtering_rules_message_2}</p>
+			<!--{if $icons}-->
+				<!--{loop $icons $key $icon}--><!--{eval $uid = $uids[$key];$icon_uid="$icon|$uid";}-->
+				<mdui-checkbox name="privacy[filter_icon][$icon_uid]" value="1" checked style="display:block;margin-bottom:.5rem"><!--{if is_numeric($icon)}--><img src="{STATICURL}image/feed/{$icon}.gif" alt="" style="vertical-align:middle" /> <!--{/if}--><!--{if isset($iconnames[$icon])}-->$iconnames[$icon]<!--{else}-->$icon<!--{/if}--> (<!--{if $users[$uid]}--><a href="home.php?mod=space&uid=$uid">$users[$uid]</a><!--{else}-->{lang all_friends}<!--{/if}-->)</mdui-checkbox>
+				<!--{/loop}-->
+			<!--{else}--><p style="opacity:.7">{lang no_shield_feed_cat}</p><!--{/if}-->
+			<mdui-button type="submit" name="privacy2submit" value="true" full-width>{lang save}</mdui-button>
+		</mdui-card>
+		<mdui-card variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">
+			<div style="font-size:1.05rem;margin-bottom:.375rem">{lang filtering_rules_title_3}</div>
+			<p style="opacity:.7">{lang filtering_rules_message_3}</p>
+			<!--{if $types}-->
+				<!--{loop $types $key $type}--><!--{eval $uid = $uids[$key];$type_uid="$type|$uid";}-->
+				<mdui-checkbox name="privacy[filter_note][$type_uid]" value="1" checked style="display:block;margin-bottom:.5rem"><!--{if isset($iconnames[$type])}-->$iconnames[$type]<!--{else}-->$type<!--{/if}--> (<!--{if $users[$uid]}--><a href="home.php?mod=space&uid=$uid">$users[$uid]</a><!--{else}-->{lang all_friends}<!--{/if}-->)</mdui-checkbox>
+				<!--{/loop}-->
+			<!--{else}--><p style="opacity:.7">{lang no_shield_feed_cat}</p><!--{/if}-->
+			<mdui-button type="submit" name="privacy2submit" value="true" full-width>{lang save}</mdui-button>
+		</mdui-card>
+	<!--{/if}-->
+	</form>
+	<!--{hook/spacecp_privacy_bottom}-->
+</div>
+<!--{template common/footer}-->

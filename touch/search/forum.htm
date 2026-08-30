@@ -1,0 +1,8 @@
+<!--{template common/header}-->
+<mdui-top-app-bar><mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon><mdui-top-app-bar-title>{lang search}</mdui-top-app-bar-title></mdui-top-app-bar>
+<div style="padding:1rem 1rem 5.5rem">
+	<form method="post" autocomplete="off" action="search.php?mod=forum&mobile=2"><input type="hidden" name="formhash" value="{FORMHASH}"><!--{subtemplate search/pubsearch}--></form>
+	<!--{if $_G['setting']['srchhotkeywords']}--><mdui-card variant="outlined" style="margin-top:1rem;padding:1rem"><div style="margin-bottom:.5rem">{lang hot_search}</div><mdui-chip-set><!--{loop $_G['setting']['srchhotkeywords'] $val}--><!--{if $val = trim($val)}--><mdui-chip href="search.php?mod=forum&srchtxt={echo rawurlencode($val)}&formhash={FORMHASH}&searchsubmit=yes">$val</mdui-chip><!--{/if}--><!--{/loop}--></mdui-chip-set></mdui-card><!--{/if}-->
+	<!--{if !empty($searchid) && submitcheck('searchsubmit', 1)}--><mdui-list style="margin-top:1rem"><mdui-list-subheader>{lang search_result}</mdui-list-subheader><!--{if empty($threadlist)}--><mdui-list-item>{lang search_nomatch}</mdui-list-item><!--{else}--><!--{loop $threadlist $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid=$thread[realtid]&highlight=$index[keywords]" rounded>$thread[subject]<span slot="description">$thread[author] · $thread[dateline] · {lang replies} $thread[replies] · {lang views} $thread[views]</span></mdui-list-item><!--{/loop}--><!--{/if}--></mdui-list><!--{if $multipage}--><div style="margin-top:1rem">$multipage</div><!--{/if}--><!--{/if}-->
+</div>
+<!--{template common/footer}-->

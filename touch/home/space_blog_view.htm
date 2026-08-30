@@ -1,0 +1,75 @@
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang blog}</mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<!--{if $_G['uid'] == $blog['uid'] || checkperm('manageblog')}-->
+	<mdui-button-icon icon="edit" data-href="home.php?mod=spacecp&ac=blog&blogid=$blog['blogid']&op=edit"></mdui-button-icon>
+	<!--{/if}-->
+</mdui-top-app-bar>
+
+<div class="mdui-blog-view">
+	<div class="mdui-blog-headline">
+		<div class="mdui-blog-labels">
+			<!--{if $classarr['classname']}--><mdui-chip data-href="home.php?mod=space&uid=$blog['uid']&do=blog&classid=$blog['classid']&view=me">{$classarr['classname']}</mdui-chip><!--{/if}-->
+			<!--{if $blog['catname']}--><mdui-chip data-href="home.php?mod=space&do=blog&view=all&catid=$blog['catid']">{$blog['catname']}</mdui-chip><!--{/if}-->
+		</div>
+		<h1>$blog['subject']<!--{if $blog['status'] == 1}--> <mdui-badge>{lang pending}</mdui-badge><!--{/if}--></h1>
+	</div>
+	<mdui-card variant="filled" class="mdui-blog-post">
+		<div class="mdui-blog-author">
+			<mdui-avatar src="<!--{avatar($blog['uid'], 'small', true)}-->"></mdui-avatar>
+			<div style="flex:1;min-width:0"><a href="home.php?mod=space&uid=$blog['uid']">$space['username']</a><div><!--{date($blog['dateline'])}--></div></div>
+			<span class="mdui-blog-stats">{lang views} $blog['viewnum'] · {lang reply} $blog['replynum']</span>
+		</div>
+		<div class="mdui-prose mdui-blog-message">$blog[message]</div>
+	</mdui-card>
+
+	<div class="mdui-blog-actions">
+		<!--{if helper_access::check_module('favorite')}--><mdui-button variant="text" icon="star" data-href="home.php?mod=spacecp&ac=favorite&type=blog&id=$blog['blogid']&spaceuid=$blog[uid]">{lang favorite}</mdui-button><!--{/if}-->
+		<!--{if $_G['uid'] == $blog['uid'] || checkperm('manageblog')}-->
+		<mdui-button variant="text" icon="edit" data-href="home.php?mod=spacecp&ac=blog&blogid=$blog['blogid']&op=edit">{lang edit}</mdui-button>
+		<!--{if checkperm('manageblog')}--><mdui-button variant="text" icon="local_fire_department" data-href="home.php?mod=spacecp&ac=blog&blogid=$blog['blogid']&op=edithot">{lang hot}</mdui-button><!--{/if}-->
+		<mdui-button variant="text" icon="delete" onclick="document.getElementById('mdui_delete_blog').open=true">{lang delete}</mdui-button>
+		<!--{/if}-->
+	</div>
+
+	<!--{if $_G['uid'] == $blog['uid'] || checkperm('manageblog')}-->
+	<mdui-dialog id="mdui_delete_blog" close-on-esc close-on-overlay-click>
+		<div slot="headline">{lang delete_blog}</div>
+		<div slot="description">{lang sure_delete_blog}</div>
+		<mdui-button slot="action" variant="text" type="button" onclick="document.getElementById('mdui_delete_blog').open=false">{lang cancel}</mdui-button>
+		<mdui-button slot="action" variant="text" type="button" onclick="mduiPost('home.php?mod=spacecp&ac=blog&op=delete&blogid=$blog['blogid']',{deletesubmit:'true',referer:location.href},function(){location.href='home.php?mod=space&uid=$blog[uid]&do=blog&view=me'})">{lang determine}</mdui-button>
+	</mdui-dialog>
+	<!--{/if}-->
+
+	<div class="mdui-blog-comments">
+		<div class="mdui-blog-comment-heading">{lang blog_comment}</div>
+		<!--{if $list}-->
+		<!--{loop $list $value}-->
+		<mdui-card variant="filled" class="mdui-blog-comment">
+			<div class="mdui-blog-author"><mdui-avatar src="<!--{avatar($value['authorid'], 'small', true)}-->"></mdui-avatar><div style="min-width:0"><a href="home.php?mod=space&uid=$value[authorid]">$value[author]</a><div>$value[dateline]</div></div></div>
+			<div class="mdui-prose mdui-blog-comment-message">$value[message]</div>
+		</mdui-card>
+		<!--{/loop}-->
+		<!--{else}--><mdui-card variant="outlined" class="mdui-blog-empty">{lang no_related_blog}</mdui-card><!--{/if}-->
+	</div>
+
+	<!--{if !$blog[noreply] && helper_access::check_module('blog')}-->
+	<form id="quickcommentform_{$id}" action="home.php?mod=spacecp&ac=comment" method="post" onsubmit="ajaxpost('quickcommentform_{$id}', 'return_qcblog_$id');return false;" class="mdui-blog-comment-form">
+		<mdui-text-field name="message" label="{lang content_area}" textarea rows="3"></mdui-text-field>
+		<!--{template common/seccheck}-->
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<input type="hidden" name="referer" value="home.php?mod=space&uid=$blog['uid']&do=$do&id=$id">
+		<input type="hidden" name="id" value="$id">
+		<input type="hidden" name="idtype" value="blogid">
+		<input type="hidden" name="handlekey" value="qcblog_{$id}">
+		<input type="hidden" name="commentsubmit" value="true">
+		<input type="hidden" name="quickcomment" value="true">
+		<span id="return_qcblog_{$id}"></span>
+		<mdui-button type="submit" full-width style="margin-top:1rem">{lang comment}</mdui-button>
+	</form>
+	<!--{/if}-->
+	<!--{if $multi}--><div class="mdui-blog-pages">$multi</div><!--{/if}-->
+</div>
+<!--{template common/footer}-->

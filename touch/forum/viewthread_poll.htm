@@ -1,0 +1,85 @@
+<div class="mdui-prose">$post['message']</div>
+
+<mdui-card variant="filled" style="display:block;margin:.75rem 0;padding:1rem">
+	<form id="poll" name="poll" method="post" autocomplete="off" action="forum.php?mod=misc&action=votepoll&fid=$_G['fid']&tid=$_G['tid']&pollsubmit=yes{if $_GET['from']}&from=$_GET['from']{/if}&quickforward=yes&mobile=2">
+		<input type="hidden" name="formhash" value="{FORMHASH}" />
+
+		<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem">
+			<mdui-icon name="poll" style="color:rgb(var(--mdui-color-primary))"></mdui-icon>
+			<strong><!--{if $multiple}-->{lang poll_multiple}<!--{else}-->{lang poll_single}<!--{/if}-->{lang thread_poll}</strong>
+			<!--{if $multiple && $maxchoices}--><mdui-chip style="--mdui-comp-chip-height:24px;font-size:.75rem">{lang poll_more_than}</mdui-chip><!--{/if}-->
+		</div>
+		<div style="font-size:.8125rem;opacity:.7;margin-bottom:.75rem">
+			{lang poll_voterscount}<!--{if $visiblepoll && $_G['group']['allowvote']}-->，{lang poll_after_result}<!--{/if}-->
+		</div>
+
+		<!--{if $_G['forum_thread']['remaintime']}-->
+		<div style="font-size:.8125rem;opacity:.7;margin-bottom:.75rem">
+			{lang poll_count_down}:
+			<!--{if $_G['forum_thread']['remaintime'][0]}-->$_G['forum_thread']['remaintime'][0] {lang days} <!--{/if}-->
+			<!--{if $_G['forum_thread']['remaintime'][1]}-->$_G['forum_thread']['remaintime'][1] {lang poll_hour} <!--{/if}-->
+			$_G['forum_thread']['remaintime'][2] {lang poll_minute}
+		</div>
+		<!--{elseif $expiration && $expirations < TIMESTAMP}-->
+		<div style="font-size:.8125rem;opacity:.7;margin-bottom:.75rem">{lang poll_end}</div>
+		<!--{/if}-->
+
+		<!--{eval $pollvotable = $_G['group']['allowvote'] && !$_G['forum_thread']['is_archived'];}-->
+		<!--{loop $polloptions $key $option}-->
+		<div style="margin-bottom:.75rem">
+			<!--{if $isimagepoll}-->
+			<div style="margin-bottom:.5rem">
+				<img src="<!--{if $option['imginfo']}-->$option['imginfo']['small']<!--{else}-->{STATICURL}image/common/nophoto.gif<!--{/if}-->" alt="$option['polloption']" style="max-width:100%;border-radius:8px;display:block" />
+			</div>
+			<!--{/if}-->
+
+			<!--{if $pollvotable}-->
+				<!--{if $multiple}-->
+				<mdui-checkbox name="pollanswers[]" value="$option['polloptionid']">$key. $option['polloption']</mdui-checkbox>
+				<!--{else}-->
+				<mdui-radio name="pollanswers[]" value="$option['polloptionid']" form="poll">$key. $option['polloption']</mdui-radio>
+				<!--{/if}-->
+			<!--{else}-->
+			<div>$key. $option['polloption']</div>
+			<!--{/if}-->
+
+			<!--{if !$visiblepoll}-->
+			<div style="display:flex;align-items:center;gap:.5rem;margin-top:.25rem">
+				<mdui-linear-progress value="$option['percent']" max="100" style="flex:1;--shape-corner:4px"></mdui-linear-progress>
+				<span style="font-size:.75rem;opacity:.7;white-space:nowrap">$option['percent']% ($option['votes']{lang debate_poll})</span>
+			</div>
+			<!--{/if}-->
+		</div>
+		<!--{/loop}-->
+
+		<!--{if $pollvotable}-->
+			<mdui-button type="submit" name="pollsubmit" value="true" full-width style="margin-top:.5rem">{lang submit}</mdui-button>
+			<!--{if $overt}--><div style="font-size:.75rem;opacity:.7;margin-top:.5rem">{lang poll_msg_overt}</div><!--{/if}-->
+		<!--{elseif !$allwvoteusergroup}-->
+			<div style="font-size:.8125rem;color:rgb(var(--mdui-color-error))"><!--{if !$_G['uid']}-->{lang poll_msg_allwvote_user}<!--{else}-->{lang poll_msg_allwvoteusergroup}<!--{/if}--></div>
+		<!--{elseif !$allowvotepolled}-->
+			<div style="font-size:.8125rem;color:rgb(var(--mdui-color-error))">{lang poll_msg_allowvotepolled}</div>
+		<!--{elseif !$allowvotethread}-->
+			<div style="font-size:.8125rem;color:rgb(var(--mdui-color-error))">{lang poll_msg_allowvotethread}</div>
+		<!--{/if}-->
+
+		<!--{if !$visiblepoll && ($overt || $_G['adminid'] == 1 || $_G['forum_thread']['authorid'] == $_G['uid']) && $post['invisible'] == 0}-->
+			<mdui-button variant="text" full-width href="forum.php?mod=misc&action=viewvote&tid=$_G['tid']&mobile=2" style="margin-top:.5rem">{lang poll_view_voters}</mdui-button>
+		<!--{/if}-->
+	</form>
+</mdui-card>
+
+<!--{if $multiple && $maxchoices}-->
+<script>
+// 后台限制了最多可选项数，超出时把未选中的临时禁用，比提交后被服务端拒掉少一次往返
+(function () {
+	var boxes = [].slice.call(document.querySelectorAll('#poll mdui-checkbox'));
+	boxes.forEach(function (b) {
+		b.addEventListener('change', function () {
+			var full = boxes.filter(function (x) { return x.checked; }).length >= $maxchoices;
+			boxes.forEach(function (x) { x.disabled = full && !x.checked; });
+		});
+	});
+})();
+</script>
+<!--{/if}-->

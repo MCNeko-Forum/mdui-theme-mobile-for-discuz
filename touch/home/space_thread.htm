@@ -1,0 +1,100 @@
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>
+		<!--{if $_G['uid'] == $space['uid']}-->
+			<!--{if $_GET['filter'] == 'save'}-->{lang mythread} · 草稿箱<!--{elseif $_GET['filter'] == 'close'}-->{lang mythread} · 已关闭<!--{elseif $_GET['filter'] == 'aduit'}-->{lang mythread} · 待审核<!--{elseif $_GET['filter'] == 'ignored'}-->{lang mythread} · 已忽略<!--{elseif $_GET['filter'] == 'recyclebin'}-->{lang mythread} · 回收站<!--{elseif $_GET['filter'] == 'common'}-->{lang mythread} · 已发表<!--{elseif $_GET['type'] == 'reply'}-->{lang my}{lang reply}<!--{elseif $_GET['type'] == 'postcomment'}-->{lang my}{lang post_comment}<!--{else}-->{lang mythread} · 全部<!--{/if}-->
+		<!--{else}-->
+			{$space['username']} - <!--{if $_GET['type'] == 'reply'}-->{lang mobta}{lang reply}<!--{elseif $_GET['type'] == 'postcomment'}-->{lang mobta}{lang post_comment}<!--{else}-->{lang mobta}{lang mobthread}<!--{/if}-->
+		<!--{/if}-->
+	</mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="home" href="index.php"></mdui-button-icon>
+</mdui-top-app-bar>
+<!--{if $_G['uid'] == $space['uid'] && $_GET['type'] == 'thread'}-->
+<mdui-tabs value="<!--{if $_GET['filter']}-->{$_GET['filter']}<!--{else}-->all<!--{/if}-->" style="position:sticky;top:64px;z-index:10;background:rgb(var(--mdui-color-surface))">
+	<mdui-tab value="all" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread">全部</mdui-tab>
+	<mdui-tab value="common" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread&filter=common">已发表</mdui-tab>
+	<mdui-tab value="save" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread&filter=save">草稿箱</mdui-tab>
+	<mdui-tab value="close" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread&filter=close">已关闭</mdui-tab>
+	<mdui-tab value="aduit" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread&filter=aduit">待审核</mdui-tab>
+	<mdui-tab value="ignored" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread&filter=ignored">已忽略</mdui-tab>
+	<mdui-tab value="recyclebin" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread&filter=recyclebin">回收站</mdui-tab>
+</mdui-tabs>
+<!--{/if}-->
+
+<div style="padding:1rem 1rem 5.5rem">
+<!--{if $list}-->
+	<!--{eval $threadlist_data = get_attach($list);}-->
+	<!--{loop $list $stid $thread}-->
+	<mdui-card variant="filled" style="display:block;margin-bottom:.75rem;padding:.875rem">
+		<!--{if $viewtype == 'thread' || $viewtype == 'reply'}-->
+		<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.625rem">
+			<mdui-avatar href="home.php?mod=space&uid={$thread['authorid']}" src="<!--{avatar($thread['authorid'], 'small', true)}-->" style="width:36px;height:36px"></mdui-avatar>
+			<div style="min-width:0"><a href="home.php?mod=space&uid={$thread['authorid']}" style="color:inherit;text-decoration:none">{$thread['author']}</a><div style="font-size:.75rem;opacity:.6">{$thread['dateline']}</div></div>
+		</div>
+		<!--{/if}-->
+		<!--{if $viewtype == 'postcomment'}-->
+			<a href="forum.php?mod=redirect&goto=findpost&ptid=$thread['tid']&pid=$thread['pid']" target="_blank" style="display:block;color:inherit;text-decoration:none">
+		<!--{elseif $_GET['filter'] == 'save'}-->
+			<a href="forum.php?mod=post&action=edit&tid=$thread['tid']&pid=$thread['pid']&fid=$thread['fid']&mobile=2" style="display:block;color:inherit;text-decoration:none">
+		<!--{else}-->
+			<a href="forum.php?mod=viewthread&tid=$thread['tid']&extra=$extra" style="display:block;color:inherit;text-decoration:none">
+		<!--{/if}-->
+			<div style="font-weight:500;line-height:1.5">
+				<!--{if !$_GET['filter']}-->
+					<!--{if $thread[$statusfield] == -1}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">回收站</mdui-chip>
+					<!--{elseif $thread[$statusfield] == -2}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">待审核</mdui-chip>
+					<!--{elseif $thread[$statusfield] == -3 && $thread['displayorder'] != -4}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">已忽略</mdui-chip>
+					<!--{elseif $thread['displayorder'] == -4}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">草稿箱</mdui-chip>
+					<!--{elseif $thread['closed'] == 1}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">已关闭</mdui-chip>
+					<!--{else}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">已发表</mdui-chip><!--{/if}-->
+				<!--{elseif $_GET['filter'] == 'common'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">已发表</mdui-chip>
+				<!--{elseif $_GET['filter'] == 'save'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">草稿箱</mdui-chip>
+				<!--{elseif $_GET['filter'] == 'close'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">已关闭</mdui-chip>
+				<!--{elseif $_GET['filter'] == 'aduit'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">待审核</mdui-chip>
+				<!--{elseif $_GET['filter'] == 'ignored'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">已忽略</mdui-chip>
+				<!--{elseif $_GET['filter'] == 'recyclebin'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">回收站</mdui-chip><!--{/if}-->
+				<!--{if $thread['folder'] == 'lock'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">已关闭</mdui-chip><!--{elseif $thread['special'] == 1}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_poll}</mdui-chip><!--{elseif $thread['special'] == 2}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_trade}</mdui-chip><!--{elseif $thread['special'] == 3}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_reward}</mdui-chip><!--{elseif $thread['special'] == 4}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_activity}</mdui-chip><!--{elseif $thread['special'] == 5}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_debate}</mdui-chip><!--{/if}-->
+				<!--{if $thread['attachment'] == 2 && $_G['setting']['mobile']['mobilesimpletype'] == 1}--><mdui-icon name="image" style="font-size:1rem;vertical-align:middle"></mdui-icon><!--{/if}-->
+				<!--{if in_array($thread['displayorder'], array(1, 2, 3, 4))}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_sticky}</mdui-chip><!--{/if}-->
+				<!--{if $thread['digest'] > 0}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_digest}</mdui-chip><!--{/if}-->
+				<span $thread['highlight']>{$thread['subject']}</span>
+			</div>
+		</a>
+		<!--{if $actives['me'] && $viewtype == 'reply'}-->
+			<!--{loop $tids[$stid] $pid}-->
+			<!--{eval $post = $posts[$pid];}-->
+			<div style="margin-top:.625rem;padding:.625rem;background:rgba(127,127,127,.1);border-radius:.5rem;color:inherit;font-size:.875rem"><a href="forum.php?mod=redirect&goto=findpost&ptid=$thread[tid]&pid=$pid" target="_blank" style="color:inherit;text-decoration:none"><!--{if $post['message'] || is_numeric($post['message'])}-->{$post[message]}<!--{else}-->......<!--{/if}--></a></div>
+			<!--{/loop}-->
+		<!--{/if}-->
+		<!--{if $actives['me'] && $viewtype == 'postcomment'}-->
+			<div style="margin-top:.625rem;padding:.625rem;background:rgba(127,127,127,.1);border-radius:.5rem;font-size:.875rem">$thread['comment']</div>
+		<!--{elseif $viewtype == 'thread'}-->
+			<!--{if $threadlist_data[$thread['tid']]['attachment']}-->
+			<!--{eval $attach_on = 0;}-->
+			<a href="forum.php?mod=viewthread&tid=$thread['tid']&extra=$extra" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:.625rem">
+				<!--{loop $threadlist_data[$thread['tid']]['attachment'] $value}-->
+				<!--{eval $attach_on++; if($attach_on > 9) break;}-->
+				<div style="position:relative"><img src="$value" style="display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px"><!--{if count($threadlist_data[$thread['tid']]['attachment']) > 9 && $attach_on == 9}--><span style="position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5);color:#fff">{echo count($threadlist_data[$thread['tid']]['attachment'])}{lang mobtu}</span><!--{/if}--></div>
+				<!--{/loop}-->
+			</a>
+			<!--{/if}-->
+			<a href="forum.php?mod=viewthread&tid=$thread['tid']&extra=$extra" style="display:block;margin-top:.625rem;color:inherit;text-decoration:none;font-size:.875rem;opacity:.75">{$threadlist_data[$thread['tid']]['message']}</a>
+			<div style="display:flex;gap:1rem;margin-top:.625rem;font-size:.75rem;opacity:.6"><a href="forum.php?mod=forumdisplay&fid=$thread['fid']">#{$_G['cache']['forums'][$thread['fid']]['name']}</a><span>浏览 {$thread['views']}</span><span>{lang reply} {$thread['replies']}</span></div>
+		<!--{/if}-->
+	</mdui-card>
+	<!--{/loop}-->
+<!--{else}-->
+	<mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.65">{lang no_related_posts}</mdui-card>
+<!--{/if}-->
+<!--{if $multi}--><div class="mdui-space-pages">$multi</div><!--{/if}-->
+<style>
+	.mdui-space-pages { display:flex; justify-content:center; flex-wrap:wrap; gap:.25rem; margin-top:1rem; }
+	.mdui-space-pages a,
+	.mdui-space-pages strong { display:inline-flex; align-items:center; justify-content:center; min-width:2.5rem; min-height:2.5rem; box-sizing:border-box; padding:.375rem .625rem; border-radius:999px; color:rgb(var(--mdui-color-on-surface)); background:rgb(var(--mdui-color-surface-container)); text-decoration:none; font-weight:400; }
+	.mdui-space-pages strong { color:rgb(var(--mdui-color-on-primary)); background:rgb(var(--mdui-color-primary)); }
+</style>
+</div>
+<!--{eval $nofooter = true;}-->
+<!--{template common/footer}-->

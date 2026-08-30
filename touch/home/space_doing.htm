@@ -1,0 +1,86 @@
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{if $_G['uid'] == $space['uid']}-->{lang doing}<!--{else}-->$space['username']{lang doing}<!--{/if}--></mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="home" href="portal.php?mod=index"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<div style="padding:0 1rem 5.5rem">
+	<div class="mdui-space-hero">
+		<mdui-avatar src="<!--{avatar($space['uid'], 'middle', true)}-->"></mdui-avatar>
+		<div class="mdui-space-identity"><div class="mdui-space-name">$space['username']</div><div class="mdui-space-meta">UID {$space['uid']}</div></div>
+	</div>
+	<mdui-tabs class="mdui-space-tabs" value="doing">
+		<mdui-tab value="profile" data-href="home.php?mod=space&uid={$space['uid']}&do=profile">{lang memcp_profile}</mdui-tab>
+		<!--{if $_G['setting']['allowviewuserthread'] !== false && helper_access::check_module('forum')}--><mdui-tab value="thread" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=thread">{lang topic}</mdui-tab><mdui-tab value="reply" data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me&type=reply">{lang reply}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('blog')}--><mdui-tab value="blog" data-href="home.php?mod=space&uid={$space['uid']}&do=blog&view=me">{lang blog}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('album')}--><mdui-tab value="album" data-href="home.php?mod=space&uid={$space['uid']}&do=album&view=me">{lang album}</mdui-tab><!--{/if}-->
+		<mdui-tab value="doing">{lang doing}</mdui-tab>
+		<mdui-tab value="wall" data-href="home.php?mod=space&uid={$space['uid']}&do=wall">{lang message_board}</mdui-tab>
+		<!--{if helper_access::check_module('follow')}--><mdui-tab value="follow" data-href="home.php?mod=follow&uid={$space['uid']}&do=view">{lang follow}</mdui-tab><!--{/if}-->
+	</mdui-tabs>
+
+	<mdui-tabs value="$_GET['view']" style="margin:.75rem -1rem 1rem;overflow:auto">
+		<mdui-tab value="we" data-href="home.php?mod=space&uid={$space['uid']}&do=doing&view=we">{lang me_friend_doing}</mdui-tab>
+		<mdui-tab value="me" data-href="home.php?mod=space&uid={$space['uid']}&do=doing&view=me">{lang doing_view_me}</mdui-tab>
+		<mdui-tab value="all" data-href="home.php?mod=space&uid={$space['uid']}&do=doing&view=all">{lang view_all}</mdui-tab>
+	</mdui-tabs>
+
+	<!--{if helper_access::check_module('doing') && $_G['uid']}--><!--{template home/space_doing_form}--><!--{/if}-->
+
+	<div style="display:grid;gap:.75rem;margin-top:.75rem">
+		<!--{if $dolist}-->
+			<!--{loop $dolist $dv}-->
+				<!--{eval $doid = $dv['doid']; $list = $clist[$doid];}-->
+				<mdui-card id="mdui_doing_$doid" variant="filled" style="display:block;padding:1rem">
+					<div style="display:flex;gap:.75rem;align-items:flex-start">
+						<mdui-avatar src="<!--{avatar($dv['uid'], 'small', true)}-->"></mdui-avatar>
+						<div style="min-width:0;flex:1">
+							<div style="display:flex;gap:.5rem;align-items:center"><a href="home.php?mod=space&uid=$dv['uid']&do=profile" style="font-weight:600;color:rgb(var(--mdui-color-primary));text-decoration:none">$dv['username']</a><span style="margin-left:auto;font-size:.75rem;opacity:.65;white-space:nowrap"><!--{date($dv['dateline'], 'u')}--></span></div>
+							<div class="mdui-prose" style="margin-top:.5rem;overflow-wrap:anywhere">$dv['message']<!--{if $dv['status'] == 1}--> <mdui-chip style="--mdui-comp-chip-height:22px">{lang moderate_need}</mdui-chip><!--{/if}--></div>
+							<div style="display:flex;justify-content:flex-end;gap:.25rem;margin-top:.5rem">
+								<!--{if helper_access::check_module('doing') && $_G['uid']}--><mdui-button variant="text" onclick="document.getElementById('mdui_doing_reply_$doid').open=true">{lang reply}</mdui-button><!--{/if}-->
+								<!--{if $_G['uid'] && ($dv['uid'] == $_G['uid'] || checkperm('managedoing'))}--><mdui-button variant="text" onclick="document.getElementById('mdui_doing_delete_$doid').open=true">{lang delete}</mdui-button><!--{/if}-->
+							</div>
+						</div>
+					</div>
+
+					<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgb(var(--mdui-color-outline-variant))">
+						<!--{template home/space_doing_li}-->
+					</div>
+				</mdui-card>
+
+				<!--{if helper_access::check_module('doing') && $_G['uid']}-->
+				<mdui-dialog id="mdui_doing_reply_$doid" close-on-esc close-on-overlay-click>
+					<div slot="headline">{lang reply}</div>
+					<form method="post" action="home.php?mod=spacecp&ac=doing&op=docomment&doid=$doid&id=0">
+						<div slot="description" style="display:flex;align-items:end;gap:.25rem"><mdui-text-field id="mdui_doing_reply_message_$doid" name="message" label="{lang reply}" rows="4" maxlength="200" counter required style="flex:1"></mdui-text-field><mdui-button-icon icon="sentiment_satisfied" type="button" onclick="mduiDoingSmile('mdui_doing_reply_message_$doid')" title="{lang smilies}"></mdui-button-icon></div>
+						<input type="hidden" name="commentsubmit" value="true"><input type="hidden" name="formhash" value="{FORMHASH}">
+						<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_doing_reply_$doid').open=false">{lang cancel}</mdui-button>
+						<mdui-button slot="action" type="submit" variant="text">{lang reply}</mdui-button>
+					</form>
+				</mdui-dialog>
+				<!--{/if}-->
+
+				<!--{if $_G['uid'] && ($dv['uid'] == $_G['uid'] || checkperm('managedoing'))}-->
+				<mdui-dialog id="mdui_doing_delete_$doid" close-on-esc close-on-overlay-click>
+					<div slot="headline">{lang delete}</div><div slot="description">{lang determine_delete_doing}</div>
+					<form method="post" action="home.php?mod=spacecp&ac=doing&op=delete&doid=$doid&id=0">
+						<input type="hidden" name="referer" value="$theurl"><input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="deletesubmit" value="true">
+						<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_doing_delete_$doid').open=false">{lang cancel}</mdui-button>
+						<mdui-button slot="action" type="submit" variant="text">{lang determine}</mdui-button>
+					</form>
+				</mdui-dialog>
+				<!--{/if}-->
+			<!--{/loop}-->
+		<!--{else}-->
+			<mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.65">{lang doing_no_replay}</mdui-card>
+		<!--{/if}-->
+	</div>
+	<!--{if $multi}--><div style="padding:1rem;text-align:center">$multi</div><!--{/if}-->
+</div>
+
+<!--{template home/space_doing_smiley}-->
+<!--{template common/footer}-->

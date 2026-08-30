@@ -1,0 +1,14 @@
+<div style="padding:0 .75rem 88px">
+	<!--{if $adminuserlist}-->
+	<mdui-card variant="filled" style="display:block;margin:.75rem 0;overflow:hidden"><mdui-list-subheader>{lang group_admin_member}</mdui-list-subheader><mdui-list>
+	<!--{loop $adminuserlist $user}--><mdui-list-item href="home.php?mod=space&uid={$user['uid']}&do=profile"><mdui-avatar slot="icon" src="<!--{avatar($user['uid'], 'middle', true)}-->"></mdui-avatar>{$user['username']}<span slot="description"><!--{if $user['level'] == 1}-->{lang group_moderator_title}<!--{elseif $user['level'] == 2}-->{lang group_moderator_vice_title}<!--{/if}--></span></mdui-list-item><!--{/loop}-->
+	</mdui-list></mdui-card>
+	<!--{/if}-->
+	<!--{if $staruserlist || $alluserlist}-->
+	<mdui-card variant="filled" style="display:block;margin:.75rem 0;overflow:hidden"><mdui-list-subheader>{lang member}</mdui-list-subheader><mdui-list>
+	<!--{loop $staruserlist $user}--><mdui-list-item href="home.php?mod=space&uid={$user['uid']}&do=profile"><mdui-avatar slot="icon" src="<!--{avatar($user['uid'], 'middle', true)}-->"></mdui-avatar>{$user['username']}<span slot="description">{lang group_star_member_title} · {echo dgmdate($user['joindateline'], 'u')}</span></mdui-list-item><!--{/loop}-->
+	<!--{loop $alluserlist $user}--><mdui-list-item href="home.php?mod=space&uid={$user['uid']}&do=profile"><mdui-avatar slot="icon" src="<!--{avatar($user['uid'], 'middle', true)}-->"></mdui-avatar>{$user['username']}<span slot="description">{echo dgmdate($user['joindateline'], 'u')}</span></mdui-list-item><!--{/loop}-->
+	</mdui-list></mdui-card>
+	<!--{/if}-->
+	<!--{if $multipage}--><div style="padding:1rem">{$multipage}</div><!--{/if}-->
+</div>

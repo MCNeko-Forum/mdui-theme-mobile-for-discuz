@@ -1,0 +1,39 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang poll_voters}</mdui-top-app-bar-title>
+</mdui-top-app-bar>
+
+<div style="padding:1rem">
+	<mdui-select id="polloptionid" value="$polloptionid" label="{lang thread_poll}" style="margin-bottom:1rem">
+		<!--{loop $polloptions $options}-->
+		<mdui-menu-item value="$options['polloptionid']"><!--{eval echo strip_tags($options['polloption']);}--> ($options['votes'])</mdui-menu-item>
+		<!--{/loop}-->
+	</mdui-select>
+
+	<!--{if !$voterlist}-->
+	<div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang none}</div>
+	<!--{else}-->
+	<mdui-list>
+		<!--{loop $voterlist $voter}-->
+		<mdui-list-item href="home.php?mod=space&uid=$voter['uid']" rounded>
+			<mdui-avatar slot="icon" src="<!--{avatar($voter['uid'], 'small', true)}-->"></mdui-avatar>
+			$voter['username']
+		</mdui-list-item>
+		<!--{/loop}-->
+	</mdui-list>
+	<!--{/if}-->
+
+	<!--{if $multipage}--><div style="padding:1rem;text-align:center">$multipage</div><!--{/if}-->
+</div>
+
+<script>
+// mdui-select 的选中值变化事件是 change，换选项直接整页跳（列表可能分页，就地替换反而要重算 multipage）
+document.getElementById('polloptionid').addEventListener('change', function () {
+	location.href = 'forum.php?mod=misc&action=viewvote&tid={$_G['tid']}&polloptionid=' + this.value + '&mobile=2';
+});
+</script>
+
+<!--{template common/footer}-->

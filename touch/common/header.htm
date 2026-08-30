@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html class="mdui-theme-auto">
+<head>
+	<title><!--{if !empty($navtitle)}-->$navtitle - <!--{/if}--><!--{if empty($nobbname)}--> $_G['setting']['bbname'] - <!--{/if}--> {lang waptitle} - Powered by Discuz!</title>
+	<meta charset="utf-8">
+	<meta http-equiv="Cache-control" content="{if $_G['setting']['mobile']['mobilecachetime'] > 0}{$_G['setting']['mobile']['mobilecachetime']}{else}no-cache{/if}" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<meta name="format-detection" content="telephone=no" />
+	<meta name="keywords" content="{if !empty($metakeywords)}{echo dhtmlspecialchars($metakeywords)}{/if}" />
+	<meta name="description" content="{if !empty($metadescription)}{echo dhtmlspecialchars($metadescription)} {/if},$_G['setting']['bbname']" />
+	<meta name="theme-color" content="{if $_G['style']['mdui_color']}$_G['style']['mdui_color']{else}#2B7ACD{/if}" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	$_G['setting']['seohead']
+	<base href="{$_G['siteurl']}" />
+	<script type="text/javascript">var STYLEID = '{STYLEID}', STATICURL = '{STATICURL}', IMGDIR = '{IMGDIR}', VERHASH = '{VERHASH}', charset = '{CHARSET}', discuz_uid = '{$_G['uid']}', cookiepre = '{$_G['config']['cookie']['cookiepre']}', cookiedomain = '{$_G['config']['cookie']['cookiedomain']}', cookiepath = '{$_G['config']['cookie']['cookiepath']}', showusercard = '{$_G['setting']['showusercard']}', attackevasive = '{$_G['config']['security']['attackevasive']}', disallowfloat = '{$_G['setting']['disallowfloat']}', creditnotice = '<!--{if $_G['setting']['creditnotice']}-->$_G['setting']['creditnames']<!--{/if}-->', defaultstyle = '$_G['style']['defaultextstyle']', REPORTURL = '$_G['currenturl_encode']', SITEURL = '$_G['siteurl']', JSPATH = '$_G['setting']['jspath']';</script>
+	<!-- MDUI 核心资源：local 本地，其余值选择对应外部 CDN，cdn 为 unpkg 兼容别名 -->
+	<!-- 浏览器兼容性检测：ES2020 支持检测 -->
+	<script nomodule>
+		// 旧浏览器回退提示
+		if(!window.mduiLegacyWarned) {
+			window.mduiLegacyWarned = true;
+			setTimeout(function() {
+				if(confirm('检测到您的浏览器版本较低，部分功能可能无法使用。\n建议使用最新版本的 Chrome、Safari 或 Firefox 浏览器。\n\n是否切换到简化版页面？')) {
+					document.cookie = 'mobile=no; path=/';
+					window.location.href = window.location.href.split('?')[0] + '?mobile=no';
+				}
+			}, 500);
+		}
+	</script>
+	<!--{if $_G['style']['mdui_resource'] == 'unpkg' || $_G['style']['mdui_resource'] == 'cdn'}-->
+	<link rel="stylesheet" href="https://unpkg.com/mdui@2.1.5/mdui.css" type="text/css" media="all">
+	<script type="module" src="https://unpkg.com/mdui@2.1.5/mdui.global.js"></script>
+	<!--{elseif $_G['style']['mdui_resource'] == 'jsdelivr'}-->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@2.1.5/mdui.css" type="text/css" media="all">
+	<script type="module" src="https://cdn.jsdelivr.net/npm/mdui@2.1.5/mdui.global.js"></script>
+	<!--{elseif $_G['style']['mdui_resource'] == 'jsdmirror_com'}-->
+	<link rel="stylesheet" href="https://cdn.jsdmirror.com/npm/mdui@2.1.5/mdui.css" type="text/css" media="all">
+	<script type="module" src="https://cdn.jsdmirror.com/npm/mdui@2.1.5/mdui.global.js"></script>
+	<!--{elseif $_G['style']['mdui_resource'] == 'jsdmirror_cn'}-->
+	<link rel="stylesheet" href="https://cdn.jsdmirror.cn/npm/mdui@2.1.5/mdui.css" type="text/css" media="all">
+	<script type="module" src="https://cdn.jsdmirror.cn/npm/mdui@2.1.5/mdui.global.js"></script>
+	<!--{else}-->
+	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/mdui.css?{VERHASH}" type="text/css" media="all">
+	<script type="module" src="{$_G['style']['styleimgdir']}/mdui.global.js?{VERHASH}"></script>
+	<!--{/if}-->
+	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/icons/material-icons.css?{VERHASH}" type="text/css" media="all">
+	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/style.css?{VERHASH}" type="text/css" media="all">
+	<script src="{STATICURL}js/mobile/jquery.min.js?{VERHASH}"></script>
+	<script src="{STATICURL}js/mobile/common.js?{VERHASH}" charset="{CHARSET}"></script>
+	<script type="text/javascript">
+	var seccheck_tpl = seccheck_tpl || {};
+	var seccheck_modid = seccheck_modid || {};
+	function updateseccode(idhash, tpl, modid) {
+		if(!document.getElementById('seccode_' + idhash)) return;
+		if(tpl) seccheck_tpl[idhash] = tpl;
+		if(modid) seccheck_modid[idhash] = modid;
+		else modid = seccheck_modid[idhash];
+		var id = 'seccodejs_' + idhash;
+		if(document.getElementById(id)) document.getElementsByTagName('head')[0].removeChild(document.getElementById(id));
+		var scriptNode = document.createElement('script');
+		scriptNode.type = 'text/javascript';
+		scriptNode.id = id;
+		scriptNode.src = 'misc.php?mod=seccode&action=update&idhash=' + idhash + '&' + Math.random() + '&modid=' + modid;
+		document.getElementsByTagName('head')[0].appendChild(scriptNode);
+	}
+	function updatesecqaa(idhash, tpl, modid) {
+		if(!document.getElementById('secqaa_' + idhash)) return;
+		if(tpl) seccheck_tpl[idhash] = tpl;
+		if(modid) seccheck_modid[idhash] = modid;
+		else modid = seccheck_modid[idhash];
+		var id = 'secqaajs_' + idhash;
+		if(document.getElementById(id)) document.getElementsByTagName('head')[0].removeChild(document.getElementById(id));
+		var scriptNode = document.createElement('script');
+		scriptNode.type = 'text/javascript';
+		scriptNode.id = id;
+		scriptNode.src = 'misc.php?mod=secqaa&action=update&idhash=' + idhash + '&' + Math.random() + '&modid=' + modid;
+		document.getElementsByTagName('head')[0].appendChild(scriptNode);
+	}
+	</script>
+	<!-- 锚点平滑滚动仅使用主题本地脚本，不随 MDUI CDN 切换。 -->
+	<script src="{$_G['style']['styleimgdir']}/anchor-scroll.js?{VERHASH}" defer></script>
+	<script>mdui.setColorScheme('{if $_G['style']['mdui_color']}$_G['style']['mdui_color']{else}#2B7ACD{/if}');</script>
+	<!--{if $_G['style']['mdui_addcss']}--><style>$_G['style']['mdui_addcss']</style><!--{/if}-->
+	<!--{if $_G['style']['mdui_head']}--><!--{eval $mdui_head = htmlspecialchars_decode($_G['style']['mdui_head'], ENT_QUOTES);}-->$mdui_head<!--{/if}-->
+	<!--{if $_G['style']['mdui_fonts']}-->
+		<!--{eval $mdui_fonts = preg_split('/\r\n|\r|\n/', htmlspecialchars_decode($_G['style']['mdui_fonts'], ENT_QUOTES));}-->
+		<!--{loop $mdui_fonts $mdui_font}-->
+			<!--{eval $mdui_font = trim($mdui_font);}-->
+			<!--{if preg_match('/^https:\/\/.*\.(woff2?|ttf|otf)(\?|$)/i', $mdui_font)}-->
+			<link rel="preload" as="font" type="font/woff2" href="$mdui_font" crossorigin>
+			<style>@font-face { font-family: "mdui-custom-font"; src: url("$mdui_font"); font-display: swap; } html, body, mdui-top-app-bar, mdui-top-app-bar-title, mdui-list, mdui-list-item, mdui-card, mdui-button, mdui-text-field, mdui-select, mdui-dialog, mdui-tabs, mdui-tab, mdui-tab-panel, mdui-navigation-bar, mdui-navigation-bar-item { font-family: "mdui-custom-font" !important; }</style>
+			<!--{elseif preg_match('/^https:\/\//i', $mdui_font)}-->
+			<link rel="stylesheet" href="$mdui_font">
+			<!--{/if}-->
+		<!--{/loop}-->
+	<!--{/if}-->
+</head>
+<body id="{$_G['basescript']}" class="pg_{CURMODULE}">
+<!--{hook/global_header_mobile}-->
+<div id="append_parent"></div>
+
+<mdui-navigation-drawer id="mdui_drawer" close-on-overlay-click close-on-esc>
+	<mdui-list style="padding:.5rem">
+		<!--{if $_G['uid']}-->
+			<mdui-list-item href="home.php?mod=space&uid={$_G['uid']}&do=profile&mycenter=1" rounded>
+				<mdui-avatar slot="icon" src="<!--{avatar($_G['uid'], 'small', true)}-->"></mdui-avatar>
+				$_G['member']['username']
+				<span slot="description">{lang credits}: $_G['member']['credits']</span>
+			</mdui-list-item>
+		<!--{else}-->
+			<mdui-list-item href="member.php?mod=logging&action=login" icon="account_circle" rounded>{lang login}</mdui-list-item>
+		<!--{/if}-->
+		<mdui-divider style="margin:.5rem 0"></mdui-divider>
+		<!--{loop $_G['setting']['navs'] $nav}-->
+			<!--{if is_array($nav) && $nav['available'] && (!$nav['level'] || ($nav['level'] == 1 && $_G['uid']) || ($nav['level'] == 2 && $_G['adminid'] > 0) || ($nav['level'] == 3 && $_G['adminid'] == 1))}-->
+				<mdui-list-item href="{$nav['filename']}" rounded>{$nav['navname']}</mdui-list-item>
+			<!--{/if}-->
+		<!--{/loop}-->
+		<mdui-divider style="margin:.5rem 0"></mdui-divider>
+		<!--{eval $mdui_i18n_paths = i18n('get'); $mdui_i18n_current = !empty($_G['i18n']) ? $_G['i18n'] : (!empty($_G['setting']['i18n_default']) ? $_G['setting']['i18n_default'] : 'SC_UTF8');}-->
+		<!--{if $mdui_i18n_paths}-->
+		<mdui-select label="语言" icon="translate" placement="auto" value="{$mdui_i18n_current}" required onchange="if(this.value) location.href='misc.php?mod=i18n&key='+encodeURIComponent(this.value)" style="margin:.25rem 0 .5rem;--mdui-menu-max-height:min(60vh,24rem)">
+			<!--{loop $mdui_i18n_paths $mdui_i18n_key $mdui_i18n_path}-->
+			<!--{if empty($_G['setting']['i18ns']) || in_array($mdui_i18n_key, (array)$_G['setting']['i18ns'])}-->
+			<mdui-menu-item value="{$mdui_i18n_key}"><!--{if $mdui_i18n_key == 'SC_UTF8'}-->简体中文<!--{elseif $mdui_i18n_key == 'TC_UTF8'}-->繁體中文<!--{elseif $mdui_i18n_key == 'EN'}-->English<!--{else}-->{$mdui_i18n_key}<!--{/if}--></mdui-menu-item>
+			<!--{/if}-->
+			<!--{/loop}-->
+		</mdui-select>
+		<!--{/if}-->
+		<mdui-list-item id="mdui_theme_toggle" icon="brightness_6" rounded>主题</mdui-list-item>
+		<!--{if $_G['uid']}-->
+			<mdui-list-item href="member.php?mod=logging&action=logout&formhash={FORMHASH}" icon="logout" rounded>{lang logout}</mdui-list-item>
+		<!--{/if}-->
+	</mdui-list>
+</mdui-navigation-drawer>

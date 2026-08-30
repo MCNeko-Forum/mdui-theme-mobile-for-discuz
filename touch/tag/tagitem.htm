@@ -1,0 +1,72 @@
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title><!--{if $tagname}-->$tagname<!--{else}-->{lang tag}<!--{/if}--></mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="sell" data-href="misc.php?mod=tag"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<style>
+	.mdui-tagitem-page { padding:0 1rem 5.5rem; }
+	.mdui-tagitem-tabs { margin:0 -1rem 1rem; overflow-x:auto; }
+	.mdui-tagitem-tabs mdui-tabs { min-width:max-content; }
+	.mdui-tagitem-list { display:grid; gap:.75rem; }
+	.mdui-tagitem-card { display:block; overflow:hidden; }
+	.mdui-tagitem-main { display:block; padding:1rem; color:inherit; text-decoration:none; }
+	.mdui-tagitem-title { font-weight:600; line-height:1.5; }
+	.mdui-tagitem-summary { display:-webkit-box; overflow:hidden; margin-top:.375rem; color:rgb(var(--mdui-color-on-surface-variant)); font-size:.875rem; line-height:1.5; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+	.mdui-tagitem-meta { display:flex; flex-wrap:wrap; gap:.25rem .75rem; margin-top:.625rem; color:rgb(var(--mdui-color-on-surface-variant)); font-size:.8125rem; }
+	.mdui-tagitem-empty { padding:2rem 1rem; text-align:center; color:rgb(var(--mdui-color-on-surface-variant)); }
+	.mdui-tagitem-pages { margin-top:1rem; }
+</style>
+
+<div class="mdui-tagitem-page">
+	<!--{if $tagname}-->
+		<div class="mdui-tagitem-tabs">
+			<mdui-tabs value="<!--{if $showtype == 'blog'}-->blog<!--{else}-->thread<!--{/if}-->" full-width>
+				<!--{if helper_access::check_module('forum')}--><mdui-tab value="thread" data-href="misc.php?mod=tag&id=$id&type=thread">{lang related_thread}</mdui-tab><!--{/if}-->
+				<!--{if helper_access::check_module('blog')}--><mdui-tab value="blog" data-href="misc.php?mod=tag&id=$id&type=blog">{lang related_blog}</mdui-tab><!--{/if}-->
+			</mdui-tabs>
+		</div>
+
+		<!--{if $showtype == 'blog'}-->
+			<!--{if $bloglist}-->
+				<div class="mdui-tagitem-list">
+					<!--{loop $bloglist $blog}-->
+						<mdui-card variant="outlined" class="mdui-tagitem-card">
+							<a class="mdui-tagitem-main" href="home.php?mod=space&uid=$blog['uid']&do=blog&id=$blog['blogid']">
+								<div class="mdui-tagitem-title">$blog['subject']</div>
+								<!--{if $blog['message']}--><div class="mdui-tagitem-summary">$blog['message']</div><!--{/if}-->
+								<div class="mdui-tagitem-meta"><span>$blog['username']</span><span>$blog['dateline']</span><span>查看 $blog['viewnum']</span><span>回复 $blog['replynum']</span></div>
+							</a>
+						</mdui-card>
+					<!--{/loop}-->
+				</div>
+			<!--{else}-->
+				<mdui-card variant="outlined" class="mdui-tagitem-empty">还没有相关的日志</mdui-card>
+			<!--{/if}-->
+		<!--{else}-->
+			<!--{if $threadlist}-->
+				<div class="mdui-tagitem-list">
+					<!--{loop $threadlist $thread}-->
+						<mdui-card variant="outlined" class="mdui-tagitem-card">
+							<a class="mdui-tagitem-main" href="forum.php?mod=viewthread&tid=$thread['tid']">
+								<div class="mdui-tagitem-title">$thread['subject']</div>
+								<div class="mdui-tagitem-meta"><span>$thread['author']</span><span>$thread['dateline']</span><span>$thread['forumname']</span><span>查看 $thread['views']</span><span>回复 $thread['replies']</span></div>
+							</a>
+						</mdui-card>
+					<!--{/loop}-->
+				</div>
+			<!--{else}-->
+				<mdui-card variant="outlined" class="mdui-tagitem-empty">还没有相关的主题</mdui-card>
+			<!--{/if}-->
+		<!--{/if}-->
+
+		<!--{if $multipage}--><div class="mdui-tagitem-pages">$multipage</div><!--{/if}-->
+	<!--{else}-->
+		<mdui-card variant="outlined" class="mdui-tagitem-empty">{lang no_content}</mdui-card>
+	<!--{/if}-->
+</div>
+
+<!--{template common/footer}-->
