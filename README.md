@@ -22,7 +22,7 @@
 
 ## 安装
 
-1. 将此仓库下载，上传到 Discuz 站点的 `template/` 目录，并将 `mdui-theme-mobile-for-discuz` 更名为 `MDUI`。
+1. 将此仓库下载，上传到 Discuz 站点的 `template/` 目录，并将 `mdui-theme-mobile-for-discuz-main` 更名为 `MDUI`。
 2. 将手机版主题设置为 `MDUI 手机版`。
 3. 在后台更新缓存和模板缓存。
 4. 打开手机版页面确认主题资源正常加载。
