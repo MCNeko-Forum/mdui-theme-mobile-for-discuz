@@ -61,6 +61,11 @@ npm run sync
 - `static/`：主题 CSS、JavaScript、图标和字体资源
 - `discuz_style_default.xml`：Discuz 主题安装配置
 
+## 文档
+
+- [自定义变量说明](value.md)：主题在后台自定义变量中读取的全部变量名及用法
+- [DIY 模块说明](DIY模块.md)：手机版门户首页可接管的 Discuz DIY 模块名称及配置方式
+
 ## 兼容说明
 
 主题主要针对 Discuz! X5.0 手机版进行适配。部分 Discuz 模块、第三方插件和自定义 DIY 页面仍可能使用默认模板或插件自身模板，具体显示效果取决于站点启用的功能和插件。

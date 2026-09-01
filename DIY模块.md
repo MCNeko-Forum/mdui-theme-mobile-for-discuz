@@ -1,7 +1,7 @@
 # MDUI 手机版 DIY 模块
 
 手机版门户首页（`touch/portal/index.htm`）的内容块都可以用 Discuz 原生 DIY 模块接管。
-数据层在 [portal_index.php](file:///d:/repos/bbs-app/LocalForumTest/template/MDUI/touch/php/portal_index.php)。
+数据层在 [portal_index.php](touch/php/portal_index.php)。
 
 ## 怎么配
 
