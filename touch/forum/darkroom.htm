@@ -1,0 +1,169 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang darkroom}</mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="home" href="forum.php"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<style>
+	.mdui-darkroom-page { padding:1rem; padding-bottom:2rem; }
+	.mdui-darkroom-intro { display:flex; align-items:flex-start; gap:.75rem; margin-bottom:1rem; padding:1rem; }
+	.mdui-darkroom-intro mdui-icon { flex-shrink:0; color:rgb(var(--mdui-color-error)); font-size:1.75rem; }
+	.mdui-darkroom-intro strong { display:block; margin-bottom:.25rem; font-size:1rem; }
+	.mdui-darkroom-intro span { color:rgb(var(--mdui-color-on-surface-variant)); font-size:.8125rem; line-height:1.6; }
+	.mdui-darkroom-list { display:grid; gap:.75rem; }
+	.mdui-darkroom-card { padding:1rem; }
+	.mdui-darkroom-card.mdui-darkroom-new { animation:mdui-darkroom-in .3s ease-out; }
+	@keyframes mdui-darkroom-in { from { opacity:0; transform:translateY(.5rem); } to { opacity:1; transform:none; } }
+	.mdui-darkroom-head { display:flex; align-items:center; gap:.75rem; min-width:0; }
+	.mdui-darkroom-user { min-width:0; flex:1; }
+	.mdui-darkroom-user a { display:block; overflow:hidden; color:inherit; font-weight:600; text-decoration:none; text-overflow:ellipsis; white-space:nowrap; }
+	.mdui-darkroom-uid { color:rgb(var(--mdui-color-on-surface-variant)); font-size:.72rem; }
+	.mdui-darkroom-action { flex-shrink:0; display:inline-flex; align-items:center; gap:.25rem; padding:.2rem .55rem; border-radius:.35rem; font-size:.75rem; font-weight:600; }
+	.mdui-darkroom-action mdui-icon { font-size:.9rem; }
+	.mdui-darkroom-action--visit { background:rgb(var(--mdui-color-error-container)); color:rgb(var(--mdui-color-on-error-container)); }
+	.mdui-darkroom-action--speak { background:rgb(var(--mdui-color-tertiary-container)); color:rgb(var(--mdui-color-on-tertiary-container)); }
+	.mdui-darkroom-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem .5rem; margin-top:1rem; }
+	.mdui-darkroom-field { min-width:0; }
+	.mdui-darkroom-label { display:block; margin-bottom:.2rem; color:rgb(var(--mdui-color-on-surface-variant)); font-size:.72rem; }
+	.mdui-darkroom-value { display:flex; align-items:center; gap:.25rem; overflow-wrap:anywhere; font-size:.8125rem; line-height:1.5; }
+	.mdui-darkroom-value mdui-icon { flex-shrink:0; font-size:.9rem; color:rgb(var(--mdui-color-error)); }
+	.mdui-darkroom-reason { grid-column:1/-1; padding-top:.75rem; border-top:1px solid rgb(var(--mdui-color-outline-variant)); }
+	.mdui-darkroom-empty { display:grid; min-height:16rem; place-items:center; padding:2rem; text-align:center; }
+	.mdui-darkroom-empty mdui-icon { color:rgb(var(--mdui-color-on-surface-variant)); font-size:3rem; }
+	.mdui-darkroom-empty p { margin:.75rem 0 0; color:rgb(var(--mdui-color-on-surface-variant)); }
+	.mdui-darkroom-more { display:flex; justify-content:center; padding:1.25rem 0 0; }
+	@media (max-width:360px) { .mdui-darkroom-meta { grid-template-columns:1fr; } .mdui-darkroom-reason { grid-column:auto; } }
+</style>
+
+<div class="mdui-darkroom-page">
+	<mdui-card variant="outlined" class="mdui-darkroom-intro">
+		<mdui-icon name="gavel"></mdui-icon>
+		<div><strong>{lang darkroom}</strong><span>这里展示当前处于禁止访问或禁止发言状态的用户及相关处理记录。</span></div>
+	</mdui-card>
+
+	<!--{if $crimelist}-->
+	<div id="mdui_darkroom_list" class="mdui-darkroom-list">
+		<!--{loop $crimelist $crime}-->
+		<mdui-card variant="filled" class="mdui-darkroom-card" id="darkroomuid_$crime[uid]" data-uid="$crime[uid]">
+			<div class="mdui-darkroom-head">
+				<mdui-avatar src="<!--{avatar($crime['uid'], 'small', true)}-->" href="home.php?mod=space&uid=$crime[uid]"></mdui-avatar>
+				<div class="mdui-darkroom-user"><a href="home.php?mod=space&uid=$crime[uid]">$crime[username]</a><span class="mdui-darkroom-uid">UID: $crime[uid]</span></div>
+				<span class="mdui-darkroom-action<!--{if $crime[actiontype] == 5}--> mdui-darkroom-action--visit<!--{else}--> mdui-darkroom-action--speak<!--{/if}-->"><mdui-icon name="<!--{if $crime[actiontype] == 5}-->block<!--{else}-->voice_over_off<!--{/if}-->"></mdui-icon>$crime[action]</span>
+			</div>
+			<div class="mdui-darkroom-meta">
+				<div class="mdui-darkroom-field"><span class="mdui-darkroom-label">{lang crime_dateline}</span><span class="mdui-darkroom-value">$crime[dateline]</span></div>
+				<div class="mdui-darkroom-field"><span class="mdui-darkroom-label">{lang expire_dateline}</span><span class="mdui-darkroom-value"><!--{if $crime[groupexpiryts]}-->$crime[groupexpiry]<!--{else}--><mdui-icon name="all_inclusive"></mdui-icon><span>$crime[groupexpiry]</span><!--{/if}--></span></div>
+				<div class="mdui-darkroom-field mdui-darkroom-reason"><span class="mdui-darkroom-label">{lang crime_reason}</span><span class="mdui-darkroom-value"><!--{if $crime[reason]}-->$crime[reason]<!--{else}-->—<!--{/if}--></span></div>
+			</div>
+		</mdui-card>
+		<!--{/loop}-->
+	</div>
+	<!--{if $dataexist == 1}-->
+	<div class="mdui-darkroom-more"><mdui-button id="darkroommore" variant="tonal" icon="expand_more" data-cid="$cid">{lang more}</mdui-button></div>
+	<!--{/if}-->
+	<!--{else}-->
+	<mdui-card variant="filled" class="mdui-darkroom-empty"><div><mdui-icon name="verified_user"></mdui-icon><p>{lang darkroom_no_users}</p></div></mdui-card>
+	<!--{/if}-->
+</div>
+
+<script type="text/javascript">
+(function() {
+	var more = document.getElementById('darkroommore');
+	if (!more) return;
+
+	var list = document.getElementById('mdui_darkroom_list');
+
+	// 头像地址：复用首张卡片的 avatar.php 地址，仅替换 uid，保持与站点 UCenter 配置一致
+	var avatarBase = '';
+	var firstAvatar = list.querySelector('mdui-avatar');
+	if (firstAvatar) {
+		avatarBase = firstAvatar.getAttribute('src') || '';
+		avatarBase = avatarBase.replace(/([?&])uid=\d+/, '$1uid=');
+	}
+
+	function avatarSrc(uid) {
+		if (avatarBase) return avatarBase.replace(/([?&])uid=/, '$1uid=' + uid);
+		return 'uc_server/avatar.php?uid=' + uid + '&size=small';
+	}
+
+	function escapeHtml(value) {
+		var div = document.createElement('div');
+		div.textContent = value == null ? '' : String(value);
+		return div.innerHTML;
+	}
+
+	function actionClass(actiontype) {
+		return parseInt(actiontype, 10) === 5 ? ' mdui-darkroom-action--visit' : ' mdui-darkroom-action--speak';
+	}
+
+	function actionIcon(actiontype) {
+		return parseInt(actiontype, 10) === 5 ? 'block' : 'voice_over_off';
+	}
+
+	function expiryHtml(item) {
+		if (item.groupexpiryts && parseInt(item.groupexpiryts, 10) > 0) {
+			return escapeHtml(item.groupexpiry);
+		}
+		return '<mdui-icon name="all_inclusive"></mdui-icon><span>' + escapeHtml(item.groupexpiry) + '</span>';
+	}
+
+	function buildCard(item) {
+		var card = document.createElement('mdui-card');
+		card.id = 'darkroomuid_' + item.uid;
+		card.variant = 'filled';
+		card.className = 'mdui-darkroom-card mdui-darkroom-new';
+		card.setAttribute('data-uid', item.uid);
+		card.innerHTML = '<div class="mdui-darkroom-head">' +
+			'<mdui-avatar src="' + avatarSrc(item.uid) + '" href="home.php?mod=space&uid=' + encodeURIComponent(item.uid) + '"></mdui-avatar>' +
+			'<div class="mdui-darkroom-user"><a href="home.php?mod=space&uid=' + encodeURIComponent(item.uid) + '">' + escapeHtml(item.username) + '</a><span class="mdui-darkroom-uid">UID: ' + escapeHtml(item.uid) + '</span></div>' +
+			'<span class="mdui-darkroom-action' + actionClass(item.actiontype) + '"><mdui-icon name="' + actionIcon(item.actiontype) + '"></mdui-icon>' + escapeHtml(item.action) + '</span></div>' +
+			'<div class="mdui-darkroom-meta">' +
+			'<div class="mdui-darkroom-field"><span class="mdui-darkroom-label">{lang crime_dateline}</span><span class="mdui-darkroom-value">' + escapeHtml(item.dateline) + '</span></div>' +
+			'<div class="mdui-darkroom-field"><span class="mdui-darkroom-label">{lang expire_dateline}</span><span class="mdui-darkroom-value">' + expiryHtml(item) + '</span></div>' +
+			'<div class="mdui-darkroom-field mdui-darkroom-reason"><span class="mdui-darkroom-label">{lang crime_reason}</span><span class="mdui-darkroom-value">' + (item.reason ? escapeHtml(item.reason) : '—') + '</span></div></div>';
+		return card;
+	}
+
+	var busy = false;
+	more.addEventListener('click', function() {
+		if (busy) return;
+		busy = true;
+		more.disabled = true;
+		more.loading = true;
+
+		var cid = parseInt(more.getAttribute('data-cid'), 10) || 0;
+		var ajax = new Ajax('JSON');
+		ajax.getJSON('forum.php?mod=misc&action=showdarkroom&ajaxdata=json&cid=' + cid + '&t=' + Date.now(), function(response) {
+			busy = false;
+			var message = response && response.message ? String(response.message).split('|') : [];
+			var data = response && response.data ? response.data : {};
+
+			for (var key in data) {
+				if (!Object.prototype.hasOwnProperty.call(data, key)) continue;
+				var item = data[key];
+				if (document.getElementById('darkroomuid_' + item.uid)) continue;
+				list.appendChild(buildCard(item));
+			}
+
+			if (message[0] === '1' && message[1]) {
+				more.setAttribute('data-cid', message[1]);
+				more.disabled = false;
+				more.loading = false;
+			} else {
+				more.parentNode.style.display = 'none';
+			}
+		}, function() {
+			// 请求失败：恢复按钮允许重试
+			busy = false;
+			more.disabled = false;
+			more.loading = false;
+		});
+	});
+})();
+</script>
+
+<!--{template common/footer}-->

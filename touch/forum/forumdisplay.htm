@@ -258,7 +258,7 @@
 		<mdui-list-item style="opacity:.7;font-size:.875rem">{lang forum_subforums}</mdui-list-item>
 		<!--{loop $sublist $sub}-->
 			<!--{eval $forumurl = !empty($sub['domain']) && !empty($_G['setting']['domain']['root']['forum']) ? $_G['scheme'].'://'.$sub['domain'].'.'.$_G['setting']['domain']['root']['forum'] : 'forum.php?mod=forumdisplay&fid='.$sub['fid'];}-->
-			<mdui-list-item href="$forumurl" rounded><!--{if $sub['icon']}--><mdui-avatar slot="icon" src="<!--{echo get_forumimg($sub['icon'])}-->"></mdui-avatar><!--{else}--><mdui-icon slot="icon" name="folder"></mdui-icon><!--{/if}--><!--{if $sub['permission'] == 1}-->{lang private_forum}<!--{else}-->{$sub['name']}<span slot="description">{lang index_threads}: {$sub['threads']} · {lang index_posts}: {$sub['posts']}</span><!--{/if}--></mdui-list-item>
+			<mdui-list-item href="$forumurl" rounded><!--{if $sub['iconUri']}--><mdui-avatar slot="icon" src="<!--{echo get_forumimg($sub['iconUri'])}-->"></mdui-avatar><!--{else}--><mdui-icon slot="icon" name="folder"></mdui-icon><!--{/if}--><!--{if $sub['permission'] == 1}-->{lang private_forum}<!--{else}-->{$sub['name']}<span slot="description">{lang index_threads}: {$sub['threads']} · {lang index_posts}: {$sub['posts']}</span><!--{/if}--></mdui-list-item>
 			<!--{hook/forumdisplay_subforum_extra_mobile $sub['fid']}-->
 		<!--{/loop}-->
 	</mdui-list>
@@ -273,6 +273,12 @@
 				<!--{if $_G['forum_threadcount']}-->
 					<!--{loop $_G['forum_threadlist'] $key $thread}-->
 						<!--{if $thread['moved']}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
+						<!--{if $thread['displayorder'] > 0}-->
+						<mdui-card variant="filled" clickable href="forum.php?mod=viewthread&tid=$thread['tid']&{if $_GET['archiveid']}archiveid={$_GET['archiveid']}&{/if}extra=$extra" style="grid-column:1/-1;display:flex;align-items:center;gap:.5rem;padding:.75rem;min-width:0">
+							<span style="flex-shrink:0;padding:.1rem .4rem;border-radius:.25rem;background:<!--{if $thread['displayorder'] == 1}-->#1976d2<!--{else}-->#d32f2f<!--{/if}-->;color:#fff;font-size:.75rem;font-weight:600;line-height:1.4">置顶</span>
+							<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500" $thread['highlight']>{$thread['subject']}</span>
+						</mdui-card>
+						<!--{else}-->
 						<mdui-card variant="filled" clickable href="forum.php?mod=viewthread&tid=$thread['tid']&{if $_GET['archiveid']}archiveid={$_GET['archiveid']}&{/if}extra=$extra" style="display:block;overflow:hidden">
 							<!--{hook/forumdisplay_thread_mobile $key}-->
 							<!--{if $thread['cover']}--><img src="$thread['coverpath']" alt="{$thread['subject']}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block"><!--{else}--><div style="width:100%;aspect-ratio:1;display:grid;place-items:center;opacity:.35"><mdui-icon name="image" style="font-size:2rem"></mdui-icon></div><!--{/if}-->
@@ -285,6 +291,7 @@
 							</div>
 							<!--{hook/forumdisplay_thread_foot_mobile $key}-->
 						</mdui-card>
+						<!--{/if}-->
 					<!--{/loop}-->
 				<!--{else}--><div style="grid-column:1/-1;padding:3rem 1rem;text-align:center;opacity:.6">{lang forum_nothreads}</div><!--{/if}-->
 			</div>
@@ -295,6 +302,12 @@
 					<!--{loop $_G['forum_threadlist'] $key $thread}-->
 						<!--{if !$_G['setting']['mobile']['forum']['displayorder3'] && $thread['displayorder'] > 0}-->{eval continue;}<!--{/if}-->
 						<!--{if $thread['moved']}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
+						<!--{if $thread['displayorder'] > 0}-->
+						<mdui-card variant="filled" clickable href="forum.php?mod=viewthread&tid=$thread['tid']&extra=$extra" style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;padding:.75rem;min-width:0">
+							<span style="flex-shrink:0;padding:.1rem .4rem;border-radius:.25rem;background:<!--{if $thread['displayorder'] == 1}-->#1976d2<!--{else}-->#d32f2f<!--{/if}-->;color:#fff;font-size:.75rem;font-weight:600;line-height:1.4">置顶</span>
+							<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500" $thread['highlight']>{$thread['subject']}</span>
+						</mdui-card>
+						<!--{else}-->
 						<mdui-card variant="filled" clickable href="forum.php?mod=viewthread&tid=$thread['tid']&extra=$extra" style="display:block;margin-bottom:.75rem;padding:.75rem">
 							<!--{hook/forumdisplay_thread_mobile $key}-->
 							<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
@@ -313,6 +326,7 @@
 							<!--{if $threadlist_data[$thread['tid']]['attachment']}--><!--{eval $attach_on = 0;}--><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:.5rem"><!--{loop $threadlist_data[$thread['tid']]['attachment'] $value}--><!--{eval $attach_on++; if($attach_on > 9) break;}--><div style="position:relative"><img src="$value" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px"><!--{if count($threadlist_data[$thread['tid']]['attachment']) > 9 && $attach_on == 9}--><span style="position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5);color:#fff">{echo count($threadlist_data[$thread['tid']]['attachment'])}{lang mobtu}</span><!--{/if}--></div><!--{/loop}--></div><!--{/if}-->
 							<!--{hook/forumdisplay_thread_content_mobile $key}--><div style="display:flex;gap:1rem;font-size:.75rem;opacity:.6"><!--{if $thread['typeid']}--><a href="forum.php?mod=forumdisplay&fid=$thread['fid']&filter=typeid&typeid=$thread['typeid']">#{$_G['forum']['threadtypes']['types'][$thread['typeid']]}</a><!--{/if}--><span>{lang views}: {$thread['views']}</span><span>{lang reply}: {$thread['allreplies']}</span><!--{if !empty($_G['setting']['recommendthread']['status']) && $thread['recommends']}--><span><mdui-icon name="thumb_up" style="font-size:.875rem;vertical-align:-2px"></mdui-icon> {$thread['recommends']}</span><!--{/if}--><!--{hook/forumdisplay_thread_foot_mobile $key}--></div>
 						</mdui-card>
+						<!--{/if}-->
 					<!--{/loop}-->
 				<!--{else}--><div style="padding:3rem 1rem;text-align:center;opacity:.6">{lang forum_nothreads}</div><!--{/if}-->
 			</mdui-list>
