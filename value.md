@@ -99,6 +99,56 @@
 
 ***
 
+## `mdui_icons`：Material Icons 图标字体来源
+
+决定 Material Icons 图标字体 CSS 从本地还是指定 CDN 加载。移动版与桌面版共用此设置。
+
+### 可用值
+
+| 变量值             | 资源来源                              |
+| --------------- | --------------------------------- |
+| `local`         | 主题本地 `template/MDUI/static/icons`，默认且推荐 |
+| `cdn`           | 兼容旧值，等同于 `unpkg`                  |
+| `unpkg`         | `https://unpkg.com`               |
+| `jsdelivr`      | `https://cdn.jsdelivr.net`        |
+| `jsdmirror_com` | `https://cdn.jsdmirror.com`       |
+| `jsdmirror_cn`  | `https://cdn.jsdmirror.cn`        |
+| `https://…`     | 任意以 `https://` 开头的自定义 CSS 链接      |
+
+所有外部 CDN 均固定使用 `material-icons@1.13.14` 的 `iconfont/material-icons.css`，包含与本地一致的 5 种图标字体（Filled、Outlined、Round、Sharp、Two Tone）。
+
+### 示例
+
+使用本地图标字体：
+
+```text
+变量名：mdui_icons
+变量值：local
+```
+
+使用 jsDelivr：
+
+```text
+变量名：mdui_icons
+变量值：jsdelivr
+```
+
+使用自定义 CDN：
+
+```text
+变量名：mdui_icons
+变量值：https://example.com/material-icons.css
+```
+
+### 注意
+
+- 变量名不区分大小写，Discuz 会统一转换，但建议按本文的小写写法填写。
+- 自定义链接必须是 `https://` 开头且以 `.css` 结尾的完整地址，否则回退为本地。
+- 该变量只影响图标字体，不影响 MDUI 核心资源，请与 `mdui_resource` 分开配置。
+- 生产环境优先使用 `local`；选择 CDN 前应确认客户端网络可访问对应域名。
+
+***
+
 ## `mdui_my_diy`：“我的”页静态导航模块
 
 在“我的”页的积分、任务、勋章、道具等导航项之后追加静态 HTML。变量为空时整个模块不渲染，不会留下空白。

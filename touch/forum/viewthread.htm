@@ -24,15 +24,22 @@
 .vt_imgs li:has(> img:only-child)::marker { content:none; }
 .vt_imgs li img { border-radius:.35rem; }
 .vt_atts > li { list-style:none; margin:.5rem 0; padding:0; }
-.vt_atts .byg_attach { display:block; margin:0; padding:.65rem .75rem; border:1px solid rgb(var(--mdui-color-outline-variant)); border-radius:.35rem; background:rgb(var(--mdui-color-surface)); overflow:hidden; }
-.vt_atts .byg_attach dd { margin:0; }
-.vt_atts .byg_attach .attnm { display:flex; align-items:center; gap:.4rem; margin:0; }
-.vt_atts .byg_attach .attnm a { position:relative; display:flex; align-items:center; gap:.35rem; min-width:0; color:rgb(var(--mdui-color-primary)); font-weight:500; text-decoration:none; overflow:hidden; overflow-wrap:anywhere; }
-.vt_atts .byg_attach .attnm a::before { content:'↓'; display:inline-flex; flex:0 0 auto; align-items:center; justify-content:center; width:1.15rem; height:1.15rem; border-radius:.2rem; background:rgb(var(--mdui-color-primary)); color:rgb(var(--mdui-color-on-primary)); font-size:.85rem; font-weight:700; }
-.vt_atts .byg_attach .attnm a::after { content:''; position:absolute; left:50%; top:50%; width:1rem; height:1rem; border-radius:50%; background:rgba(var(--mdui-color-primary),.22); transform:translate(-50%,-50%) scale(0); opacity:0; pointer-events:none; }
-.vt_atts .byg_attach .attnm a:active::after { animation:mdui-attach-ripple .45s ease-out; }
-.vt_atts .byg_attach .attnm a img { width:1rem; height:1rem; object-fit:contain; }
-.vt_atts .byg_attach .xg1 { display:block; margin-top:.3rem; padding-left:1.5rem; font-size:.7rem; color:rgb(var(--mdui-color-on-surface-variant)); }
+/* 附件下载卡片：图标+文件名一行，元信息一行，右侧下载按钮垂直居中，整卡涟漪 */
+.vt_atts, .post_attlist { list-style:none; margin:.75rem 0 0; padding:0; }
+.vt_atts > li, .post_attlist { position:relative; display:flex; align-items:center; gap:.6rem; margin:.5rem 0; padding:.7rem .9rem; border:1px solid rgb(var(--mdui-color-outline-variant)); border-radius:.75rem; background:rgb(var(--mdui-color-surface)); overflow:hidden; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.vt_atts > li::before, .post_attlist::before { content:''; position:absolute; left:50%; top:50%; width:1rem; height:1rem; border-radius:50%; background:rgba(var(--mdui-color-primary),.22); transform:translate(-50%,-50%) scale(0); opacity:0; pointer-events:none; }
+.vt_atts > li:active::before, .post_attlist:active::before { animation:mdui-attach-ripple .45s ease-out; }
+.vt_atts > li > a, .post_attlist > a { flex:1 1 auto; min-width:0; display:block; text-decoration:none !important; color:inherit; -webkit-tap-highlight-color:transparent; }
+.vt_atts > li > a:hover, .post_attlist > a:hover { text-decoration:none !important; }
+.vt_atts .tit, .post_attlist .tit { display:block; margin:0; }
+.vt_atts .tit .z, .post_attlist .tit .z { display:inline-flex; vertical-align:-.15rem; margin:0; padding:0; }
+.vt_atts .tit .z img, .post_attlist .tit .z img { width:1.1rem; height:1.1rem; object-fit:contain; }
+.vt_atts .tit .link, .post_attlist .tit .link { display:inline; margin-left:.35rem; color:rgb(var(--mdui-color-primary)); font-weight:500; overflow-wrap:anywhere; }
+.vt_atts .tit p, .post_attlist .tit p { display:inline; margin:0; padding:0; font-size:.7rem; line-height:1.6; color:rgb(var(--mdui-color-on-surface-variant)); }
+.vt_atts .tit p:first-of-type::before, .post_attlist .tit p:first-of-type::before { content:''; display:block; }
+.vt_atts .tit p a, .post_attlist .tit p a { color:rgb(var(--mdui-color-primary)); }
+.vt_atts .att-desc, .post_attlist .att-desc { flex:0 1 100%; margin:0; font-size:.7rem; color:rgb(var(--mdui-color-on-surface-variant)); }
+.vt_atts > li::after, .post_attlist::after { content:'file_download'; flex:0 0 auto; font-family:'Material Icons'; font-weight:normal; font-style:normal; font-size:1.4rem; line-height:1; color:rgb(var(--mdui-color-primary)); -webkit-font-smoothing:antialiased; }
 @keyframes mdui-attach-ripple { from { transform:translate(-50%,-50%) scale(0); opacity:.75; } to { transform:translate(-50%,-50%) scale(16); opacity:0; } }
 #vt_magic_body form, #vt_rate_body form { display:block !important; width:100%; margin:0; }
 #vt_magic_body ul, #vt_rate_body ul { list-style:none; margin:0; padding:0; }
@@ -1286,5 +1293,23 @@ document.addEventListener('click', function (e) {
 })();
 </script>
 <!--{/if}-->
+
+<!-- 附件卡片整卡可点：点击卡片或右侧下载图标即触发内部下载链接；并让涟漪从点击处扩散 -->
+<script>
+document.addEventListener('click', function(e) {
+	var card = e.target.closest ? e.target.closest('.post_attlist, .vt_atts > li') : null;
+	if(card && !e.target.closest('a')) {
+		var a = card.querySelector('a[href]');
+		if(a) a.click();
+		return;
+	}
+	var more = e.target.closest ? e.target.closest('.vt_forum-more') : null;
+	if(more) {
+		var r = more.getBoundingClientRect();
+		more.style.setProperty('--vt-ripple-x', (e.clientX - r.left) + 'px');
+		more.style.setProperty('--vt-ripple-y', (e.clientY - r.top) + 'px');
+	}
+});
+</script>
 
 <!--{template common/footer}-->

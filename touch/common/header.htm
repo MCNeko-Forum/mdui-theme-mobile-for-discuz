@@ -43,7 +43,19 @@
 	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/mdui.css?{VERHASH}" type="text/css" media="all">
 	<script type="module" src="{$_G['style']['styleimgdir']}/mdui.global.js?{VERHASH}"></script>
 	<!--{/if}-->
+	<!--{if $_G['style']['mdui_icons'] == 'unpkg' || $_G['style']['mdui_icons'] == 'cdn'}-->
+	<link rel="stylesheet" href="https://unpkg.com/material-icons@1.13.14/iconfont/material-icons.css" type="text/css" media="all">
+	<!--{elseif $_G['style']['mdui_icons'] == 'jsdelivr'}-->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/material-icons@1.13.14/iconfont/material-icons.css" type="text/css" media="all">
+	<!--{elseif $_G['style']['mdui_icons'] == 'jsdmirror_com'}-->
+	<link rel="stylesheet" href="https://cdn.jsdmirror.com/npm/material-icons@1.13.14/iconfont/material-icons.css" type="text/css" media="all">
+	<!--{elseif $_G['style']['mdui_icons'] == 'jsdmirror_cn'}-->
+	<link rel="stylesheet" href="https://cdn.jsdmirror.cn/npm/material-icons@1.13.14/iconfont/material-icons.css" type="text/css" media="all">
+	<!--{elseif substr($_G['style']['mdui_icons'], 0, 8) == 'https://'}-->
+	<link rel="stylesheet" href="$_G['style']['mdui_icons']" type="text/css" media="all">
+	<!--{else}-->
 	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/icons/material-icons.css?{VERHASH}" type="text/css" media="all">
+	<!--{/if}-->
 	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/style.css?{VERHASH}" type="text/css" media="all">
 	<script src="{STATICURL}js/mobile/jquery.min.js?{VERHASH}"></script>
 	<script src="{STATICURL}js/mobile/common.js?{VERHASH}" charset="{CHARSET}"></script>
@@ -80,6 +92,21 @@
 	<!-- 锚点平滑滚动仅使用主题本地脚本，不随 MDUI CDN 切换。 -->
 	<script src="{$_G['style']['styleimgdir']}/anchor-scroll.js?{VERHASH}" defer></script>
 	<script>mdui.setColorScheme('{if $_G['style']['mdui_color']}$_G['style']['mdui_color']{else}#2B7ACD{/if}');</script>
+	<!-- 折叠组件兼容：spoiler.js 在 head 中执行时按钮尚未渲染，改用事件委托按相邻关系开关内容，并拦截原脚本避免重复切换 -->
+	<script>
+	document.addEventListener('click', function(e) {
+		var btn = e.target.closest ? e.target.closest('.toggleButton') : null;
+		if(!btn) return;
+		var c = btn.nextElementSibling;
+		if(!c || !c.classList || !c.classList.contains('content')) {
+			c = btn.parentElement ? btn.parentElement.querySelector(':scope > .content') : null;
+		}
+		if(c) {
+			c.style.display = (window.getComputedStyle(c).display === 'none') ? 'block' : 'none';
+			e.stopPropagation();
+		}
+	}, true);
+	</script>
 	<!--{if $_G['style']['mdui_addcss']}--><style>$_G['style']['mdui_addcss']</style><!--{/if}-->
 	<!--{if $_G['style']['mdui_head']}--><!--{eval $mdui_head = htmlspecialchars_decode($_G['style']['mdui_head'], ENT_QUOTES);}-->$mdui_head<!--{/if}-->
 	<!--{if $_G['style']['mdui_fonts']}-->

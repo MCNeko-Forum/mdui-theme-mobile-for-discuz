@@ -39,9 +39,6 @@
 		<mdui-button type="submit" name="loginsubmit" value="true" full-width>{lang login}</mdui-button>
 	</form>
 
-	<!--{if $_G['setting']['connect']['allow'] && !$_G['setting']['bbclosed']}-->
-		<mdui-button variant="outlined" full-width href="$_G['connect']['login_url']&statfrom=login_simple" style="margin-top:.75rem">{lang qqconnect:connect_mobile_login}</mdui-button>
-	<!--{/if}-->
 	<!--{if $_G['setting']['regstatus']}-->
 	<div style="display:flex;justify-content:space-between;margin-top:1.5rem">
 		<mdui-button variant="text" href="member.php?mod=logging&action=login&lostpasswd=yes&viewlostpw=1">{lang getpassword}</mdui-button>
