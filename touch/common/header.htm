@@ -107,6 +107,27 @@
 		}
 	}, true);
 	</script>
+	<!-- 侧边栏二级导航：点击右侧箭头仅展开/收起子导航，不触发一级导航链接 -->
+	<style>
+	.mdui-nav-parent .mdui-nav-expand { transition: transform .2s ease; }
+	.mdui-nav-parent.mdui-nav-open .mdui-nav-expand { transform: rotate(180deg); }
+	</style>
+	<script>
+	document.addEventListener('click', function(e) {
+		var btn = e.target.closest ? e.target.closest('.mdui-nav-expand') : null;
+		if(!btn) return;
+		e.preventDefault();
+		e.stopPropagation();
+		var parent = btn.closest('.mdui-nav-parent');
+		if(!parent) return;
+		var open = parent.classList.toggle('mdui-nav-open');
+		var sib = parent.nextElementSibling;
+		while(sib && sib.classList && sib.classList.contains('mdui-nav-sub')) {
+			sib.style.display = open ? '' : 'none';
+			sib = sib.nextElementSibling;
+		}
+	}, true);
+	</script>
 	<!--{if $_G['style']['mdui_addcss']}--><style>$_G['style']['mdui_addcss']</style><!--{/if}-->
 	<!--{if $_G['style']['mdui_head']}--><!--{eval $mdui_head = htmlspecialchars_decode($_G['style']['mdui_head'], ENT_QUOTES);}-->$mdui_head<!--{/if}-->
 	<!--{if $_G['style']['mdui_fonts']}-->
@@ -140,7 +161,23 @@
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>
 		<!--{loop $_G['setting']['navs'] $nav}-->
 			<!--{if is_array($nav) && $nav['available'] && (!$nav['level'] || ($nav['level'] == 1 && $_G['uid']) || ($nav['level'] == 2 && $_G['adminid'] > 0) || ($nav['level'] == 3 && $_G['adminid'] == 1))}-->
+				<!--{eval $mdui_has_sub = false; if(!empty($nav['subs'])): foreach($nav['subs'] as $mdui_sub): if(!$mdui_sub['level'] || ($mdui_sub['level'] == 1 && $_G['uid']) || ($mdui_sub['level'] == 2 && $_G['adminid'] > 0) || ($mdui_sub['level'] == 3 && $_G['adminid'] == 1)): $mdui_has_sub = true; break; endif; endforeach; endif; }-->
+				<!--{if $mdui_has_sub}-->
+				<mdui-list-item class="mdui-nav-parent" href="{$nav['filename']}" rounded>
+					{$nav['navname']}
+					<mdui-icon slot="end-icon" name="keyboard_arrow_down" class="mdui-nav-expand"></mdui-icon>
+				</mdui-list-item>
+				<!--{loop $nav['subs'] $mdui_sub}-->
+					<!--{if !$mdui_sub['level'] || ($mdui_sub['level'] == 1 && $_G['uid']) || ($mdui_sub['level'] == 2 && $_G['adminid'] > 0) || ($mdui_sub['level'] == 3 && $_G['adminid'] == 1)}-->
+					<mdui-list-item class="mdui-nav-sub" href="{$mdui_sub['filename']}"<!--{if $mdui_sub['target'] == 1}--> target="_blank"<!--{/if}--> rounded style="display:none">
+						<mdui-icon slot="icon" name="subdirectory_arrow_right"></mdui-icon>
+						{$mdui_sub['navname']}
+					</mdui-list-item>
+					<!--{/if}-->
+				<!--{/loop}-->
+				<!--{else}-->
 				<mdui-list-item href="{$nav['filename']}" rounded>{$nav['navname']}</mdui-list-item>
+				<!--{/if}-->
 			<!--{/if}-->
 		<!--{/loop}-->
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>

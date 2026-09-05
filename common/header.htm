@@ -110,7 +110,23 @@
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>
 		<!--{loop $_G['setting']['navs'] $nav}-->
 			<!--{if is_array($nav) && $nav['available'] && (!$nav['level'] || ($nav['level'] == 1 && $_G['uid']) || ($nav['level'] == 2 && $_G['adminid'] > 0) || ($nav['level'] == 3 && $_G['adminid'] == 1))}-->
+				<!--{eval $mdui_has_sub = false; if(!empty($nav['subs'])): foreach($nav['subs'] as $mdui_sub): if(!$mdui_sub['level'] || ($mdui_sub['level'] == 1 && $_G['uid']) || ($mdui_sub['level'] == 2 && $_G['adminid'] > 0) || ($mdui_sub['level'] == 3 && $_G['adminid'] == 1)): $mdui_has_sub = true; break; endif; endforeach; endif; }-->
+				<!--{if $mdui_has_sub}-->
+				<mdui-list-item class="mdui-nav-parent" href="{$nav['filename']}" rounded>
+					{$nav['navname']}
+					<mdui-icon slot="end-icon" name="keyboard_arrow_down" class="mdui-nav-expand"></mdui-icon>
+				</mdui-list-item>
+				<!--{loop $nav['subs'] $mdui_sub}-->
+					<!--{if !$mdui_sub['level'] || ($mdui_sub['level'] == 1 && $_G['uid']) || ($mdui_sub['level'] == 2 && $_G['adminid'] > 0) || ($mdui_sub['level'] == 3 && $_G['adminid'] == 1)}-->
+					<mdui-list-item class="mdui-nav-sub" href="{$mdui_sub['filename']}"<!--{if $mdui_sub['target'] == 1}--> target="_blank"<!--{/if}--> rounded style="display:none">
+						<mdui-icon slot="icon" name="subdirectory_arrow_right"></mdui-icon>
+						{$mdui_sub['navname']}
+					</mdui-list-item>
+					<!--{/if}-->
+				<!--{/loop}-->
+				<!--{else}-->
 				<mdui-list-item href="{$nav['filename']}" rounded>{$nav['navname']}</mdui-list-item>
+				<!--{/if}-->
 			<!--{/if}-->
 		<!--{/loop}-->
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>
