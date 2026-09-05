@@ -100,7 +100,7 @@
 				<!--{/if}-->
 			<!--{/loop}-->
 		<!--{/if}-->
-		<img class="mdui-img-circle" style="float:left;margin-top:6px;margin-right:12px;width:48px;height:48px;" src="uc_server/avatar.php?uid=$space['uid']&size=middle"/>
+		<img class="mdui-img-circle" style="float:left;margin-top:6px;margin-right:12px;width:48px;height:48px;" src="<!--{avatar($space['uid'], 'middle', true)}-->"/>
 
 		<div class="mdui-card-primary-title">
 			{$space[username]}
