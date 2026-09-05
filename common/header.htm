@@ -77,6 +77,28 @@
 		}
 	}, true);
 	</script>
+	<!-- X5 头像懒加载兼容：mobile/common.js 缺少 loadAvatar()，手动把 _avt 头像的 data-src 转为 src（修复 ahome_horn 等插件头像不显示） -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		var defurl = typeof DEFAULTAVATAR != 'undefined' ? DEFAULTAVATAR : './data/avatar/noavatar.svg';
+		var avatarurl = (typeof DEFAULTAVATAR != 'undefined' && DEFAULTAVATAR.lastIndexOf('/') !== -1) ? DEFAULTAVATAR.substring(0, DEFAULTAVATAR.lastIndexOf('/') + 1) : '';
+		document.querySelectorAll('img._avt').forEach(function(img) {
+			img.onerror = function() { this.onerror = null; this.src = defurl; };
+			if(img.dataset.uid && avatarurl) {
+				var size = img.dataset.size || 'middle';
+				var uid = img.dataset.uid.toString().padStart(9, '0');
+				var random = img.dataset.random ? '?r=' + img.dataset.random : '';
+				img.dataset.src = avatarurl + uid.substring(0, 3) + '/' + uid.substring(3, 5) + '/' + uid.substring(5, 7) + '/' + uid.substring(7) + '_avatar_' + size + '.jpg' + random;
+				delete img.dataset.uid; delete img.dataset.size; delete img.dataset.random;
+			}
+			if(img.dataset.src) {
+				img.src = img.dataset.src;
+				delete img.dataset.src;
+			}
+			img.classList.remove('_avt');
+		});
+	});
+	</script>
 	<!--{if $_G['style']['mdui_addcss']}--><style>$_G['style']['mdui_addcss']</style><!--{/if}-->
 	<!--{if $_G['style']['mdui_head']}--><!--{eval $mdui_head = htmlspecialchars_decode($_G['style']['mdui_head'], ENT_QUOTES);}-->$mdui_head<!--{/if}-->
 	<!--{if $_G['style']['mdui_fonts']}-->
