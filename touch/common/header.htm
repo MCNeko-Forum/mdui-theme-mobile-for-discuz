@@ -72,7 +72,7 @@
 		var scriptNode = document.createElement('script');
 		scriptNode.type = 'text/javascript';
 		scriptNode.id = id;
-		scriptNode.src = 'misc.php?mod=seccode&action=update&idhash=' + idhash + '&' + Math.random() + '&modid=' + modid;
+		scriptNode.src = 'misc.php?mod=seccode&action=update&mobile=2&idhash=' + idhash + '&' + Math.random() + '&modid=' + modid;
 		document.getElementsByTagName('head')[0].appendChild(scriptNode);
 	}
 	function updatesecqaa(idhash, tpl, modid) {
@@ -85,9 +85,66 @@
 		var scriptNode = document.createElement('script');
 		scriptNode.type = 'text/javascript';
 		scriptNode.id = id;
-		scriptNode.src = 'misc.php?mod=secqaa&action=update&idhash=' + idhash + '&' + Math.random() + '&modid=' + modid;
+		scriptNode.src = 'misc.php?mod=secqaa&action=update&mobile=2&idhash=' + idhash + '&' + Math.random() + '&modid=' + modid;
 		document.getElementsByTagName('head')[0].appendChild(scriptNode);
 	}
+	// 单独刷新安全验证：题目换新、答案输入框清空、验证码换图
+	// ponytail: X5 移动版 common.js 只调用未定义 evalscript（桌面版才有），
+	// 核心验证码/问答刷新脚本会因此中断；此垫片仅透传字符串（刷新注入内容
+	// 不含 <script>），含脚本时需移植桌面版完整实现
+	window.evalscript = window.evalscript || function (s) { return s; };
+	window.nekoSecRefresh = function () {
+		document.querySelectorAll('input[name="secqaahash"]').forEach(function (i) {
+			window.updatesecqaa && updatesecqaa(i.value);
+		});
+		document.querySelectorAll('mdui-text-field[name="secanswer"], input[name="secanswer"]').forEach(function (i) { i.value = ''; });
+		document.querySelectorAll('input[name="seccodehash"]').forEach(function (i) {
+			window.updateseccode && updateseccode(i.value);
+		});
+		document.querySelectorAll('input[name="seccodeverify"]').forEach(function (i) { i.value = ''; });
+	};
+	// 安全验证表单 AJAX 提交：注册/登录及任何带安全问答的表单，出错走 Discuz
+	// handlekey 回调协议（inajax=1），底部 snackbar 提示并局部刷新，不再跳整页
+	window.errorhandle_nekoerr = function (msg) {
+		mduiTip(msg, true);
+		window.nekoSecRefresh();
+	};
+	window.succeedhandle_nekoerr = function (url, msg) {
+		// 成功也走 snackbar 提示，停留 2 秒再跳转，否则用户感知不到成功
+		if (msg) mduiTip(msg);
+		if (url) setTimeout(function () { location.href = String(url).replace(/&amp;/g, '&'); }, msg ? 2000 : 0);
+	};
+	document.addEventListener('submit', function (e) {
+		var f = e.target;
+		if (e.defaultPrevented || !(f.id === 'registerform' || f.id === 'loginform' || f.querySelector('input[name="secqaahash"]'))) return;
+		e.preventDefault();
+		// 剥离 mobile 参数：inajax 响应与手机模式无关，但带 mobile 参数会被
+		// Discuz _init_mobile 按 UA 判定 302 踢回桌面版（fetch 无法自定义 UA），
+		// POST 数据随重定向丢失，表现为点注册按钮毫无提示
+		var action = (f.getAttribute('action') || '').replace(/([?&])mobile=[^&]*&?/g, '$1').replace(/[?&]+$/, '');
+		f.action = action;
+		fetch(action + (action.indexOf('?') < 0 ? '?' : '&') + 'inajax=1&handlekey=nekoerr', {
+			method: 'POST',
+			body: new FormData(f),
+			credentials: 'same-origin'
+		}).then(function (r) { return r.text(); }).then(function (t) {
+			var m = t.match(/<!\[CDATA\[([\s\S]*)\]\]>/);
+			var box = document.createElement('div');
+			box.innerHTML = m ? m[1] : t;
+			var fired = false;
+			box.querySelectorAll('script').forEach(function (old) {
+				var code = old.textContent || '';
+				if (!/errorhandle_nekoerr|succeedhandle_nekoerr|window\.location\.href/.test(code)) return;
+				fired = true;
+				var s = document.createElement('script');
+				s.textContent = code;
+				document.body.appendChild(s);
+				s.remove();
+			});
+			// 兜底：响应里没有回调/跳转脚本（插件输出脏数据等）时退回整页提交，功能不断
+			if (!fired) f.submit();
+		}).catch(function () { f.submit(); });
+	});
 	</script>
 	<!-- 锚点平滑滚动仅使用主题本地脚本，不随 MDUI CDN 切换。 -->
 	<script src="{$_G['style']['styleimgdir']}/anchor-scroll.js?{VERHASH}" defer></script>

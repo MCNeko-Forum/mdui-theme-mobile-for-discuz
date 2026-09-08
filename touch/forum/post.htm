@@ -226,6 +226,8 @@ window.postInsert = function (code) {
 				}, 1000);
 			} else {
 				button.loading = false;
+				// 出错（含验证问答/验证码错误）时换新题并清空答案，留在本页修正
+				window.nekoSecRefresh && nekoSecRefresh();
 			}
 		}).catch(function () {
 			button.loading = false;

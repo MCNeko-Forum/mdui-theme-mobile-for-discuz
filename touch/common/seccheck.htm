@@ -3,8 +3,13 @@
 	$sectpl = str_replace("'", "\'", $sectpl);
 }
 <!--{if $secqaacheck}-->
-<div class="mdui-seccheck"><span id="secqaa_q$sechash" class="mdui-seccheck-content"></span></div>
-<script type="text/javascript" reload="1">updatesecqaa('q$sechash', '$sectpl', '{$_G[basescript]}::{CURMODULE}');</script>
+<!--{eval $question = make_secqaa();}-->
+<div class="mdui-seccheck">
+	<label>{lang secqaa}</label>
+	<div class="mdui-seccheck-question"><span id="secqaa_$sechash"><span id="vsecqaa_$sechash"><a href="javascript:;" class="xi2" onclick="updatesecqaa('$sechash');">$question</a></span></span></div>
+	<input name="secqaahash" type="hidden" value="$sechash" />
+	<mdui-text-field name="secanswer" id="secqaaverify_$sechash" label="{lang secqaa}" variant="outlined"></mdui-text-field>
+</div>
 <!--{/if}-->
 <!--{if $seccodecheck}-->
 <div class="mdui-seccheck"><span id="seccode_c$sechash" class="mdui-seccheck-content"></span></div>
