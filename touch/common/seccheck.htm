@@ -3,7 +3,16 @@
 	$sectpl = str_replace("'", "\'", $sectpl);
 }
 <!--{if $secqaacheck}-->
-<!--{eval $question = make_secqaa();}-->
+<!--{eval
+	// 核心 helper_seccheck::_create 写 cookie 的键取决于 GET 里的 hash 参数：
+	// 手机 UA（IN_MOBILE）固定写 secqaa，桌面 UA 写带 secqaahash 后缀的键。同步渲染时
+	// 渲染请求 GET 里没有 hash，导致两种键不一致，桌面浏览器提交必报“验证问答填写错误”。
+	// 这里预先注入 hash，让写入键与提交时读取键一致，两种 UA 通吃。
+	// 注意：注释里不能写花括号形式的模板标签，否则编译器会错误解析。
+	$_GET['secqaahash'] = $sechash;
+	$question = make_secqaa();
+	unset($_GET['secqaahash']);
+}-->
 <div class="mdui-seccheck">
 	<label>{lang secqaa}</label>
 	<div class="mdui-seccheck-question"><span id="secqaa_$sechash"><span id="vsecqaa_$sechash"><a href="javascript:;" class="xi2" onclick="updatesecqaa('$sechash');">$question</a></span></span></div>

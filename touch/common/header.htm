@@ -141,8 +141,16 @@
 				document.body.appendChild(s);
 				s.remove();
 			});
-			// 兜底：响应里没有回调/跳转脚本（插件输出脏数据等）时退回整页提交，功能不断
-			if (!fired) f.submit();
+			// 兜底：响应里没有回调/跳转脚本时，提取消息文字弹消息条（如 showmessage
+			// 带 handle=>false 的错误，如邮箱不合法），避免整页跳转丢失上下文；
+			// 完全解析不出的脏数据才退回整页提交
+			if (!fired) {
+				box.querySelectorAll('script').forEach(function (s) { s.remove(); });
+				var mt = box.querySelector('#messagetext') || box;
+				var txt = mt.textContent.replace(/\s+/g, ' ').trim();
+				if (txt) { mduiTip(txt, true); window.nekoSecRefresh(); }
+				else f.submit();
+			}
 		}).catch(function () { f.submit(); });
 	});
 	</script>

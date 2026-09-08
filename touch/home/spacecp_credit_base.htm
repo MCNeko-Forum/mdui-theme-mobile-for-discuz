@@ -4,7 +4,22 @@
 <!--{subtemplate home/spacecp_credit_header}-->
 <!--{hook/spacecp_credit_top}-->
 
-<!--{if $_GET['op'] == 'exchange'}-->
+<!--{if $_GET['op'] == 'transfer'}-->
+	<!--{if $_G['setting']['transferstatus'] && $_G['group']['allowtransfer']}-->
+	<mdui-card variant="filled" class="mdui-credit-exchange-card">
+		<div class="mdui-credit-exchange-title">{lang memcp_credits_transfer}</div>
+		<form id="transferform" method="post" autocomplete="off" action="home.php?mod=spacecp&ac=credit&op=transfer">
+			<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="transfersubmit" value="true">
+			<mdui-text-field name="transferamount" type="number" value="0" label="{lang memcp_credits_transfer}" required></mdui-text-field>
+			<mdui-text-field name="to" label="{lang credits_give}" required></mdui-text-field>
+			<mdui-text-field name="password" type="password" label="{lang transfer_login_password}" toggle-password required></mdui-text-field>
+			<mdui-text-field name="transfermessage" label="{lang credits_transfer_message}"></mdui-text-field>
+			<div class="mdui-credit-exchange-hint">{lang memcp_credits_transfer_min_balance} $_G['setting']['transfermincredits'] {$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][9]]['unit']}<!--{if intval($taxpercent) > 0}--> · {lang credits_tax} $taxpercent<!--{/if}--></div>
+			<mdui-button type="submit" variant="filled" full-width>{lang memcp_credits_transfer}</mdui-button>
+		</form>
+	</mdui-card>
+	<!--{else}--><mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">积分转账暂未开启</mdui-card><!--{/if}-->
+<!--{elseif $_GET['op'] == 'exchange'}-->
 	<!--{if $_G['setting']['exchangestatus'] && ($_G['setting']['extcredits'] || $_CACHE['creditsettings'])}-->
 	<mdui-card variant="filled" class="mdui-credit-exchange-card">
 		<div class="mdui-credit-exchange-title">{lang exchange_credits}</div>

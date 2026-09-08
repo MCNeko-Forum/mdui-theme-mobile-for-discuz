@@ -1,0 +1,47 @@
+<!--{eval $nofooter = 1; $actives = array('account' => 1);}-->
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+
+<mdui-card id="neko_acct_box" variant="filled" style="display:block;padding:1rem">
+	<div style="font-size:.9375rem;margin-bottom:1rem">
+		<!--{if $method == 'bindmobile'}-->{lang action_account_security_set}<!--{else}-->{lang action_account_security_verify}<!--{/if}--> · {lang action_account_security_type_email}
+	</div>
+	<form method="post" autocomplete="off" action="home.php?mod=spacecp&ac=account&op=verify&method=$method&verify=email&formhash={FORMHASH}">
+		<input type="hidden" name="security_submit" value="true">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<!--{if $method == 'chgemail' && empty($_G['member']['email'])}-->
+		<mdui-text-field id="secemail" name="email" label="{lang email}" type="email" style="margin-bottom:1rem"></mdui-text-field>
+		<!--{else}-->
+		<!--{eval $email_arr = explode('@', $_G['member']['email']);}-->
+		<div style="font-size:.875rem;margin-bottom:1rem"><!--{echo substr($email_arr[0], 0, 3).'****'.'@'.$email_arr[1];}--></div>
+		<input type="hidden" name="email" value="{$_G['member']['email']}">
+		<!--{/if}-->
+		<div style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:1rem">
+			<mdui-text-field name="seccode" label="{lang seccode}" style="flex:1"></mdui-text-field>
+			<mdui-button type="button" variant="tonal" id="secemail_send" style="margin-top:.25rem">{lang send}</mdui-button>
+		</div>
+		<mdui-button type="submit" variant="filled" full-width>{lang action_account_security_submit}</mdui-button>
+	</form>
+</mdui-card>
+
+<script>
+(function () {
+	var btn = document.getElementById('secemail_send');
+	if (!btn) return;
+	btn.addEventListener('click', function () {
+		var input = document.getElementById('secemail');
+		var email = input ? input.value : '{$_G['member']['email']}';
+		if (!email) { if (window.mduiTip) mduiTip('请先填写邮箱'); return; }
+		fetch('misc.php?mod=secemailseccode&action=send&svctype=1&email=' + encodeURIComponent(email) + '&inajax=1', {credentials: 'same-origin'})
+			.then(function (r) { return r.text(); })
+			.then(function (t) {
+				var m = t.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
+				var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '发送失败';
+				if (window.mduiTip) mduiTip(text || '发送成功');
+			})
+			.catch(function () { if (window.mduiTip) mduiTip('发送失败'); });
+	});
+})();
+</script>
+</div>
+<!--{template common/footer}-->

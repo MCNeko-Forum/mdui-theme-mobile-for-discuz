@@ -1,0 +1,63 @@
+<!--{eval $nofooter = 1; $actives = array('account' => 1);}-->
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+
+<mdui-card id="neko_acct_box" variant="filled" style="display:block;padding:1rem">
+	<div style="font-size:.9375rem;margin-bottom:1rem">
+		<!--{if $method == 'bindmobile'}-->{lang action_account_security_set}<!--{else}-->{lang action_account_security_verify}<!--{/if}--> · {lang action_account_security_type_mobile}
+	</div>
+	<form method="post" autocomplete="off" action="home.php?mod=spacecp&ac=account&op=verify&method=$method&verify=secmobile&formhash={FORMHASH}">
+		<input type="hidden" name="security_submit" value="true">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<!--{if $method == 'bindmobile' && empty($_G['member']['secmobile'])}-->
+		<!--{eval $smssupportedccarr = $_G['setting']['smssupportedcc'] ? explode("\r\n", $_G['setting']['smssupportedcc']) : array();}-->
+		<mdui-select id="secmobicc" name="secmobicc" label="{lang secmobile}" style="margin-bottom:1rem">
+			<!--{if !empty($smssupportedccarr)}-->
+			<!--{loop $smssupportedccarr $cc_value}-->
+			<!--{eval $cc_value_arr = explode('=', $cc_value);}-->
+			<mdui-menu-item value="$cc_value_arr[0]"<!--{if $cc_value_arr[0] == $_G['setting']['smsdefaultcc']}--> selected<!--{/if}-->>+{$cc_value_arr[0]} {$cc_value_arr[1]}</mdui-menu-item>
+			<!--{/loop}-->
+			<!--{else}-->
+			<mdui-menu-item value="{$_G['setting']['smsdefaultcc']}" selected>+{$_G['setting']['smsdefaultcc']}</mdui-menu-item>
+			<!--{/if}-->
+		</mdui-select>
+		<mdui-text-field id="secmobile_input" name="secmobile" type="number" label="{lang secmobile}" style="margin-bottom:1rem"></mdui-text-field>
+		<input type="hidden" name="idstring_v" value="$idstring_v">
+		<input type="hidden" name="sign_v" value="$sign_v">
+		<!--{else}-->
+		<div style="font-size:.875rem;margin-bottom:1rem">{lang secmobile}: +{$_G['member']['secmobicc']} <!--{eval echo substr($_G['member']['secmobile'], 0, 3).'****'.substr($_G['member']['secmobile'], -3);}--></div>
+		<input type="hidden" name="secmobicc" value="{$_G['member']['secmobicc']}">
+		<input type="hidden" name="secmobile" value="{$_G['member']['secmobile']}">
+		<!--{/if}-->
+		<div style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:1rem">
+			<mdui-text-field id="secmobseccode" name="secmobseccode" label="{lang secmobseccode}" style="flex:1"></mdui-text-field>
+			<mdui-button type="button" variant="tonal" id="secmob_send" style="margin-top:.25rem">{lang send}</mdui-button>
+		</div>
+		<mdui-button type="submit" variant="filled" full-width>{lang action_account_security_submit}</mdui-button>
+	</form>
+</mdui-card>
+
+<script>
+(function () {
+	var btn = document.getElementById('secmob_send');
+	if (!btn) return;
+	btn.addEventListener('click', function () {
+		var cc = document.getElementById('secmobicc');
+		var visible = document.getElementById('secmobile_input');
+		var hidden = document.querySelector('input[name=secmobile]');
+		var mobile = (visible && visible.value) ? visible.value : (hidden ? hidden.value : '');
+		if (!mobile || mobile.length < 5) { if (window.mduiTip) mduiTip('请先填写手机号'); return; }
+		var ccval = cc ? cc.value : '{$_G['member']['secmobicc']}';
+		fetch('misc.php?mod=secmobseccode&action=send&svctype=1&secmobicc=' + encodeURIComponent(ccval) + '&secmobile=' + encodeURIComponent(mobile) + '&inajax=1', {credentials: 'same-origin'})
+			.then(function (r) { return r.text(); })
+			.then(function (t) {
+				var m = t.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
+				var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '发送失败';
+				if (window.mduiTip) mduiTip(text || '发送成功');
+			})
+			.catch(function () { if (window.mduiTip) mduiTip('发送失败'); });
+	});
+})();
+</script>
+</div>
+<!--{template common/footer}-->

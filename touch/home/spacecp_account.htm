@@ -1,0 +1,298 @@
+<!--{eval $nofooter = 1; $actives = array('account' => 1);}-->
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+
+<!--{eval $creditExtra = !empty($_G['setting']['creditstransextra']['13']) ? $_G['setting']['creditstransextra']['13'] : $_G['setting']['credittrans'];}-->
+<!--{eval $extcredit = $_G['setting']['extcredits'][$creditExtra];}-->
+<mdui-card variant="filled" style="display:block;padding:.5rem 0;margin-bottom:1rem">
+	<div style="padding:.75rem 1rem .25rem;font-size:.8125rem;opacity:.7">{lang action_account_title_security}</div>
+	<mdui-list style="padding:0">
+		<!--{if $_G['setting']['security_rename']}-->
+		<mdui-list-item nonclickable>
+			{lang action_account_security_type_rename}: {$_G['member']['username']}
+			<span slot="description">
+				{lang action_account_security_type_rename_comment}
+				<!--{if $_G['setting']['chgusername']['max_times'] > 0}-->，已改 {echo table_common_member_username_history::t()->count_by_uid($_G['uid']);} / {$_G['setting']['chgusername']['max_times']} 次<!--{/if}-->
+				<!--{if $_G['setting']['chgusername']['credits_pay'] > 0}-->，需支付 {$_G['setting']['chgusername']['credits_pay']} {$extcredit['unit']} {$extcredit['title']}<!--{/if}-->
+			</span>
+			<span slot="end-icon">
+				<!--{if getuserprofile('extcredits'.$creditExtra) < $_G['setting']['chgusername']['credits_pay'] || ($_G['member']['credits'] < $_G['setting']['chgusername']['credits_threshold'] && !in_array($_G['member']['groupid'], (array)$_G['setting']['chgusername']['credits_unlimit_group']))}-->
+				<span style="opacity:.5">{lang action_account_operate_chg}</span>
+				<!--{else}-->
+				<mdui-button variant="tonal" data-acct="home.php?mod=spacecp&ac=account&op=verify&method=chgusername&formhash={FORMHASH}">{lang action_account_operate_chg}</mdui-button>
+				<!--{/if}-->
+			</span>
+		</mdui-list-item>
+		<!--{/if}-->
+		<!--{if $_G['member']['loginname'] != $_G['member']['username']}-->
+		<mdui-list-item nonclickable>
+			{lang loginname}
+			<span slot="description">{$_G['member']['loginname']}</span>
+		</mdui-list-item>
+		<!--{/if}-->
+		<!--{if $_G['setting']['security_password']}-->
+		<mdui-list-item nonclickable>
+			{lang action_account_security_type_password}
+			<span slot="description">
+				******
+				<!--{if $_G['member']['freeze'] == 1}--><span style="color:rgb(var(--mdui-color-error))">{lang freeze_pw_tips}</span><!--{/if}-->
+				<!--{if $pwdexpire == 1}-->{lang pwdexpire_1}<!--{elseif $pwdexpire == 2}--><span style="color:rgb(var(--mdui-color-error))">{lang pwdexpire_2}</span><!--{/if}-->
+			</span>
+			<span slot="end-icon"><mdui-button variant="tonal" data-acct="home.php?mod=spacecp&ac=account&op=verify&method=chgpassword&formhash={FORMHASH}">{lang action_account_operate_password_modify}</mdui-button></span>
+		</mdui-list-item>
+		<!--{/if}-->
+		<!--{if $_G['setting']['security_question']}-->
+		<mdui-list-item nonclickable>
+			{lang action_account_security_type_question}
+			<span slot="description">{lang action_account_security_type_question_comment}</span>
+			<span slot="end-icon"><mdui-button variant="tonal" data-acct="home.php?mod=spacecp&ac=account&op=verify&method=chgquestion&formhash={FORMHASH}">{lang action_account_operate_chg}</mdui-button></span>
+		</mdui-list-item>
+		<!--{/if}-->
+		<!--{if $_G['setting']['security_email']}-->
+		<mdui-list-item nonclickable>
+			{lang action_account_security_type_email}
+			<span slot="description">
+				<!--{if $_G['member']['email']}-->
+					<!--{eval $email_arr = explode('@', $_G['member']['email']);}-->
+					<!--{echo substr($email_arr[0], 0, 3).'****'.'@'.$email_arr[1];}-->
+					<!--{if $_G['member']['emailstatus']}-->
+						<span style="color:rgb(var(--mdui-color-primary))">（{lang action_account_status_active}）</span>
+					<!--{else}-->
+						<a href="home.php?mod=spacecp&ac=account&op=verifyemail&method=resend&formhash={FORMHASH}" style="color:rgb(var(--mdui-color-error))">（{lang action_account_operate_email_active}）</a>
+					<!--{/if}-->
+				<!--{else}-->
+					{lang action_account_security_type_data_empty}
+				<!--{/if}-->
+				<!--{if $_G['member']['freeze'] == 2}--><span style="color:rgb(var(--mdui-color-error))">{lang freeze_email_tips}</span><!--{/if}-->
+			</span>
+			<span slot="end-icon"><mdui-button variant="tonal" data-acct="home.php?mod=spacecp&ac=account&op=verify&method=chgemail&formhash={FORMHASH}">{lang action_account_operate_chg}</mdui-button></span>
+		</mdui-list-item>
+		<!--{/if}-->
+		<!--{if $_G['setting']['security_mobile']}-->
+		<mdui-list-item nonclickable>
+			{lang action_account_security_type_mobile}
+			<span slot="description">
+				<!--{if $_G['member']['secmobile']}-->
+					<!--{if $_G['member']['secmobicc']}-->+{$_G['member']['secmobicc']} <!--{/if}-->
+					<!--{eval echo substr($_G['member']['secmobile'], 0, 3).'****'.substr($_G['member']['secmobile'], -3);}-->
+				<!--{else}-->
+					{lang action_account_security_type_data_empty}
+				<!--{/if}-->
+			</span>
+			<span slot="end-icon">
+				<!--{if !$_G['member']['secmobile']}-->
+				<mdui-button variant="tonal" data-acct="home.php?mod=spacecp&ac=account&op=verify&method=bindmobile&formhash={FORMHASH}">{lang action_account_operate_bind}</mdui-button>
+				<!--{else}-->
+				<mdui-button variant="tonal" data-acct="home.php?mod=spacecp&ac=account&op=verify&method=unbindmobile&formhash={FORMHASH}">{lang action_account_operate_unbind}</mdui-button>
+				<!--{/if}-->
+			</span>
+		</mdui-list-item>
+		<!--{/if}-->
+		<!--{if $_G['setting']['security_logoff']}-->
+		<mdui-list-item nonclickable>
+			{lang action_account_security_type_logoff}
+			<span slot="description">{lang action_account_security_type_logoff_comment}</span>
+			<span slot="end-icon"><mdui-button variant="tonal" data-acct="home.php?mod=spacecp&ac=account&op=verify&method=logoff&formhash={FORMHASH}">{lang action_account_operate_logoff_set}</mdui-button></span>
+		</mdui-list-item>
+		<!--{/if}-->
+		<!--{if $_G['member']['freeze'] == 2 || $_G['member']['freeze'] == -1}-->
+		<mdui-list-item nonclickable>
+			{lang action_account_security_type_freeze}
+			<span slot="description">
+				<!--{if $_G['member']['freeze'] == 2}-->{lang freeze_reason_comment}
+				<!--{else}--><span style="color:rgb(var(--mdui-color-error))">{lang freeze_admincp_tips}</span><!--{/if}-->
+			</span>
+			<span slot="end-icon"><mdui-button variant="tonal" data-acct="home.php?mod=spacecp&ac=account&op=verify&method=freeze&formhash={FORMHASH}">{lang action_account_operate_chg}</mdui-button></span>
+		</mdui-list-item>
+		<!--{/if}-->
+	</mdui-list>
+</mdui-card>
+
+<!--{if $list}-->
+<mdui-card variant="filled" style="display:block;padding:.5rem 0">
+	<div style="padding:.75rem 1rem .25rem;font-size:.8125rem;opacity:.7">{lang action_account_title_third_login_method}</div>
+	<mdui-list style="padding:0">
+		<!--{loop $list $key $value}-->
+		<mdui-list-item nonclickable>
+			{$value[1]}
+			<span slot="description">
+				<!--{if !empty($account_list[$value[0]]['account'])}-->
+					{$account_list[$value[0]]['bindname']}
+				<!--{else}-->
+					{lang action_account_status_unbind}
+				<!--{/if}-->
+			</span>
+			<span slot="end-icon">
+				<!--{if !empty($account_list[$value[0]]['account'])}-->
+				<mdui-button variant="tonal" data-href="home.php?mod=spacecp&ac=account&op=unbind&method={$value[0]}&formhash={FORMHASH}">{lang action_account_operate_unbind}</mdui-button>
+				<!--{else}-->
+				<mdui-button variant="tonal" data-href="login.php?method={$value[0]}&formhash={FORMHASH}">{lang action_account_operate_bind}</mdui-button>
+				<!--{/if}-->
+			</span>
+		</mdui-list-item>
+		<!--{/loop}-->
+	</mdui-list>
+</mdui-card>
+<!--{/if}-->
+<!--{hook/spacecp_account_bottom}-->
+
+<!-- 账号安全修改弹窗：内容按需从对应 verify 页抓取（#neko_acct_box），站方开没开安全验证都能自适应 -->
+<mdui-dialog id="neko_acct_dlg" close-on-esc close-on-overlay-click class="neko-acct-dlg">
+	<div id="neko_acct_body" style="padding:.25rem 0;max-height:62vh;overflow-y:auto"></div>
+</mdui-dialog>
+<style>
+.neko-acct-dlg::part(panel) { width: calc(100vw - 48px); max-width: 560px; }
+</style>
+<script>
+(function () {
+	var dlg = document.getElementById('neko_acct_dlg');
+	if (!dlg) return;
+	var body = document.getElementById('neko_acct_body');
+	function tip(m, err) { window.mduiTip && mduiTip(m, err); }
+	// innerHTML 注入的 script 不会执行，手动重建（短信验证码发送按钮依赖它）
+	function runScripts(root) {
+		root.querySelectorAll('script').forEach(function (old) {
+			var s = document.createElement('script');
+			s.textContent = old.textContent;
+			document.body.appendChild(s);
+			s.remove();
+		});
+	}
+	function clean(u) {
+		return String(u).replace(/&amp;/g, '&').replace(/([?&])mobile=[^&]*&?/g, '$1').replace(/[?&]+$/, '');
+	}
+	// 表单底部：提交按钮左侧并排一个取消按钮（各占一半，取消用淡色），点取消关弹窗
+	function decorate() {
+		var sub = body.querySelector('form mdui-button[type="submit"]');
+		if (!sub || sub.dataset.nekoRow) return;
+		sub.dataset.nekoRow = '1';
+		sub.removeAttribute('full-width');
+		sub.style.flex = '1';
+		var row = document.createElement('div');
+		row.style.cssText = 'display:flex;gap:.75rem';
+		sub.parentElement.insertBefore(row, sub);
+		var cancel = document.createElement('mdui-button');
+		cancel.setAttribute('type', 'button');
+		cancel.setAttribute('variant', 'tonal');
+		cancel.textContent = '取消';
+		cancel.style.flex = '1';
+		cancel.addEventListener('click', function () { dlg.open = false; });
+		row.appendChild(cancel);
+		row.appendChild(sub);
+	}
+	// 统一响应处理：AJAX 协议走 handlekey 回调；整页含锚点卡片则装进弹窗；
+	// 「验证通过」中转页（location.href 或 showWindow 两种形态）解析目标后弹窗内续步；
+	// 普通提示页弹 snackbar 后刷新。任何终态都保证关弹窗，绝不挂在「加载中」
+	// AJAX 信封严格判定：整个响应必须是 <root><![CDATA[...]]></root>。
+	// 不能用宽松正则——footer 注释里就有 <root><![CDATA[html]]></root> 示例，
+	// 整页 HTML 会被误判成 AJAX 响应导致弹窗秒关
+	function parseCdata(t) {
+		var s = String(t).replace(/^\s*<\?xml[^>]*>/, '').trim();
+		if (s.slice(0, 6) !== '<root>' || s.slice(-7) !== '</root>') return null;
+		var m = s.slice(6, -7).match(/^\s*<!\[CDATA\[([\s\S]*)\]\]>\s*$/);
+		return m ? m[1] : null;
+	}
+	function handle(t, depth) {
+		var m = parseCdata(t);
+		if (m !== null) {
+			var fired = false;
+			window.nekoAcctFired = function () { fired = true; };
+			var box = document.createElement('div');
+			box.innerHTML = m;
+			box.querySelectorAll('script').forEach(function (old) {
+				var s = document.createElement('script');
+				s.textContent = old.textContent;
+				document.body.appendChild(s);
+				s.remove();
+			});
+			// 响应没触发回调：可能是 showmessage(['handle'=>false]) 的错误提示
+			// （如邮箱被占用），提取文字弹消息条；抓不到文字才静默刷新
+			if (!fired) {
+				var text = box.textContent.replace(/\s+/g, ' ').trim();
+				dlg.open = false;
+				tip(text || '操作失败', !text);
+				setTimeout(function () { location.reload(); }, text ? 1200 : 300);
+			}
+			return;
+		}
+		var doc = new DOMParser().parseFromString(t, 'text/html');
+		var frag = doc.querySelector('#neko_acct_box');
+		if (frag) { body.innerHTML = frag.innerHTML; runScripts(body); decorate(); return; }
+		// 收集脚本与链接里的所有跳转候选，只认带 idstring 票据的（页脚 i18n 等无关
+		// location.href 不能干扰，否则中转页解析错乱弹窗卡死）
+		var urls = [];
+		doc.querySelectorAll('script').forEach(function (s) {
+			var re = /location\.href\s*=\s*'([^']+)'|showWindow\("[^"]*",\s*"([^"]+)"/g, mm;
+			while ((mm = re.exec(s.textContent || ''))) urls.push(mm[1] || mm[2]);
+		});
+		doc.querySelectorAll('a[href]').forEach(function (a) { urls.push(a.getAttribute('href')); });
+		var url = null;
+		for (var i = 0; i < urls.length; i++) {
+			if (urls[i] && String(urls[i]).indexOf('idstring=') >= 0) { url = urls[i]; break; }
+		}
+		// 带验证票据（idstring）的中转页继续跟进；普通提示页（如「解绑成功」）
+		// 弹出提示文案后刷新列表，不跟进避免绕回主页空转
+		if (url && depth < 3) { load(clean(url), depth + 1); return; }
+		var msgDiv = doc.querySelector('#messagetext') || doc.querySelector('div[style*="line-height:1.6"]');
+		dlg.open = false;
+		if (msgDiv && msgDiv.textContent.trim()) {
+			tip(msgDiv.textContent.trim());
+			setTimeout(function () { location.reload(); }, 1200);
+		} else {
+			tip('加载失败', true);
+		}
+	}
+	function load(url, depth) {
+		body.innerHTML = '<div style="padding:2rem;text-align:center;opacity:.6">加载中...</div>';
+		dlg.open = true;
+		var ctrl = new AbortController();
+		setTimeout(function () { ctrl.abort(); }, 10000);
+		fetch(clean(url), {credentials: 'same-origin', signal: ctrl.signal}).then(function (r) { return r.text(); }).then(function (t) {
+			handle(t, depth || 0);
+		}).catch(function () { dlg.open = false; tip('加载失败', true); });
+	}
+	document.querySelectorAll('[data-acct]').forEach(function (btn) {
+		btn.addEventListener('click', function () { load(btn.dataset.acct); });
+	});
+	// 弹窗内的 data-href 按钮（验证方式选择）：劫持换成弹窗内换页，阻断全局跳转委托
+	body.addEventListener('click', function (e) {
+		var node = e.target.closest ? e.target.closest('[data-href]') : null;
+		if (node) { e.preventDefault(); e.stopPropagation(); load(node.dataset.href); }
+	});
+	// 弹窗内表单统一 AJAX 提交：出错 snackbar 提示留在弹窗；验证通过若返回整页
+	// （下一步表单），继续在弹窗内展示；最终成功走 succeedhandle 关弹窗刷新
+	body.addEventListener('submit', function (e) {
+		var f = e.target;
+		if (e.defaultPrevented) return;
+		e.preventDefault();
+		e.stopPropagation();
+		var action = f.getAttribute('action') || '';
+		fetch(action + (action.indexOf('?') < 0 ? '?' : '&') + 'inajax=1&handlekey=nekoacct', {
+			method: 'POST',
+			body: new FormData(f),
+			credentials: 'same-origin'
+		}).then(function (r) { return r.text(); }).then(function (t) {
+			handle(t, 0);
+		}).catch(function () { tip('网络错误', true); });
+	});
+	window.errorhandle_nekoacct = function (msg) {
+		window.nekoAcctFired && nekoAcctFired();
+		tip(msg, true);
+	};
+	window.succeedhandle_nekoacct = function (url, msg) {
+		window.nekoAcctFired && nekoAcctFired();
+		// 安全验证通过的中转（带票据）：弹窗内直接续到下一步表单，不用关了再点
+		if (url && String(url).indexOf('idstring=') >= 0) {
+			if (msg) tip(msg);
+			load(clean(url), 0);
+			return;
+		}
+		if (msg) tip(msg);
+		dlg.open = false;
+		// 最终成功回账号安全页刷新列表
+		setTimeout(function () { location.reload(); }, msg ? 1200 : 0);
+	};
+})();
+</script>
+</div>
+<!--{template common/footer}-->
