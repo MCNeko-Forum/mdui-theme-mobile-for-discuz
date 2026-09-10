@@ -20,19 +20,25 @@
 		</mdui-select>
 		<mdui-text-field name="answernew" label="{lang security_answer}" style="margin-bottom:1rem"></mdui-text-field>
 		<mdui-button type="submit" variant="filled" full-width>{lang action_account_security_submit}</mdui-button>
+		<script>
+		// 服务端规则：问题选「保持现状」(空) 会清空全部，选「无安全提问」(0) 答案可空，
+		// 其余问题必须填答案——答案框随选择显隐，显示时强制填写。
+		// 注意：脚本必须留在锚点卡片内部，弹窗只提取 #neko_acct_box 的内容。
+		(function () {
+			var q = document.querySelector('[name=questionidnew]');
+			var a = document.querySelector('[name=answernew]');
+			if (!q || !a) return;
+			function sync() {
+				var need = q.value !== '' && q.value !== '0';
+				a.style.display = need ? '' : 'none';
+				a.required = need;
+				if (!need) a.value = '';
+			}
+			q.addEventListener('change', sync);
+			sync();
+		})();
+		</script>
 	</form>
 </mdui-card>
-<script>
-// 服务端规则：问题选「保持现状」(空) 会清空全部，选「无安全提问」(0) 答案可空，
-// 其余问题必须填答案——required 随选择联动
-(function () {
-	var q = document.querySelector('[name=questionidnew]');
-	var a = document.querySelector('[name=answernew]');
-	if (!q || !a) return;
-	function sync() { a.required = q.value !== '' && q.value !== '0'; }
-	q.addEventListener('change', sync);
-	sync();
-})();
-</script>
 </div>
 <!--{template common/footer}-->

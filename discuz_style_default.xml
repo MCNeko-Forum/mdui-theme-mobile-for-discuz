@@ -13,6 +13,15 @@
 			<item id="mdui_color"><![CDATA[#2B7ACD]]></item>
 			<item id="mdui_resource"><![CDATA[local]]></item>
 			<item id="mdui_my_diy"><![CDATA[]]></item>
+			<item id="mdui_nav"><![CDATA[首页|portal.php?mod=index|home
+论坛|forum.php|forum
+导读|forum.php?mod=guide&view=newthread|menu_book
+圈子|group.php?mod=index|groups
+日志|home.php?mod=space&do=blog|article
+记录|home.php?mod=space&do=doing|edit_note
+勋章|home.php?mod=medal|workspace_premium
+任务|home.php?mod=task|task_alt
+道具|home.php?mod=magic|auto_awesome]]></item>
 			<item id="mdui_addcss"><![CDATA[]]></item>
 			<item id="mdui_head"><![CDATA[]]></item>
 			<item id="mdui_footer"><![CDATA[]]></item>

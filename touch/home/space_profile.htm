@@ -40,6 +40,10 @@
 		<div data-href="home.php?mod=space&do=friend&view=visitor"><mdui-button-icon icon="location_on"></mdui-button-icon><span>{lang my_visitor}</span></div>
 	</div>
 
+	<mdui-list class="mdui-mycenter-theme">
+		<mdui-list-item data-mdui-theme-cycle icon="dark_mode" rounded><span class="mdui-theme-label">夜间</span></mdui-list-item>
+	</mdui-list>
+
 	<mdui-list class="mdui-mycenter-list">
 		<mdui-list-item icon="notifications" data-href="home.php?mod=space&do=notice" rounded>{lang remind}<!--{if $_G['member']['newprompt']}--><mdui-badge slot="end-icon">NEW</mdui-badge><!--{/if}--></mdui-list-item>
 		<mdui-list-item icon="badge" data-href="home.php?mod=spacecp&ac=profile" rounded>{lang setup}</mdui-list-item>

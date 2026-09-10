@@ -17,6 +17,7 @@
 | `mdui_color`           | MDUI 主题主色            | `#2B7ACD` |
 | `mdui_resource`        | MDUI 核心 CSS、JS 的加载来源 | `local`   |
 | `mdui_my_diy`          | “我的”页底部的静态导航模块       | 空         |
+| `mdui_nav`             | 侧边栏自定义导航（每行一条）       | 内置九项（见下文）  |
 | `mdui_addcss`          | 全站额外 CSS             | 空         |
 | `mdui_head`            | 全站 `<head>` 自定义代码    | 空         |
 | `mdui_footer`         | 全站 footer 自定义代码      | 空         |
@@ -216,6 +217,52 @@
 - `data-href` 使用站内链接时，主题会统一接管点击跳转；也可以直接写 `href`。
 - 变量内容会原样输出，因此仅限可信任的管理员编辑，勿粘贴来源不明的脚本或 HTML。
 - 不要再嵌套一层 `<mdui-list>`，因为插槽已经位于现有列表内部。
+
+***
+
+## `mdui_nav`：侧边栏自定义导航
+
+控制侧边栏（抽屉）导航列表的内容，替换 Discuz 后台的导航设置。变量为空时使用主题内置的默认九项。
+
+### 值格式
+
+每行一条，格式为「名称|链接|图标」，图标为 Material Icons 名称，可省略：
+
+```text
+名称|链接|图标
+```
+
+### 内置默认值
+
+变量留空时，侧边栏显示以下九项：
+
+```text
+首页|portal.php?mod=index|home
+论坛|forum.php|forum
+导读|forum.php?mod=guide&view=newthread|menu_book
+圈子|group.php?mod=index|groups
+日志|home.php?mod=space&do=blog|article
+记录|home.php?mod=space&do=doing|edit_note
+勋章|home.php?mod=medal|workspace_premium
+任务|home.php?mod=task|task_alt
+道具|home.php?mod=magic|auto_awesome
+```
+
+### 自定义示例
+
+```text
+首页|portal.php?mod=index|home
+论坛|forum.php|forum
+商店|plugin.php?id=shop:index|storefront
+```
+
+### 注意
+
+- 填写该变量后完全覆盖侧边栏导航，后台「界面 → 导航设置」不再影响侧边栏；可同时保留后台导航用于桌面版。
+- 链接以 `http://` 或 `https://` 开头时自动新窗口打开，站内链接当前窗口跳转。
+- 空行、缺少名称或缺少链接的行会被忽略。
+- 图标名称必须是 Material Icons 的合法名称，写错时图标不显示但文字正常。
+- 修改后如侧边栏未更新，请更新缓存或清理模板编译缓存。
 
 ***
 

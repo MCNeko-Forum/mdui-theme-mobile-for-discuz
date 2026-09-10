@@ -34,30 +34,30 @@
 			<mdui-button type="button" variant="tonal" id="secmob_send" style="margin-top:.25rem">{lang send}</mdui-button>
 		</div>
 		<mdui-button type="submit" variant="filled" full-width>{lang action_account_security_submit}</mdui-button>
+		<script>
+		// 脚本必须留在锚点卡片内部：弹窗只提取 #neko_acct_box 的内容并重建其中的脚本
+		(function () {
+			var btn = document.getElementById('secmob_send');
+			if (!btn) return;
+			btn.addEventListener('click', function () {
+				var cc = document.getElementById('secmobicc');
+				var visible = document.getElementById('secmobile_input');
+				var hidden = document.querySelector('input[name=secmobile]');
+				var mobile = (visible && visible.value) ? visible.value : (hidden ? hidden.value : '');
+				if (!mobile || mobile.length < 5) { if (window.mduiTip) mduiTip('请先填写手机号'); return; }
+				var ccval = cc ? cc.value : '{$_G['member']['secmobicc']}';
+				fetch('misc.php?mod=secmobseccode&action=send&svctype=1&secmobicc=' + encodeURIComponent(ccval) + '&secmobile=' + encodeURIComponent(mobile) + '&inajax=1', {credentials: 'same-origin'})
+					.then(function (r) { return r.text(); })
+					.then(function (t) {
+						var m = t.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
+						var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '发送失败';
+						if (window.mduiTip) mduiTip(text || '发送成功');
+					})
+					.catch(function () { if (window.mduiTip) mduiTip('发送失败'); });
+			});
+		})();
+		</script>
 	</form>
 </mdui-card>
-
-<script>
-(function () {
-	var btn = document.getElementById('secmob_send');
-	if (!btn) return;
-	btn.addEventListener('click', function () {
-		var cc = document.getElementById('secmobicc');
-		var visible = document.getElementById('secmobile_input');
-		var hidden = document.querySelector('input[name=secmobile]');
-		var mobile = (visible && visible.value) ? visible.value : (hidden ? hidden.value : '');
-		if (!mobile || mobile.length < 5) { if (window.mduiTip) mduiTip('请先填写手机号'); return; }
-		var ccval = cc ? cc.value : '{$_G['member']['secmobicc']}';
-		fetch('misc.php?mod=secmobseccode&action=send&svctype=1&secmobicc=' + encodeURIComponent(ccval) + '&secmobile=' + encodeURIComponent(mobile) + '&inajax=1', {credentials: 'same-origin'})
-			.then(function (r) { return r.text(); })
-			.then(function (t) {
-				var m = t.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
-				var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '发送失败';
-				if (window.mduiTip) mduiTip(text || '发送成功');
-			})
-			.catch(function () { if (window.mduiTip) mduiTip('发送失败'); });
-	});
-})();
-</script>
 </div>
 <!--{template common/footer}-->

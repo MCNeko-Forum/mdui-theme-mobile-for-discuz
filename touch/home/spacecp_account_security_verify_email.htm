@@ -21,27 +21,27 @@
 			<mdui-button type="button" variant="tonal" id="secemail_send" style="margin-top:.25rem">{lang send}</mdui-button>
 		</div>
 		<mdui-button type="submit" variant="filled" full-width>{lang action_account_security_submit}</mdui-button>
+		<script>
+		// 脚本必须留在锚点卡片内部：弹窗只提取 #neko_acct_box 的内容并重建其中的脚本
+		(function () {
+			var btn = document.getElementById('secemail_send');
+			if (!btn) return;
+			btn.addEventListener('click', function () {
+				var input = document.getElementById('secemail');
+				var email = input ? input.value : '{$_G['member']['email']}';
+				if (!email) { if (window.mduiTip) mduiTip('请先填写邮箱'); return; }
+				fetch('misc.php?mod=secemailseccode&action=send&svctype=1&email=' + encodeURIComponent(email) + '&inajax=1', {credentials: 'same-origin'})
+					.then(function (r) { return r.text(); })
+					.then(function (t) {
+						var m = t.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
+						var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '发送失败';
+						if (window.mduiTip) mduiTip(text || '发送成功');
+					})
+					.catch(function () { if (window.mduiTip) mduiTip('发送失败'); });
+			});
+		})();
+		</script>
 	</form>
 </mdui-card>
-
-<script>
-(function () {
-	var btn = document.getElementById('secemail_send');
-	if (!btn) return;
-	btn.addEventListener('click', function () {
-		var input = document.getElementById('secemail');
-		var email = input ? input.value : '{$_G['member']['email']}';
-		if (!email) { if (window.mduiTip) mduiTip('请先填写邮箱'); return; }
-		fetch('misc.php?mod=secemailseccode&action=send&svctype=1&email=' + encodeURIComponent(email) + '&inajax=1', {credentials: 'same-origin'})
-			.then(function (r) { return r.text(); })
-			.then(function (t) {
-				var m = t.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
-				var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '发送失败';
-				if (window.mduiTip) mduiTip(text || '发送成功');
-			})
-			.catch(function () { if (window.mduiTip) mduiTip('发送失败'); });
-	});
-})();
-</script>
 </div>
 <!--{template common/footer}-->

@@ -120,7 +120,7 @@
 				<div style="font-weight:500">
 					<!--{if $post['authorid'] && $post['username'] && !$post['anonymous']}-->
 						<a href="home.php?mod=space&uid=$post['authorid']" style="color:inherit;text-decoration:none">{$post['author']}</a>
-						<!--{if $post['authortitle']}--><a href="home.php?mod=spacecp&ac=usergroup&gid={$post['groupid']}" style="font-size:.75rem;opacity:.65;margin-left:.25rem;text-decoration:none">{$post['authortitle']}</a><!--{/if}-->
+						<!--{if $post['authortitle']}--><!--{eval $gt_bg = ($gt_color = $_G['cache']['usergroups'][$post['groupid']]['color']) ? ($gt_color[0] == '#' ? $gt_color : '#'.$gt_color) : 'rgb(var(--mdui-color-primary))';}--><a href="home.php?mod=spacecp&ac=usergroup&gid={$post['groupid']}" style="font-size:.75rem;margin-left:.25rem;padding:.05rem .4rem;border-radius:.35rem;background:{$gt_bg};color:#fff;text-decoration:none"><!--{echo strip_tags($post['authortitle'])}--></a><!--{/if}-->
 					<!--{elseif !$post['authorid']}-->
 						{lang guest} <span style="font-size:.75rem;opacity:.6">{$post['useip']}<!--{if $post['port']}-->:{$post['port']}<!--{/if}--></span>
 					<!--{elseif $post['authorid'] && $post['username'] && $post['anonymous']}-->

@@ -194,27 +194,6 @@
 		});
 	});
 	</script>
-	<!-- 侧边栏二级导航：点击右侧箭头仅展开/收起子导航，不触发一级导航链接 -->
-	<style>
-	.mdui-nav-parent .mdui-nav-expand { transition: transform .2s ease; }
-	.mdui-nav-parent.mdui-nav-open .mdui-nav-expand { transform: rotate(180deg); }
-	</style>
-	<script>
-	document.addEventListener('click', function(e) {
-		var btn = e.target.closest ? e.target.closest('.mdui-nav-expand') : null;
-		if(!btn) return;
-		e.preventDefault();
-		e.stopPropagation();
-		var parent = btn.closest('.mdui-nav-parent');
-		if(!parent) return;
-		var open = parent.classList.toggle('mdui-nav-open');
-		var sib = parent.nextElementSibling;
-		while(sib && sib.classList && sib.classList.contains('mdui-nav-sub')) {
-			sib.style.display = open ? '' : 'none';
-			sib = sib.nextElementSibling;
-		}
-	}, true);
-	</script>
 	<!--{if $_G['style']['mdui_addcss']}--><style>$_G['style']['mdui_addcss']</style><!--{/if}-->
 	<!--{if $_G['style']['mdui_head']}--><!--{eval $mdui_head = htmlspecialchars_decode($_G['style']['mdui_head'], ENT_QUOTES);}-->$mdui_head<!--{/if}-->
 	<!--{if $_G['style']['mdui_fonts']}-->
@@ -246,26 +225,36 @@
 			<mdui-list-item href="member.php?mod=logging&action=login" icon="account_circle" rounded>{lang login}</mdui-list-item>
 		<!--{/if}-->
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>
-		<!--{loop $_G['setting']['navs'] $nav}-->
-			<!--{if is_array($nav) && $nav['available'] && (!$nav['level'] || ($nav['level'] == 1 && $_G['uid']) || ($nav['level'] == 2 && $_G['adminid'] > 0) || ($nav['level'] == 3 && $_G['adminid'] == 1))}-->
-				<!--{eval $mdui_has_sub = false; if(!empty($nav['subs'])): foreach($nav['subs'] as $mdui_sub): if(!$mdui_sub['level'] || ($mdui_sub['level'] == 1 && $_G['uid']) || ($mdui_sub['level'] == 2 && $_G['adminid'] > 0) || ($mdui_sub['level'] == 3 && $_G['adminid'] == 1)): $mdui_has_sub = true; break; endif; endforeach; endif; }-->
-				<!--{if $mdui_has_sub}-->
-				<mdui-list-item class="mdui-nav-parent" href="{$nav['filename']}" rounded>
-					{$nav['navname']}
-					<mdui-icon slot="end-icon" name="keyboard_arrow_down" class="mdui-nav-expand"></mdui-icon>
-				</mdui-list-item>
-				<!--{loop $nav['subs'] $mdui_sub}-->
-					<!--{if !$mdui_sub['level'] || ($mdui_sub['level'] == 1 && $_G['uid']) || ($mdui_sub['level'] == 2 && $_G['adminid'] > 0) || ($mdui_sub['level'] == 3 && $_G['adminid'] == 1)}-->
-					<mdui-list-item class="mdui-nav-sub" href="{$mdui_sub['filename']}"<!--{if $mdui_sub['target'] == 1}--> target="_blank"<!--{/if}--> rounded style="display:none">
-						<mdui-icon slot="icon" name="subdirectory_arrow_right"></mdui-icon>
-						{$mdui_sub['navname']}
-					</mdui-list-item>
-					<!--{/if}-->
-				<!--{/loop}-->
-				<!--{else}-->
-				<mdui-list-item href="{$nav['filename']}" rounded>{$nav['navname']}</mdui-list-item>
-				<!--{/if}-->
-			<!--{/if}-->
+		<!--{eval
+		// 侧边栏导航：mdui_nav 自定义变量，每行一条「名称|链接|图标」（图标可省略）；变量为空时使用内置默认导航
+		$mdui_nav_items = [];
+		if(!empty($_G['style']['mdui_nav'])):
+			foreach(preg_split('/\r\n|\r|\n/', htmlspecialchars_decode($_G['style']['mdui_nav'], ENT_QUOTES)) as $mdui_nav_line):
+				$mdui_nav_line = trim($mdui_nav_line);
+				if($mdui_nav_line === '') continue;
+				$mdui_nav_parts = array_map('trim', explode('|', $mdui_nav_line));
+				if($mdui_nav_parts[0] === '' || empty($mdui_nav_parts[1])) continue;
+				$mdui_nav_items[] = $mdui_nav_parts;
+			endforeach;
+		else:
+			$mdui_nav_items = [
+				['首页', 'portal.php?mod=index', 'home'],
+				['论坛', 'forum.php', 'forum'],
+				['导读', 'forum.php?mod=guide&view=newthread', 'menu_book'],
+				['圈子', 'group.php?mod=index', 'groups'],
+				['日志', 'home.php?mod=space&do=blog', 'article'],
+				['记录', 'home.php?mod=space&do=doing', 'edit_note'],
+				['勋章', 'home.php?mod=medal', 'workspace_premium'],
+				['任务', 'home.php?mod=task', 'task_alt'],
+				['道具', 'home.php?mod=magic', 'auto_awesome'],
+			];
+		endif;
+		}-->
+		<!--{loop $mdui_nav_items $mdui_nav_item}-->
+			<mdui-list-item href="{$mdui_nav_item[1]}"<!--{if preg_match('/^https?:\/\//i', $mdui_nav_item[1])}--> target="_blank"<!--{/if}--> rounded>
+				<!--{if !empty($mdui_nav_item[2])}--><mdui-icon slot="icon" name="{$mdui_nav_item[2]}"></mdui-icon><!--{/if}-->
+				{$mdui_nav_item[0]}
+			</mdui-list-item>
 		<!--{/loop}-->
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>
 		<!--{eval $mdui_i18n_paths = i18n('get'); $mdui_i18n_current = !empty($_G['i18n']) ? $_G['i18n'] : (!empty($_G['setting']['i18n_default']) ? $_G['setting']['i18n_default'] : 'SC_UTF8');}-->
@@ -278,7 +267,7 @@
 			<!--{/loop}-->
 		</mdui-select>
 		<!--{/if}-->
-		<mdui-list-item id="mdui_theme_toggle" icon="brightness_6" rounded>主题</mdui-list-item>
+		<mdui-list-item data-mdui-theme-cycle icon="dark_mode" rounded><span class="mdui-theme-label">夜间</span></mdui-list-item>
 		<!--{if $_G['uid']}-->
 			<mdui-list-item href="member.php?mod=logging&action=logout&formhash={FORMHASH}" icon="logout" rounded>{lang logout}</mdui-list-item>
 		<!--{/if}-->

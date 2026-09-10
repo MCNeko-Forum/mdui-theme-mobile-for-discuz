@@ -95,14 +95,30 @@ document.querySelector('#mdui_menu_btn')?.addEventListener('click', function () 
 		startX = 0;
 	}, {passive: true});
 })();
-document.querySelector('#mdui_theme_toggle')?.addEventListener('click', function () {
-	var next = {light: 'dark', dark: 'auto', auto: 'light'}[mdui.getTheme()];
-	mdui.setTheme(next);
-	document.cookie = 'mdui_theme=' + next + ';path=/;max-age=31536000';
-});
+// 夜间/日间/自动共用一个按钮：点击在三种模式间循环，图标和文字实时显示当前模式（侧边栏与“我的”页共用，事件委托）
 (function () {
+	var modes = {dark: ['dark_mode', '夜间'], light: ['light_mode', '日间'], auto: ['brightness_auto', '自动']};
+	function syncThemeItems() {
+		var cur = mdui.getTheme();
+		if (!modes[cur]) cur = 'auto';
+		document.querySelectorAll('[data-mdui-theme-cycle]').forEach(function (item) {
+			item.setAttribute('icon', modes[cur][0]);
+			var label = item.querySelector('.mdui-theme-label');
+			if (label) label.textContent = modes[cur][1];
+		});
+	}
+	document.addEventListener('click', function (e) {
+		var item = e.target.closest && e.target.closest('[data-mdui-theme-cycle]');
+		if (!item) return;
+		var cur = mdui.getTheme();
+		var next = {dark: 'light', light: 'auto', auto: 'dark'}[cur] || 'dark';
+		mdui.setTheme(next);
+		document.cookie = 'mdui_theme=' + next + ';path=/;max-age=31536000';
+		syncThemeItems();
+	});
 	var m = document.cookie.match(/(?:^|;\s*)mdui_theme=(light|dark|auto)/);
 	m && mdui.setTheme(m[1]);
+	syncThemeItems();
 })();
 // mdui-tab 没有 href 属性（不同于 mdui-navigation-bar-item），用 data-href 事件委托实现跳转
 // 使用 composedPath() 兼容点击组件内部 Shadow DOM 内容的情况

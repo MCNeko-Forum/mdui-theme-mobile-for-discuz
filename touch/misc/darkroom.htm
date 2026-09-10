@@ -10,6 +10,8 @@
 
 <style>
 	.mdui-darkroom-page { padding:1rem; padding-bottom:2rem; }
+	.mdui-darkroom-search { display:flex; gap:.5rem; align-items:flex-start; margin-bottom:1rem; }
+	.mdui-darkroom-search mdui-text-field { flex:1; }
 	.mdui-darkroom-intro { display:flex; align-items:flex-start; gap:.75rem; margin-bottom:1rem; padding:1rem; }
 	.mdui-darkroom-intro mdui-icon { flex-shrink:0; color:rgb(var(--mdui-color-error)); font-size:1.75rem; }
 	.mdui-darkroom-intro strong { display:block; margin-bottom:.25rem; font-size:1rem; }
@@ -45,6 +47,12 @@
 		<div><strong>{lang darkroom}</strong><span>这里展示当前处于禁止访问或禁止发言状态的用户及相关处理记录。</span></div>
 	</mdui-card>
 
+	<form method="get" action="misc.php" class="mdui-darkroom-search">
+		<input type="hidden" name="mod" value="darkroom">
+		<mdui-text-field name="username" label="{lang darkroom_search_placeholder}" clearable<!--{if !empty($username)}--> value="$username"<!--{/if}-->></mdui-text-field>
+		<mdui-button type="submit" variant="tonal" icon="search">{lang darkroom_search}</mdui-button>
+	</form>
+
 	<!--{if $crimelist}-->
 	<div id="mdui_darkroom_list" class="mdui-darkroom-list">
 		<!--{loop $crimelist $crime}-->
@@ -66,7 +74,7 @@
 	<div class="mdui-darkroom-more"><mdui-button id="darkroommore" variant="tonal" icon="expand_more" data-cid="$cid">{lang more}</mdui-button></div>
 	<!--{/if}-->
 	<!--{else}-->
-	<mdui-card variant="filled" class="mdui-darkroom-empty"><div><mdui-icon name="verified_user"></mdui-icon><p>{lang darkroom_no_users}</p></div></mdui-card>
+	<mdui-card variant="filled" class="mdui-darkroom-empty"><div><mdui-icon name="verified_user"></mdui-icon><p><!--{if !empty($search_no_result)}-->{lang darkroom_no_search_result}<!--{else}-->{lang darkroom_no_users}<!--{/if}--></p></div></mdui-card>
 	<!--{/if}-->
 </div>
 
@@ -136,32 +144,35 @@
 		more.loading = true;
 
 		var cid = parseInt(more.getAttribute('data-cid'), 10) || 0;
-		var ajax = new Ajax('JSON');
-		ajax.getJSON('forum.php?mod=misc&action=showdarkroom&ajaxdata=json&cid=' + cid + '&t=' + Date.now(), function(response) {
-			busy = false;
-			var message = response && response.message ? String(response.message).split('|') : [];
-			var data = response && response.data ? response.data : {};
+		// 必须直连 misc.php：forum.php 的 showdarkroom 会 302 跳转并丢弃 cid/ajaxdata 参数
+		fetch('misc.php?mod=darkroom&ajaxdata=json&cid=' + cid + '&t=' + Date.now(), {credentials: 'same-origin'})
+			.then(function(r) { return r.json(); })
+			.then(function(response) {
+				busy = false;
+				var message = response && response.message ? String(response.message).split('|') : [];
+				var data = response && response.data ? response.data : {};
 
-			for (var key in data) {
-				if (!Object.prototype.hasOwnProperty.call(data, key)) continue;
-				var item = data[key];
-				if (document.getElementById('darkroomuid_' + item.uid)) continue;
-				list.appendChild(buildCard(item));
-			}
+				for (var key in data) {
+					if (!Object.prototype.hasOwnProperty.call(data, key)) continue;
+					var item = data[key];
+					if (document.getElementById('darkroomuid_' + item.uid)) continue;
+					list.appendChild(buildCard(item));
+				}
 
-			if (message[0] === '1' && message[1]) {
-				more.setAttribute('data-cid', message[1]);
+				if (message[0] === '1' && message[1]) {
+					more.setAttribute('data-cid', message[1]);
+					more.disabled = false;
+					more.loading = false;
+				} else {
+					more.parentNode.style.display = 'none';
+				}
+			})
+			.catch(function() {
+				// 请求失败：恢复按钮允许重试
+				busy = false;
 				more.disabled = false;
 				more.loading = false;
-			} else {
-				more.parentNode.style.display = 'none';
-			}
-		}, function() {
-			// 请求失败：恢复按钮允许重试
-			busy = false;
-			more.disabled = false;
-			more.loading = false;
-		});
+			});
 	});
 })();
 </script>

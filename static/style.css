@@ -881,7 +881,8 @@ p.d {
 .mdui-mycenter { padding: 1rem 1rem 5.5rem; background: rgb(var(--mdui-color-surface-container-low)); }
 .mdui-mycenter-profile,
 .mdui-mycenter-grid,
-.mdui-mycenter-list { box-sizing: border-box; margin-bottom: 1rem; border-radius: 1rem; background: rgb(var(--mdui-color-surface)); }
+.mdui-mycenter-list,
+.mdui-mycenter-theme { box-sizing: border-box; margin-bottom: 1rem; border-radius: 1rem; background: rgb(var(--mdui-color-surface)); }
 .mdui-mycenter-profile { display: flex; align-items: center; gap: .75rem; padding: 1rem; }
 .mdui-mycenter-profile mdui-avatar { width: 4.5rem; height: 4.5rem; flex: 0 0 auto; }
 .mdui-mycenter-user { min-width: 0; flex: 1; }

@@ -17,7 +17,11 @@
 			</form>
 		</mdui-dialog>
 	<!--{/if}-->
-	<mdui-button-icon icon="edit" href="forum.php?mod=post&action=newthread&fid={$_G['fid']}" title="{lang post_newthread}"></mdui-button-icon>
+	<!--{if $_G['uid'] && $_G['group']['allowpost']}-->
+		<mdui-button-icon icon="edit" onclick="document.getElementById('mdui_newthread_sheet').open=true" title="{lang post_newthread}"></mdui-button-icon>
+	<!--{else}-->
+		<mdui-button-icon icon="edit" href="forum.php?mod=post&action=newthread&fid={$_G['fid']}" title="{lang post_newthread}"></mdui-button-icon>
+	<!--{/if}-->
 </mdui-top-app-bar>
 <!--{hook/forumdisplay_top_mobile}-->
 
@@ -335,5 +339,50 @@
 	<!--{/if}-->
 </div>
 <!--{hook/forumdisplay_bottom_mobile}-->
+
+<!-- 发帖类型面板：mdui 没有 bottom-sheet，复用 dialog 压到底部的方案 -->
+<!--{if $_G['uid'] && $_G['group']['allowpost']}-->
+<mdui-dialog id="mdui_newthread_sheet" close-on-esc close-on-overlay-click class="mdui-thread-sheet">
+	<!--{eval
+		// 与 post.php 的权限判断一致：组权限 × 版块 allowpostspecial，只显示真正能发的
+		// 分类信息不单列入口：发帖页 post.htm 顶部有类型切换，可就地选分类
+		$nt_items = array(
+			array(0, '#F37D7D', 'edit', '发帖子', 1),
+			array(1, '#FFB300', 'bar_chart', '发投票', $_G['group']['allowpostpoll']),
+			array(2, '#FF9800', 'storefront', '发商品', $_G['group']['allowposttrade']),
+			array(3, '#7E57C2', 'redeem', '发悬赏', $_G['group']['allowpostreward']),
+			array(4, '#4CAF50', 'event', '发活动', $_G['group']['allowpostactivity']),
+			array(5, '#2196F3', 'forum', '发辩论', $_G['group']['allowpostdebate']),
+		);
+	}-->
+	<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem .5rem;padding:1.25rem 1rem 1rem">
+		<!--{loop $nt_items $nt_item}-->
+			<!--{if !empty($nt_item[4])}-->
+			<a href="forum.php?mod=post&action=newthread&fid={$_G['fid']}<!--{if $nt_item[0]}-->&special={$nt_item[0]}<!--{/if}-->" onclick="document.getElementById('mdui_newthread_sheet').open=false" style="display:flex;flex-direction:column;align-items:center;gap:.4rem;text-decoration:none;color:inherit">
+				<span style="width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:{$nt_item[1]}"><mdui-icon name="{$nt_item[2]}" style="color:#fff;font-size:1.5rem"></mdui-icon></span>
+				<span style="font-size:.75rem">{$nt_item[3]}</span>
+			</a>
+			<!--{/if}-->
+		<!--{/loop}-->
+	</div>
+	<div style="padding:.75rem 1rem 1rem">
+		<mdui-button type="button" variant="tonal" full-width onclick="document.getElementById('mdui_newthread_sheet').open=false">{lang cancel}</mdui-button>
+	</div>
+</mdui-dialog>
+<style>
+/* dialog 默认居中，压到底部铺满宽度模拟 bottom sheet；panel 去内边距让取消行通栏 */
+.mdui-thread-sheet::part(panel) {
+	padding: 0;
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	max-width: none;
+	width: 100vw;
+	max-height: calc(100vh - 80px);
+	border-radius: 1rem 1rem 0 0;
+}
+</style>
+<!--{/if}-->
 
 <!--{template common/footer}-->
