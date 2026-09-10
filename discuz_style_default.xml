@@ -26,6 +26,7 @@
 			<item id="mdui_head"><![CDATA[]]></item>
 			<item id="mdui_footer"><![CDATA[]]></item>
 			<item id="mdui_fonts"><![CDATA[]]></item>
+			<item id="mdui_ladyload"><![CDATA[]]></item>
 			<item id="font"><![CDATA[-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Microsoft Yahei',sans-serif]]></item>
 			<item id="fontsize"><![CDATA[14px/1.5]]></item>
 			<item id="contentwidth"><![CDATA[100%]]></item>

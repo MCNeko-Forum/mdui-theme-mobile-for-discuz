@@ -285,7 +285,7 @@
 						<!--{else}-->
 						<mdui-card variant="filled" clickable href="forum.php?mod=viewthread&tid=$thread['tid']&{if $_GET['archiveid']}archiveid={$_GET['archiveid']}&{/if}extra=$extra" style="display:block;overflow:hidden">
 							<!--{hook/forumdisplay_thread_mobile $key}-->
-							<!--{if $thread['cover']}--><img src="$thread['coverpath']" alt="{$thread['subject']}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block"><!--{else}--><div style="width:100%;aspect-ratio:1;display:grid;place-items:center;opacity:.35"><mdui-icon name="image" style="font-size:2rem"></mdui-icon></div><!--{/if}-->
+							<!--{if $thread['cover']}--><img src="$thread['coverpath']" alt="{$thread['subject']}"<!--{if $_G['style']['mdui_ladyload']}--> loading="lazy"<!--{/if}--> style="width:100%;aspect-ratio:1;object-fit:cover;display:block"><!--{else}--><div style="width:100%;aspect-ratio:1;display:grid;place-items:center;opacity:.35"><mdui-icon name="image" style="font-size:2rem"></mdui-icon></div><!--{/if}-->
 							<div style="padding:.5rem">
 								<div style="font-size:.875rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden" $thread['highlight']>{$thread['subject']}</div>
 								<div style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;opacity:.6;margin-top:.35rem">

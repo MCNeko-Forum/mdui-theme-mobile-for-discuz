@@ -6,7 +6,7 @@
 <!--{if !$_GET['mycenter']}--><!--{eval $nofooter = 1;}--><!--{/if}-->
 <!--{template common/header}-->
 
-<mdui-top-app-bar<!--{if $_GET['mycenter']}--> class="mdui-mycenter-bar"<!--{/if}-->>
+<mdui-top-app-bar>
 	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
 	<mdui-top-app-bar-title><!--{if $_GET['mycenter']}-->{lang my}<!--{elseif $_G['uid'] == $space['uid']}-->{lang myprofile}<!--{else}-->$space['username']{lang otherprofile}<!--{/if}--></mdui-top-app-bar-title>
 	<div style="flex-grow:1"></div>
@@ -42,6 +42,7 @@
 
 	<mdui-list class="mdui-mycenter-theme">
 		<mdui-list-item data-mdui-theme-cycle icon="dark_mode" rounded><span class="mdui-theme-label">夜间</span></mdui-list-item>
+		<!--{hook/space_profile_themecolor_mobile}-->
 	</mdui-list>
 
 	<mdui-list class="mdui-mycenter-list">

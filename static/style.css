@@ -877,7 +877,6 @@ p.d {
 .mdui-space-action { margin: .75rem 0; }
 
 /* “我的”页独立于普通空间资料页，采用概览、宫格和设置列表三段布局。 */
-.mdui-mycenter-bar { background: rgb(var(--mdui-color-primary)); color: rgb(var(--mdui-color-on-primary)); }
 .mdui-mycenter { padding: 1rem 1rem 5.5rem; background: rgb(var(--mdui-color-surface-container-low)); }
 .mdui-mycenter-profile,
 .mdui-mycenter-grid,

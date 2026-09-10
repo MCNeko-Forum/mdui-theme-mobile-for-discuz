@@ -30,7 +30,7 @@
 					<!--{eval $guide_attach_count = 0;}-->
 					<!--{loop $guide_attach[$thread['tid']]['attachment'] $image}-->
 						<!--{eval $guide_attach_count++; if($guide_attach_count > 3) break;}-->
-						<img src="$image" alt="">
+						<img src="$image" alt=""<!--{if $_G['style']['mdui_ladyload']}--> loading="lazy"<!--{/if}-->>
 					<!--{/loop}-->
 				</div>
 			<!--{elseif $guide_attach[$thread['tid']]['media']}-->

@@ -22,7 +22,7 @@
 				<!--{if $thread['displayorder'] > 0}--><mdui-badge>{lang thread_sticky}</mdui-badge><!--{/if}-->
 				<!--{if $thread['folder'] == 'lock'}--><mdui-badge>{lang closed_thread}</mdui-badge><!--{elseif $thread['special'] == 1}--><mdui-badge>{lang thread_poll}</mdui-badge><!--{elseif $thread['special'] == 2}--><mdui-badge>{lang thread_trade}</mdui-badge><!--{elseif $thread['special'] == 3}--><mdui-badge>{lang thread_reward}</mdui-badge><!--{elseif $thread['special'] == 4}--><mdui-badge>{lang thread_activity}</mdui-badge><!--{elseif $thread['special'] == 5}--><mdui-badge>{lang thread_debate}</mdui-badge><!--{/if}-->
 				{$thread['subject']}
-				<!--{if $threadlist_data[$thread['tid']]['attachment']}--><div style="display:flex;gap:.35rem;overflow:hidden;margin-top:.45rem"><!--{loop $threadlist_data[$thread['tid']]['attachment'] $image}--><img src="{$image}" style="width:3.5rem;height:3.5rem;object-fit:cover;border-radius:.25rem"><!--{/loop}--></div><!--{/if}-->
+				<!--{if $threadlist_data[$thread['tid']]['attachment']}--><div style="display:flex;gap:.35rem;overflow:hidden;margin-top:.45rem"><!--{loop $threadlist_data[$thread['tid']]['attachment'] $image}--><img src="{$image}"<!--{if $_G['style']['mdui_ladyload']}--> loading="lazy"<!--{/if}--> style="width:3.5rem;height:3.5rem;object-fit:cover;border-radius:.25rem"><!--{/loop}--></div><!--{/if}-->
 			</div>
 			<span slot="description">{$thread['author']} · {$thread['dateline']} · {$thread['views']} / {$thread['replies']}</span>
 			<mdui-icon slot="end-icon" name="chevron_right"></mdui-icon>
