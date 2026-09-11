@@ -3,6 +3,16 @@
 <head>
 	<title><!--{if !empty($navtitle)}-->$navtitle - <!--{/if}--><!--{if empty($nobbname)}--> $_G['setting']['bbname'] - <!--{/if}--> {lang waptitle} - Powered by Discuz!</title>
 	<meta charset="utf-8">
+	<script>
+	// 首帧前同步应用已保存的主题，避免夜间模式闪白（读取 mdui_theme cookie，默认 auto）
+	(function() {
+		var m = document.cookie.match(/(?:^|;\s*)mdui_theme=(light|dark|auto)/);
+		var mode = m ? m[1] : 'auto';
+		var root = document.documentElement;
+		root.classList.remove('mdui-theme-auto');
+		root.classList.add('mdui-theme-' + mode);
+	})();
+	</script>
 	<meta http-equiv="Cache-control" content="{if $_G['setting']['mobile']['mobilecachetime'] > 0}{$_G['setting']['mobile']['mobilecachetime']}{else}no-cache{/if}" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no" />

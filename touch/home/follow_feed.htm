@@ -52,6 +52,22 @@
 			<!--{if $viewself}-->{lang follow_following_null}<!--{else}-->{lang follow_no_content}<!--{/if}-->
 			<!--{if $do == 'feed' && $view == 'special'}--><div style="margin-top:.5rem">{lang follow_add_special_tip}<a href="home.php?mod=follow&do=following&uid=$uid">{lang follow_add_special_following}</a></div><!--{/if}-->
 		</mdui-card>
+		<!--{if !empty($recommend) && $showrecommend}-->
+		<mdui-card variant="filled" style="display:block;margin-top:1rem;padding:1rem">
+			<div style="display:flex;align-items:center;gap:.375rem;margin-bottom:.875rem;font-weight:600"><mdui-icon name="person_add"></mdui-icon>{lang follow_recommend}</div>
+			<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.875rem .5rem">
+				<!--{loop $recommend $ruid $rusername}-->
+				<div style="display:flex;flex-direction:column;align-items:center;gap:.375rem;min-width:0;text-align:center">
+					<mdui-avatar src="<!--{avatar($ruid, 'middle', true)}-->" href="home.php?mod=space&uid=$ruid&do=profile" style="width:48px;height:48px"></mdui-avatar>
+					<a href="home.php?mod=space&uid=$ruid&do=profile" style="max-width:100%;overflow:hidden;color:inherit;font-size:.8125rem;text-decoration:none;text-overflow:ellipsis;white-space:nowrap">$rusername</a>
+					<!--{if helper_access::check_module('follower')}-->
+					<mdui-button variant="tonal" class="neko-fo-btn" data-mode="off" data-add="home.php?mod=spacecp&ac=follow&op=add&hash={FORMHASH}&fuid=$ruid" data-del="home.php?mod=spacecp&ac=follow&op=del&fuid=$ruid" data-on="{lang follow_del}" data-off="{lang follow_add}" onclick="nekofollow(this)" style="min-width:0">{lang follow_add}</mdui-button>
+					<!--{/if}-->
+				</div>
+				<!--{/loop}-->
+			</div>
+		</mdui-card>
+		<!--{/if}-->
 		<!--{/if}-->
 	<!--{elseif in_array($do, array('following', 'follower'))}-->
 		<!--{if $list}-->
@@ -62,7 +78,7 @@
 				<mdui-avatar slot="icon" src="<!--{avatar($profileuid, 'middle', true)}-->"></mdui-avatar>
 				$profilename
 				<span slot="description">{lang follow_follower}: $memberinfo[$fuid]['follower'] · {lang follow_add}: $memberinfo[$fuid]['following']</span>
-				<!--{if $profileuid != $_G['uid'] && helper_access::check_module('follow')}--><mdui-button slot="end-icon" variant="text" data-href="home.php?mod=spacecp&ac=follow&op=<!--{if $canunfollow}-->del<!--{else}-->add&hash={FORMHASH}<!--{/if}-->&fuid=$profileuid" onclick="doane(event)"><!--{if $canunfollow}-->{lang follow_del}<!--{else}-->{lang follow_add}<!--{/if}--></mdui-button><!--{/if}-->
+				<!--{if $profileuid != $_G['uid'] && helper_access::check_module('follow')}--><mdui-button slot="end-icon" variant="text" class="neko-fo-btn" data-mode="<!--{if $canunfollow}-->on<!--{else}-->off<!--{/if}-->" data-add="home.php?mod=spacecp&ac=follow&op=add&hash={FORMHASH}&fuid=$profileuid" data-del="home.php?mod=spacecp&ac=follow&op=del&fuid=$profileuid" data-on="{lang follow_del}" data-off="{lang follow_add}" onclick="nekofollow(this)"><!--{if $canunfollow}-->{lang follow_del}<!--{else}-->{lang follow_add}<!--{/if}--></mdui-button><!--{/if}-->
 			</mdui-list-item>
 			<!--{/loop}-->
 		</mdui-list>
@@ -76,5 +92,16 @@
 <script type="text/javascript">
 	function quickreply(fid, tid, feedid) { ajaxget('forum.php?mod=ajax&action=quickreply&tid='+tid+'&fid='+fid+'&handlekey=qreply_'+feedid+'&feedid='+feedid, 'replybox_'+feedid); }
 	function quickrelay(feedid, tid) { ajaxget('home.php?mod=spacecp&ac=follow&op=relay&feedid='+feedid+'&tid='+tid+'&handlekey=qrelay_'+feedid, 'relaybox_'+feedid); }
+	// 关注/取消关注：按钮自带当前状态与两个方向的 URL，成功后原地翻转，无需刷新
+	function nekofollow(btn) {
+		if (btn.disabled) return;
+		var on = btn.dataset.mode === 'on';
+		btn.disabled = true;
+		mduiGet(on ? btn.dataset.del : btn.dataset.add, function () {
+			btn.disabled = false;
+			btn.dataset.mode = on ? 'off' : 'on';
+			btn.textContent = on ? btn.dataset.off : btn.dataset.on;
+		});
+	}
 </script>
 <!--{template common/footer}-->

@@ -1,0 +1,48 @@
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang feed}</mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<mdui-button-icon icon="stream" onclick="location.href='home.php?mod=follow'"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<mdui-tabs value="<!--{if $_GET['view'] == 'we'}-->we<!--{elseif $_GET['view'] == 'me'}-->me<!--{else}-->all<!--{/if}-->" style="position:sticky;top:64px;z-index:9">
+	<mdui-tab value="all" data-href="home.php?mod=space&do=home&view=all">{lang view_all}</mdui-tab>
+	<mdui-tab value="we" data-href="home.php?mod=space&do=home&view=we">{lang friend_feed}</mdui-tab>
+	<mdui-tab value="me" data-href="home.php?mod=space&do=home&view=me">{lang my_feed}</mdui-tab>
+</mdui-tabs>
+
+<div style="padding:1rem;padding-bottom:5rem">
+	<!--{if $list}-->
+		<!--{loop $list $day $values}-->
+		<div style="margin:.25rem 0 .75rem;font-size:.8125rem;opacity:.6"><!--{if $day=='yesterday'}-->{lang yesterday}<!--{elseif $day=='today'}-->{lang today}<!--{else}-->$day<!--{/if}--></div>
+		<!--{loop $values $value}--><!--{subtemplate home/space_feed_li}--><!--{/loop}-->
+		<!--{/loop}-->
+	<!--{elseif $feed_users}-->
+		<!--{loop $feed_users $day $users}-->
+		<div style="margin:.25rem 0 .75rem;font-size:.8125rem;opacity:.6"><!--{if $day=='yesterday'}-->{lang yesterday}<!--{elseif $day=='today'}-->{lang today}<!--{else}-->$day<!--{/if}--></div>
+		<!--{loop $users $user}-->
+		<!--{eval $daylist = $feed_list[$day][$user['uid']];}-->
+		<div style="display:flex;align-items:center;gap:.625rem;margin-bottom:.625rem">
+			<!--{if $user['uid']}-->
+			<mdui-avatar src="<!--{avatar($user['uid'], 'small', true)}-->" href="home.php?mod=space&uid=$user['uid']&do=profile" style="width:36px;height:36px"></mdui-avatar>
+			<a href="home.php?mod=space&uid=$user['uid']&do=profile" style="font-weight:500;color:inherit;text-decoration:none">$user['username']</a>
+			<!--{else}-->
+			<mdui-avatar icon="notifications" style="width:36px;height:36px"></mdui-avatar>
+			<!--{/if}-->
+		</div>
+		<!--{loop $daylist $value}--><!--{subtemplate home/space_feed_li}--><!--{/loop}-->
+		<!--{eval $morelist = $more_list[$day][$user['uid']];}-->
+		<!--{if $morelist}-->
+		<!--{loop $morelist $value}--><!--{subtemplate home/space_feed_li}--><!--{/loop}-->
+		<!--{/if}-->
+		<!--{/loop}-->
+		<!--{/loop}-->
+	<!--{else}-->
+		<mdui-card variant="filled" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">{lang no_feed}</mdui-card>
+	<!--{/if}-->
+	<!--{if $multi}--><div style="padding-top:1rem;text-align:center">$multi</div><!--{/if}-->
+</div>
+
+<!--{template common/footer}-->
