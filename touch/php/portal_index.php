@@ -52,12 +52,24 @@ foreach (C::t('common_block')->fetch_all_by_where('WHERE b.name IN (' . dimplode
 }
 if ($mdui_blocks) {
 	include_once libfile('function/block');
-	// 先载入模块到 $_G['block']，后续才能调用 Discuz 原生强制更新函数。
-	block_get_batch(array_values(array_diff_key($mdui_blocks, array('nav' => 1, 'entry' => 1))));
-	// 首页所有使用论坛帖子数据源的 DIY 模块每次访问都即时更新；静态 HTML 和非帖子模块保持原缓存策略。
-	foreach ($mdui_blocks as $bid) {
-		if (in_array($_G['block'][$bid]['blockclass'], array('forum_thread', 'group_thread'))) {
-			block_updatecache($bid, true);
+	$mdui_thread_bids = array_values(array_diff_key($mdui_blocks, array('nav' => 1, 'entry' => 1)));
+	block_get_batch($mdui_thread_bids);
+	// 主题变量 mdui_block_cache：DIY 模块缓存时间（秒）。留空默认 30，填 0 表示每次访问即时刷新。
+	// 过期模块在请求内重建（不带 force，受 Discuz 进程锁节流：同一时刻只有一个请求重建，其余继续用旧数据）。
+	// 不能在每次请求无条件 block_updatecache($bid, true)——那会每请求产生约 60 条 DELETE/INSERT 写查询，
+	// 高并发下 InnoDB 锁冲突拖垮整站（v1.2 教训）。
+	$mdui_cache_ttl = trim((string)($_G['style']['mdui_block_cache'] ?? ''));
+	$mdui_cache_ttl = $mdui_cache_ttl === '' ? 30 : max(0, intval($mdui_cache_ttl));
+	foreach ($mdui_thread_bids as $mdui_bid) {
+		$mdui_block = $_G['block'][$mdui_bid] ?? null;
+		if (!$mdui_block || !in_array($mdui_block['blockclass'], array('forum_thread', 'group_thread'))) {
+			continue;
+		}
+		if ($mdui_cache_ttl === 0 || TIMESTAMP - $mdui_block['dateline'] > $mdui_cache_ttl) {
+			block_updatecache($mdui_bid, $mdui_cache_ttl === 0);
+		} else {
+			// 未过期：把缓存时长同步给本页展示逻辑（block_fetch_content 等处的判断用）
+			$_G['block'][$mdui_bid]['cachetime'] = $mdui_cache_ttl;
 		}
 	}
 }
