@@ -1,0 +1,359 @@
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang send_posts}</mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+</mdui-top-app-bar>
+
+<div style="padding:1rem 1rem 2rem">
+	<div class="fs-wrap">
+		<!-- 左侧：分区导航 -->
+		<div class="fs-rail" id="fs_rail"></div>
+		<!-- 右侧：版块列表，子版块随版块行展开（每行两个） -->
+		<div class="fs-main">
+			<div class="fs-main-title">版块</div>
+			<div id="block_forum"></div>
+		</div>
+	</div>
+
+	<!-- 保留后端生成的三级版块数据，供前端级联显示。 -->
+	<div style="display:none">
+		<ul id="fs_group">$grouplist</ul>
+		<ul id="fs_forum_common">$commonlist</ul>
+		<!--{loop $forumlist $forumid $forum}-->
+			<ul id="fs_forum_$forumid">$forum</ul>
+		<!--{/loop}-->
+		<!--{loop $subforumlist $forumid $forum}-->
+			<ul id="fs_subforum_$forumid">$forum</ul>
+		<!--{/loop}-->
+	</div>
+</div>
+
+<style>
+.fs-wrap {
+	display:flex;
+	align-items:flex-start;
+	gap:.75rem;
+}
+/* 左侧分区导航 */
+.fs-rail {
+	flex:0 0 6.25rem;
+	display:flex;
+	flex-direction:column;
+	gap:.25rem;
+	position:sticky;
+	top:1rem;
+}
+.fs-group {
+	position:relative;
+	overflow:visible;
+	padding:.625rem .25rem;
+	border-radius:.5rem;
+	text-align:center;
+	font-size:.8125rem;
+	line-height:1.1rem;
+	color:rgb(var(--mdui-color-on-surface-variant));
+	cursor:pointer;
+	user-select:none;
+	-webkit-tap-highlight-color:transparent;
+	transition:background-color .2s;
+}
+.fs-group:active {
+	background-color:rgba(var(--mdui-color-on-surface-variant),0.08);
+}
+.fs-group.fs-active {
+	background:rgb(var(--mdui-color-secondary-container));
+	color:rgb(var(--mdui-color-on-secondary-container));
+	font-weight:600;
+}
+/* 右侧版块列表 */
+.fs-main {
+	flex:1;
+	min-width:0;
+	background:rgb(var(--mdui-color-surface-container-low));
+	border-radius:.75rem;
+	overflow:hidden;
+}
+.fs-main-title {
+	padding:.75rem .75rem .25rem;
+	font-size:.75rem;
+	opacity:.6;
+}
+.fs-item + .fs-item {
+	border-top:1px solid rgb(var(--mdui-color-surface-container-highest));
+}
+.fs-row {
+	position:relative;
+	overflow:visible;
+	display:flex;
+	align-items:center;
+	gap:.75rem;
+	padding:.5rem .75rem;
+	min-height:3.25rem;
+	cursor:pointer;
+	user-select:none;
+	-webkit-tap-highlight-color:transparent;
+	transition:background-color .2s;
+}
+.fs-row:active {
+	background-color:rgba(var(--mdui-color-on-surface),0.08);
+}
+.fs-row-icon {
+	flex:0 0 2rem;
+	width:2rem;
+	height:2rem;
+	border-radius:50%;
+	background:rgb(var(--mdui-color-surface-container-high));
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	overflow:hidden;
+}
+.fs-row-icon img {
+	width:100%;
+	height:100%;
+	object-fit:cover;
+}
+.fs-row-icon mdui-icon {
+	font-size:1.25rem;
+	color:rgb(var(--mdui-color-on-surface-variant));
+}
+.fs-row-name {
+	flex:1;
+	min-width:0;
+	font-size:.875rem;
+	font-weight:500;
+	color:rgb(var(--mdui-color-on-surface));
+	overflow:hidden;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+}
+.fs-row-arrow {
+	flex:0 0 auto;
+	font-size:1.25rem;
+	color:rgb(var(--mdui-color-on-surface-variant));
+	transition:transform .2s;
+	cursor:pointer;
+}
+.fs-row-arrow.fs-open {
+	transform:rotate(90deg);
+}
+/* 子版块：每行两个 */
+.fs-subs {
+	padding:0 .5rem .5rem;
+	display:grid;
+	grid-template-columns:repeat(2,minmax(0,1fr));
+	gap:.5rem;
+}
+.fs-sub {
+	position:relative;
+	overflow:visible;
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	justify-content:center;
+	gap:.25rem;
+	padding:.5rem;
+	aspect-ratio:1;
+	border-radius:.5rem;
+	background:rgb(var(--mdui-color-surface-container));
+	cursor:pointer;
+	user-select:none;
+	-webkit-tap-highlight-color:transparent;
+	transition:background-color .2s;
+}
+.fs-sub:active {
+	background-color:rgba(var(--mdui-color-on-surface),0.08);
+}
+.fs-sub img {
+	flex:0 0 1.25rem;
+	width:1.25rem;
+	height:1.25rem;
+	border-radius:50%;
+	object-fit:cover;
+}
+.fs-sub mdui-icon {
+	flex:0 0 1.25rem;
+	font-size:1.25rem;
+}
+.fs-sub .fs-sub-name {
+	min-width:0;
+	font-size:.75rem;
+	color:rgb(var(--mdui-color-on-surface));
+	overflow:hidden;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+}
+.fs-empty {
+	padding:1rem .75rem 1.25rem;
+	text-align:center;
+	font-size:.8125rem;
+	opacity:.6;
+}
+</style>
+
+<script type="text/javascript" reload="1">
+var specialQuery = <!--{if $special}-->'&special=$special'<!--{else}-->''<!--{/if}-->;
+var attachurl = '$_G[setting][attachurl]'.replace(/\/?$/, '/');
+
+/* 版块图标映射：fid -> data/attachment/common/ 下的路径（forumfield 表，过滤掉未显示版块） */
+<!--{eval}-->
+	$fsicons = array();
+	foreach(C::t('forum_forumfield')->fetch_all_by_fid(array_keys($_G['cache']['forums'])) as $fsiconfid => $fsiconval):
+		if($fsiconval['icon'] && $_G['cache']['forums'][$fsiconfid]['status'] == 1):
+			$fsicons[$fsiconfid] = $fsiconval['icon'];
+		endif;
+	endforeach;
+<!--{/eval}-->
+var forumIcons = {echo json_encode($fsicons)};
+
+var activeGroupBtn = null;
+var expandedItem = null;
+
+function gotoPost(fid) {
+	location.href = 'forum.php?mod=post&action=newthread&fid=' + fid + specialQuery;
+}
+
+function forumItems(id) {
+	var source = document.getElementById(id);
+	return source ? source.getElementsByTagName('LI') : [];
+}
+
+function esc(s) {
+	return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function iconHtml(fid) {
+	var p = forumIcons[String(fid)];
+	if (p) return '<img loading="lazy" alt="" src="' + attachurl + 'common/' + p + '">';
+	return '<mdui-icon name="forum"></mdui-icon>';
+}
+
+function locationforums(block, fid) {
+	location.href = block === 1 ? 'forum.php?gid=' + fid : 'forum.php?mod=forumdisplay&fid=' + fid;
+}
+
+function expandItem(item) {
+	if (!item.subs) return;
+	item.subs.hidden = false;
+	if (item.arrow) item.arrow.classList.add('fs-open');
+	expandedItem = item;
+}
+
+function collapseItem(item) {
+	if (!item.subs) return;
+	item.subs.hidden = true;
+	if (item.arrow) item.arrow.classList.remove('fs-open');
+	if (expandedItem === item) expandedItem = null;
+}
+
+function toggleItem(item) {
+	if (expandedItem && expandedItem !== item) collapseItem(expandedItem);
+	if (item.subs.hidden) {
+		expandItem(item);
+	} else {
+		collapseItem(item);
+	}
+}
+
+function selectGroup(btn, gid) {
+	if (activeGroupBtn) activeGroupBtn.classList.remove('fs-active');
+	activeGroupBtn = btn;
+	btn.classList.add('fs-active');
+	renderForumList(gid);
+}
+
+function makeGroupBtn(name, gid) {
+	var b = document.createElement('div');
+	b.className = 'fs-group';
+	b.innerHTML = '<mdui-ripple></mdui-ripple>' + esc(name);
+	b.addEventListener('click', function () { selectGroup(b, gid); });
+	b.addEventListener('dblclick', function () { locationforums(1, gid); });
+	return b;
+}
+
+function renderForumList(gid) {
+	var wrap = document.getElementById('block_forum');
+	wrap.innerHTML = '';
+	expandedItem = null;
+	var items = forumItems('fs_forum_' + gid);
+	if (!items.length) {
+		wrap.innerHTML = '<div class="fs-empty">该分区下暂无可发帖的版块</div>';
+		return;
+	}
+	for (var i = 0; i < items.length; i++) {
+		var fid = items[i].getAttribute('fid');
+		if (!fid || fid <= 0) continue;
+		var subItems = forumItems('fs_subforum_' + fid);
+		var item = document.createElement('div');
+		item.className = 'fs-item';
+		var row = document.createElement('div');
+		row.className = 'fs-row';
+		row.innerHTML = '<mdui-ripple></mdui-ripple>'
+			+ '<div class="fs-row-icon">' + iconHtml(fid) + '</div>'
+			+ '<span class="fs-row-name">' + esc(items[i].textContent) + '</span>'
+			+ (subItems.length ? '<mdui-icon class="fs-row-arrow" name="keyboard_arrow_right"></mdui-icon>' : '');
+		var entry = { row: row, subs: null, arrow: row.querySelector('.fs-row-arrow') };
+		if (subItems.length) {
+			var subs = document.createElement('div');
+			subs.className = 'fs-subs';
+			subs.hidden = true;
+			for (var j = 0; j < subItems.length; j++) {
+				var subfid = subItems[j].getAttribute('fid');
+				if (!subfid || subfid <= 0) continue;
+				var chip = document.createElement('div');
+				chip.className = 'fs-sub';
+				chip.innerHTML = '<mdui-ripple></mdui-ripple>' + iconHtml(subfid)
+					+ '<span class="fs-sub-name">' + esc(subItems[j].textContent) + '</span>';
+				(function (currentFid) {
+					chip.addEventListener('click', function () { gotoPost(currentFid); });
+				})(subfid);
+				subs.appendChild(chip);
+			}
+			entry.subs = subs;
+		}
+		(function (entryObj, currentFid) {
+			row.addEventListener('click', function () { gotoPost(currentFid); });
+			if (entryObj.arrow) {
+				/* 点箭头只展开/收起子版块，不触发整行跳转 */
+				entryObj.arrow.addEventListener('click', function (e) {
+					e.stopPropagation();
+					toggleItem(entryObj);
+				});
+			}
+		})(entry, fid);
+		item.appendChild(row);
+		if (entry.subs) item.appendChild(entry.subs);
+		wrap.appendChild(item);
+	}
+}
+
+(function () {
+	var rail = document.getElementById('fs_rail');
+	var groupItems = forumItems('fs_group');
+	var firstBtn = null, firstGid = null;
+	/* 仅在常用版块存在有效数据时显示常用分组（游客会产生 fid=0 的空项） */
+	var commonItems = forumItems('fs_forum_common');
+	var hasCommon = false;
+	for (var ci = 0; ci < commonItems.length; ci++) {
+		var cfid = commonItems[ci].getAttribute('fid');
+		if (cfid && cfid > 0) { hasCommon = true; break; }
+	}
+	if (hasCommon) {
+		firstBtn = makeGroupBtn('{lang nav_forum_frequently}', 'common');
+		firstGid = 'common';
+		rail.appendChild(firstBtn);
+	}
+	for (var i = 0; i < groupItems.length; i++) {
+		var fid = groupItems[i].getAttribute('fid');
+		if (!fid || !document.getElementById('fs_forum_' + fid)) continue;
+		var btn = makeGroupBtn(groupItems[i].textContent, fid);
+		rail.appendChild(btn);
+		if (!firstBtn) { firstBtn = btn; firstGid = fid; }
+	}
+	if (firstBtn) selectGroup(firstBtn, firstGid);
+})();
+</script>
+
+<!--{template common/footer}-->
