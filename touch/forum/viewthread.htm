@@ -344,7 +344,7 @@
 		<!--{if $post['signature'] && ($_G['setting']['bannedmessages'] & 4 && ($post['memberstatus'] == '-1' || ($post['authorid'] && !$post['username']) || ($post['groupid'] == 4 || $post['groupid'] == 5) || ($post['status'] & 1)))}-->
 			<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgba(var(--mdui-color-on-surface),.12);opacity:.7;font-size:.8125rem">{lang member_signature_banned}</div>
 		<!--{elseif $post['signature'] && !$post['anonymous'] && $showsignatures}-->
-			<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgba(var(--mdui-color-on-surface),.12);max-height:{$_G['setting']['maxsigrows']}px;overflow:hidden;font-size:.8125rem;opacity:.7">{$post['signature']}</div>
+			<div class="vt-sig" style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgba(var(--mdui-color-on-surface),.12);max-height:{$_G['setting']['maxsigrows']}px;overflow:hidden;font-size:.8125rem;opacity:.7">{$post['signature']}</div>
 		<!--{elseif !$post['anonymous'] && $showsignatures && !empty($_G['setting']['globalsightml'])}-->
 			<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgba(var(--mdui-color-on-surface),.12);font-size:.8125rem;opacity:.7">{$_G['setting']['globalsightml']}</div>
 		<!--{/if}-->
@@ -1310,6 +1310,180 @@ document.addEventListener('click', function(e) {
 		more.style.setProperty('--vt-ripple-y', (e.clientY - r.top) + 'px');
 	}
 });
+</script>
+
+<!-- 帖子图片查看器：帖子/回帖中未被链接包围的图片（外链图 + 附件图 + 签名图），点击后淡入查看 -->
+<style>
+html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
+.vt-viewer { position:fixed; left:0; right:0; top:0; bottom:0; z-index:20000; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.55); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility .25s ease; -webkit-tap-highlight-color:transparent; }
+.vt-viewer.vt-open { opacity:1; visibility:visible; }
+.vt-viewer-img { display:block; width:auto; height:auto; max-width:92vw; max-height:86vh; object-fit:contain; border-radius:.35rem; transform:scale(.92); transition:transform .25s ease; }
+.vt-viewer.vt-open .vt-viewer-img { transform:scale(1); }
+.vt-viewer-btn { position:absolute; display:flex; align-items:center; justify-content:center; width:2.75rem; height:2.75rem; margin:0; padding:0; border:none; border-radius:50%; background:rgba(0,0,0,.45); color:#fff; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+.vt-viewer-btn:active { background:rgba(0,0,0,.7); }
+.vt-viewer-btn[disabled] { opacity:.5; }
+.vt-viewer-btn .material-icons { font-size:1.5rem; }
+.vt-viewer-close { top:calc(env(safe-area-inset-top, 0px) + .75rem); left:.75rem; }
+.vt-viewer-dl { right:.75rem; bottom:calc(env(safe-area-inset-bottom, 0px) + .75rem); }
+</style>
+<script>
+(function () {
+	'use strict';
+
+	// 生效范围：帖子正文、附件图列表、签名
+	var SCOPE = '.mdui-prose, .vt_imgs, .vt-sig';
+	var IMG_RE = /\.(png|jpe?g|gif|webp|bmp|avif|svg|ico)$/i;
+
+	var viewer, vimg, btnClose, btnDl, current = null;
+
+	function absUrl(u) {
+		// 页面带 <base href>，必须按 baseURI 解析才与浏览器实际加载的地址一致
+		try { return new URL(u, document.baseURI || location.href); } catch (e) { return null; }
+	}
+
+	// 模板自带的相册/附件包装链接不算「被链接包围」，只有用户 [url] 链接才算
+	function isTemplateWrap(href) {
+		return /(^|[?&])from=album(&|$)/.test(href)
+			|| /mod=attachment/.test(href)
+			|| (/mod=viewthread/.test(href) && /(^|[?&])aid=/.test(href));
+	}
+
+	// 命中则返回可放大的 img，否则返回 null
+	function pick(node) {
+		var img = node && node.closest ? node.closest('img') : null;
+		if (!img || img === vimg) return null;
+		if (img.hasAttribute('smilieid')) return null;
+		if (img.classList.contains('vm')) return null;   // Discuz 附件文件类型小图标
+		if (img.closest('.post_attlist')) return null;   // 附件下载卡片，整卡交给下载逻辑
+		if (!img.closest(SCOPE)) return null;
+		var a = img.closest('a[href]');
+		if (a && !isTemplateWrap(a.getAttribute('href') || '')) return null;
+		var u = absUrl(img.getAttribute('src') || '');
+		if (!u || (u.protocol !== 'http:' && u.protocol !== 'https:')) return null;
+		return img;
+	}
+
+	function fileName(img) {
+		var alt = (img.getAttribute('alt') || '').trim();
+		if (IMG_RE.test(alt)) return alt;
+		var u = absUrl(img.getAttribute('src') || '');
+		if (u) {
+			var base = u.pathname.split('/').pop() || '';
+			try { base = decodeURIComponent(base); } catch (e) {}
+			if (IMG_RE.test(base)) return base;
+		}
+		return alt || 'image';
+	}
+
+	function anchorDownload(href, name) {
+		var a = document.createElement('a');
+		a.href = href;
+		a.download = name;
+		a.rel = 'noopener';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	}
+
+	function download() {
+		if (!current) return;
+		var u = absUrl(current.getAttribute('src') || '');
+		if (!u) return;
+		var name = fileName(current);
+
+		// 本站图片（附件 / data 目录）直接下载；同域但协议不同时升到当前页协议
+		if (u.hostname === location.hostname) {
+			anchorDownload(location.origin + u.pathname + u.search, name);
+			return;
+		}
+
+		// 跨域外链无法用 download 属性强制下载，走本站同源中转
+		btnDl.disabled = true;
+		fetch('imgdl.php?u=' + encodeURIComponent(u.href) + '&name=' + encodeURIComponent(name))
+			.then(function (r) {
+				if (!r.ok) throw new Error('HTTP ' + r.status);
+				return r.blob();
+			})
+			.then(function (b) {
+				var ou = URL.createObjectURL(b);
+				anchorDownload(ou, name);
+				setTimeout(function () { URL.revokeObjectURL(ou); }, 10000);
+			})
+			.catch(function () {
+				if (window.mduiTip) mduiTip('下载失败，可长按图片保存', true);
+			})
+			.then(function () { btnDl.disabled = false; });
+	}
+
+	function open(img) {
+		current = img;
+		vimg.src = img.getAttribute('src') || '';
+		vimg.alt = img.getAttribute('alt') || '';
+		viewer.classList.add('vt-open');
+		viewer.setAttribute('aria-hidden', 'false');
+		document.documentElement.classList.add('vt-viewer-lock');
+	}
+
+	function close() {
+		viewer.classList.remove('vt-open');
+		viewer.setAttribute('aria-hidden', 'true');
+		document.documentElement.classList.remove('vt-viewer-lock');
+		current = null;
+		setTimeout(function () {
+			if (!viewer.classList.contains('vt-open')) vimg.removeAttribute('src');
+		}, 300);
+	}
+
+	function build() {
+		viewer = document.createElement('div');
+		viewer.className = 'vt-viewer';
+		viewer.setAttribute('aria-hidden', 'true');
+
+		btnClose = document.createElement('button');
+		btnClose.type = 'button';
+		btnClose.className = 'vt-viewer-btn vt-viewer-close';
+		btnClose.setAttribute('aria-label', '关闭');
+		btnClose.innerHTML = '<i class="material-icons">close</i>';
+
+		vimg = document.createElement('img');
+		vimg.className = 'vt-viewer-img';
+		vimg.alt = '';
+
+		btnDl = document.createElement('button');
+		btnDl.type = 'button';
+		btnDl.className = 'vt-viewer-btn vt-viewer-dl';
+		btnDl.setAttribute('aria-label', '下载图片');
+		btnDl.innerHTML = '<i class="material-icons">download</i>';
+
+		viewer.appendChild(btnClose);
+		viewer.appendChild(vimg);
+		viewer.appendChild(btnDl);
+		document.body.appendChild(viewer);
+	}
+
+	build();
+
+	// 捕获阶段拦截：既接管点击，也挡掉 Discuz 自带的 zoom() 与图片外链跳转
+	document.addEventListener('click', function (e) {
+		var t = e.target;
+		if (!t || t.nodeType !== 1) return;
+
+		if (viewer.contains(t)) {
+			e.preventDefault();
+			e.stopPropagation();
+			if (t.closest('.vt-viewer-close')) close();
+			else if (t.closest('.vt-viewer-dl')) download();
+			else if (t !== vimg) close();   // 点透明遮罩关闭，点图片本体不关
+			return;
+		}
+
+		var img = pick(t);
+		if (!img) return;
+		e.preventDefault();
+		e.stopPropagation();
+		open(img);
+	}, true);
+})();
 </script>
 
 <!--{template common/footer}-->
