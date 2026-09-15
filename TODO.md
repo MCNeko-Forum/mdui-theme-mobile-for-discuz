@@ -25,6 +25,8 @@ MDUI 没做的页面会自动回落到 Discuz 自带的 `template/default/touch`
 | 常见问题  | `common/faq`           |    √   |
 | 购买邀请码 | `common/buyinvitecode` | <br /> |
 
+- √ 积分变动提示改用底部消息条：读取 `creditnotice` / `creditbase` / `creditrule` cookie，解析出积分名与变动值后走 `mduiTip` 显示，读完即清 cookie。
+
 ## 论坛
 
 | 页面         | 文件                                                            |   已做   |

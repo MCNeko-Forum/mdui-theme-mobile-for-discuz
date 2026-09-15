@@ -204,6 +204,66 @@ window.mduiGet = function (url, done) {
 };
 </script>
 
+<script>
+// 积分变动提示：Discuz 把本次变动写进 creditnotice / creditbase / creditrule 三个 cookie，
+// 桌面版用居中弹窗展示。手机版改成底部消息条，读完即清，避免每次翻页重复提示。
+(function () {
+	function readCookie(name) {
+		var key = cookiepre + name + '=';
+		// 前面补分隔符，避免 cookiepre 前缀相同（creditnotice / creditrule）时误匹配
+		var all = '; ' + document.cookie;
+		var start = all.indexOf('; ' + key);
+		if (start < 0) return '';
+		start += 2 + key.length;
+		var end = all.indexOf(';', start);
+		return all.substring(start, end < 0 ? all.length : end);
+	}
+	function clearCookie(name) {
+		document.cookie = cookiepre + name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=' + (cookiepath || '/') + (cookiedomain ? '; domain=' + cookiedomain : '');
+	}
+
+	var raw = readCookie('creditnotice');
+	if (!raw) return;
+	var notice = raw.split('D');
+	if (!discuz_uid || notice.length < 2 || notice[9] != discuz_uid) {
+		clearCookie('creditnotice');
+		clearCookie('creditrule');
+		return;
+	}
+
+	var info = [];
+	creditnotice.split(',').forEach(function (item) {
+		var e = item.split('|');
+		info[e[0]] = [e[1], e[2]];
+	});
+
+	var parts = [];
+	for (var i = 1; i <= 8; i++) {
+		var delta = parseInt(notice[i], 10);
+		if (!delta || !info[i]) continue;
+		parts.push(info[i][0] + (delta > 0 ? ' +' : ' ') + delta + (info[i][1] || ''));
+	}
+
+	var rule = '';
+	try {
+		// PHP setcookie 用 urlencode，空格会变成 +，先还原再解码
+		rule = decodeURI(readCookie('creditrule').replace(/\+/g, ' ')).replace(/\t/g, ' ');
+	} catch (e) {
+		rule = '';
+	}
+
+	clearCookie('creditnotice');
+	clearCookie('creditbase');
+	clearCookie('creditrule');
+	if (!parts.length) return;
+
+	// mdui.global.js 是 module 脚本，解析完才会执行，等 DOMContentLoaded 再弹
+	document.addEventListener('DOMContentLoaded', function () {
+		window.mduiTip((rule ? rule + '：' : '') + parts.join('，'));
+	});
+})();
+</script>
+
 <!--{if !$_G['setting']['bbclosed'] && empty($_G['member']['freeze'] && $_G['member']['groupid'] != 5)}-->
 	<!--{if $_G['uid'] && !isset($_G['cookie']['checkpm'])}-->
 	<script type="text/javascript" src="home.php?mod=spacecp&ac=pm&op=checknewpm&rand=$_G[timestamp]"></script>
