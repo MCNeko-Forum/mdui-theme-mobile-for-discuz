@@ -67,6 +67,8 @@ const required = [
 	'touch/ranklist/group.htm',
 	'touch/ranklist/side_top.htm',
 	'touch/ranklist/period.htm',
+	// 帖子图片查看器的跨域下载中转，随主题一起部署
+	'imgdl.php',
 	'static/style.css',
 	'static/mdui.css',
 	'static/mdui.global.js',

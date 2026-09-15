@@ -1333,6 +1333,8 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 	// 生效范围：帖子正文、附件图列表、签名
 	var SCOPE = '.mdui-prose, .vt_imgs, .vt-sig';
 	var IMG_RE = /\.(png|jpe?g|gif|webp|bmp|avif|svg|ico)$/i;
+	// 跨域外链下载中转，随主题一起部署；{$_G['style']['tpldir']} 形如 ./template/MDUI
+	var IMGDL = '{$_G['style']['tpldir']}/imgdl.php';
 
 	var viewer, vimg, btnClose, btnDl, current = null;
 
@@ -1397,9 +1399,9 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 			return;
 		}
 
-		// 跨域外链无法用 download 属性强制下载，走本站同源中转
+		// 跨域外链无法用 download 属性强制下载，走主题自带的同源中转
 		btnDl.disabled = true;
-		fetch('imgdl.php?u=' + encodeURIComponent(u.href) + '&name=' + encodeURIComponent(name))
+		fetch(IMGDL + '?u=' + encodeURIComponent(u.href) + '&name=' + encodeURIComponent(name))
 			.then(function (r) {
 				if (!r.ok) throw new Error('HTTP ' + r.status);
 				return r.blob();
