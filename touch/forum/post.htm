@@ -101,6 +101,65 @@
 	<!--{/if}-->
 
 	<div style="padding:1rem 1rem 96px">
+		<!-- 帖子自动保存恢复提示（对齐电脑版 rstnotice）：置于标题上方、与输入框等宽，恢复/清除二选一 -->
+		<mdui-card id="mdui_rstnotice" variant="filled" style="display:none;padding:.5rem .75rem;margin-bottom:1rem">
+			<div style="display:flex;align-items:center;gap:.25rem;font-size:.8125rem">
+				<span style="flex-grow:1">{lang missed_data}</span>
+				<mdui-button type="button" variant="text" id="mdui_rst_restore">{lang post_autosave_restore}</mdui-button>
+				<mdui-button type="button" variant="text" id="mdui_rst_clear">{lang post_topicreset}</mdui-button>
+			</div>
+		</mdui-card>
+
+		<!-- 未使用图片：对齐电脑版 post_editor_extra 的 attachnotice_img，数据源供 JS 取用 -->
+		<!--{if !empty($imgattachs['unused'])}-->
+		<mdui-card id="attachnotice_img" variant="filled" style="display:block;padding:.5rem;margin-bottom:1rem">
+			<div style="display:flex;align-items:center;gap:.25rem;font-size:.8125rem;opacity:.7">
+				<mdui-icon name="lightbulb" style="font-size:18px;color:var(--mdui-color-primary);flex-shrink:0"></mdui-icon>
+				<span>{lang you_have}<span id="unusednum_img"><!--{echo count($imgattachs['unused']);}--></span>{lang img_unused}</span>
+			</div>
+			<div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.25rem">
+				<mdui-button variant="text" onclick="attachoption('img', 2)">{lang attach_view}</mdui-button>
+				<mdui-button variant="text" onclick="attachoption('img', 1)">{lang attach_use}</mdui-button>
+				<mdui-button variant="text" onclick="attachoption('img', 0)">{lang attach_delete}</mdui-button>
+			</div>
+			<div id="unusedlist_img" style="display:none">
+				<!--{loop $imgattachs['unused'] $temp}-->
+					<!--{if !empty($temp['aid'])}-->
+						<label id="unused{$temp['aid']}" data-aid="{$temp['aid']}" data-url="{$temp['url']}/$temp['attachment']" data-name="<!--{echo dhtmlspecialchars($temp['filename']);}-->">
+							<input type="checkbox" value="{$temp['aid']}" checked>
+							<span>$temp['filename']</span>
+						</label>
+					<!--{/if}-->
+				<!--{/loop}-->
+			</div>
+		</mdui-card>
+		<!--{/if}-->
+
+		<!-- 未使用附件：与未使用图片并列在标题上方常显区 -->
+		<!--{if $_G['group']['allowpostattach'] && !empty($attachs['unused'])}-->
+		<mdui-card id="attachnotice_attach" variant="filled" style="display:block;padding:.5rem;margin-bottom:1rem">
+			<div style="display:flex;align-items:center;gap:.25rem;font-size:.8125rem;opacity:.7">
+				<mdui-icon name="lightbulb" style="font-size:18px;color:var(--mdui-color-primary);flex-shrink:0"></mdui-icon>
+				<span>{lang you_have}<span id="unusednum_attach"><!--{echo count($attachs['unused']);}--></span>{lang attach_unused}</span>
+			</div>
+			<div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.25rem">
+				<mdui-button variant="text" onclick="attachoption('attach', 2)">{lang attach_view}</mdui-button>
+				<mdui-button variant="text" onclick="attachoption('attach', 1)">{lang attach_use}</mdui-button>
+				<mdui-button variant="text" onclick="attachoption('attach', 0)">{lang attach_delete}</mdui-button>
+			</div>
+			<div id="unusedlist_attach" style="display:none">
+				<!--{loop $attachs['unused'] $temp}-->
+					<!--{if !empty($temp['aid'])}-->
+						<label id="unused{$temp['aid']}" data-aid="{$temp['aid']}" data-name="<!--{echo dhtmlspecialchars($temp['filename']);}-->">
+							<input type="checkbox" value="{$temp['aid']}" checked>
+							<span>$temp['filename']</span>
+						</label>
+					<!--{/if}-->
+				<!--{/loop}-->
+			</div>
+		</mdui-card>
+		<!--{/if}-->
+
 		<!--{if $_GET['action'] == 'reply' && !empty($_GET['addtrade']) || $_GET['action'] == 'edit' && $thread['special'] == 2 && !$postinfo['first']}-->
 			<input name="subject" type="hidden" value="">
 		<!--{elseif $_GET['action'] != 'reply'}-->
@@ -128,17 +187,24 @@
 
 		<mdui-text-field id="needmessage" name="$editor['textarea']" variant="outlined" autocomplete="off" rows="8" autosize min-rows="8" max-rows="24" label="{lang thread_content}" style="margin-top:1rem" value="<!--{if $special != 127}-->$postinfo['message']<!--{/if}-->"></mdui-text-field>
 
+		<!-- 自动保存状态行：倒计时 + 已保存提示，贴在正文输入框下方右侧（对齐电脑版编辑器底栏 svdsecond） -->
+		<div id="mdui_as_stat" style="text-align:right;font-size:.75rem;opacity:.55;margin-top:.25rem;min-height:1.1em"></div>
+
 		<!--{if $_GET['action'] == 'edit' && $isorigauthor && ($isfirstpost && $thread['replies'] < 1 || !$isfirstpost) && !$rushreply && $_G['setting']['editperdel']}-->
 			<mdui-checkbox name="delete" value="1" style="margin-top:.75rem">{lang post_delpost}</mdui-checkbox>
 		<!--{/if}-->
 
 		<!--{hook/post_middle_mobile}-->
+
 		<!--{subtemplate forum/post_editor_attribute}-->
 
 		<!--{if $_GET['action'] != 'edit' && ($secqaacheck || $seccodecheck)}-->
-			<mdui-card variant="outlined" style="display:block;padding:.75rem;margin-top:1rem">
+			<!-- 发帖验证码弹窗：点发表/存草稿先弹此窗，确认后才真正提交（对齐电脑版验证流程的手机版形态） -->
+			<mdui-dialog id="mdui_sec_dlg" close-on-esc headline="安全验证">
 				<ul style="list-style:none;margin:0;padding:0"><!--{subtemplate common/seccheck}--></ul>
-			</mdui-card>
+				<mdui-button slot="action" variant="text" id="mdui_sec_cancel">{lang cancel}</mdui-button>
+				<mdui-button slot="action" variant="tonal" id="mdui_sec_ok">{lang submit}</mdui-button>
+			</mdui-dialog>
 		<!--{/if}-->
 		<!--{hook/post_bottom_mobile}-->
 	</div>
@@ -213,6 +279,10 @@ window.postInsert = function (code) {
 			return r.json();
 		}).then(function (j) {
 			mduiTip(j.message);
+			// 发表/存草稿成功即清自动保存档（对齐 PC 版 clearUserdata）
+			if (j.data && j.data.tid) {
+				try { localStorage.removeItem('Discuz_forum_{$_G['uid']}'); } catch (e) {}
+			}
 			if (j.data && j.data.tid && !isDraft) {
 				setTimeout(function () {
 					var isReply = '{$_GET['action']}' === 'reply';
@@ -226,8 +296,10 @@ window.postInsert = function (code) {
 				}, 1000);
 			} else {
 				button.loading = false;
-				// 出错（含验证问答/验证码错误）时换新题并清空答案，留在本页修正
+				// 出错（含验证问答/验证码错误）时换新题并清空答案，重新弹窗让用户修正
+				window.__secPassed = false;
 				window.nekoSecRefresh && nekoSecRefresh();
+				secDlg && (secDlg.open = true);
 			}
 		}).catch(function () {
 			button.loading = false;
@@ -235,8 +307,152 @@ window.postInsert = function (code) {
 		});
 	}
 
-	btn.addEventListener('click', function () { submitPost(btn, false); });
-	draftBtn && draftBtn.addEventListener('click', function () { submitPost(draftBtn, true); });
+	// 有验证码时点发表/存草稿先弹验证窗，确认后才真正提交
+	var secDlg = document.getElementById('mdui_sec_dlg');
+	var pendingIsDraft = false;
+	function gateSec(button, isDraft) {
+		if (secDlg && !window.__secPassed) {
+			pendingIsDraft = isDraft;
+			secDlg.open = true;
+			return;
+		}
+		submitPost(button, isDraft);
+	}
+	if (secDlg) {
+		document.getElementById('mdui_sec_cancel').addEventListener('click', function () { secDlg.open = false; });
+		document.getElementById('mdui_sec_ok').addEventListener('click', function () {
+			window.__secPassed = true;
+			secDlg.open = false;
+			submitPost(pendingIsDraft ? draftBtn : btn, pendingIsDraft);
+		});
+	}
+
+	btn.addEventListener('click', function () { gateSec(btn, false); });
+	draftBtn && draftBtn.addEventListener('click', function () { gateSec(draftBtn, true); });
+})();
+
+// ===== 帖子自动保存：对齐 PC 版 saveData/loadData（forum_post.js + common.js） =====
+// localStorage 键与 PC 版相同：Discuz_forum_ 加上用户 UID，两端存档互通；记录为 [name, value, checked] 数组
+(function () {
+	var form = document.getElementById('postform');
+	if (!form || !'{$_G['uid']}') return;
+	var key = 'Discuz_forum_' + '{$_G['uid']}';
+	// 与 PC 版一致：跳过 attach*（附件走独立流程）、formhash/posttime、验证码相关与提交开关
+	var skip = {formhash: 1, posttime: 1, save: 1, secqaahash: 1, secanswer: 1, seccodehash: 1, seccodeverify: 1, seccodemodid: 1, topicsubmit: 1, replysubmit: 1, editsubmit: 1};
+	function canSave(el) {
+		return el.name && !skip[el.name] && el.name.substr(0, 6) != 'attach' &&
+			el.type != 'file' && el.type != 'button' && el.type != 'submit';
+	}
+	function collect() {
+		var data = [];
+		form.querySelectorAll('[name]').forEach(function (el) {
+			if (!canSave(el)) return;
+			if (el.type == 'checkbox' || el.type == 'radio') {
+				el.checked && data.push([el.name, el.value, 1]);
+			} else if (el.value !== undefined) {
+				data.push([el.name, el.value, 0]);
+			}
+		});
+		return data;
+	}
+	function saveData(ignoreempty) {
+		var data = collect();
+		if (!ignoreempty) {
+			// 标题与正文都为空则不保存，避免空档覆盖有效草稿（对齐 PC 版判断）
+			var sub = '', msg = '';
+			data.forEach(function (r) {
+				if (r[0] == 'subject') sub = r[1];
+				if (r[0] == 'message') msg = r[1];
+			});
+			if (!sub.trim() && !msg.trim()) return;
+		}
+		try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+	}
+	// 状态行：倒计时进行中显示秒数，保存成功后短暂显示已保存（对齐 PC 版编辑器底栏）
+	var asStat = document.getElementById('mdui_as_stat');
+	var countdown = 30;
+	var statTimer = null;
+	function tickStat() {
+		countdown = countdown > 0 ? countdown - 1 : 30;
+		if (countdown > 0) asStat && (asStat.textContent = countdown + ' 秒后自动保存');
+	}
+	setInterval(tickStat, 1000);
+	tickStat();
+	function savedTip() {
+		if (!asStat) return;
+		countdown = 30;
+		asStat.textContent = '已自动保存';
+		clearTimeout(statTimer);
+		statTimer = setTimeout(tickStat, 3000);
+	}
+	function loadData(quiet) {
+		var raw;
+		try { raw = localStorage.getItem(key); } catch (e) {}
+		if (!raw) return;
+		// 兼容两种格式：本页存的 JSON 数组，以及 PC 版编辑器写入的
+		// name\t标签\t类型\t值\t\t 制表符格式（同一 localStorage 键两端互通）
+		var data;
+		if (raw.charAt(0) == '[') {
+			try { data = JSON.parse(raw); } catch (e) { return; }
+		} else {
+			data = [];
+			raw.split('\t\t').forEach(function (rec) {
+				if (!rec) return;
+				var v = rec.split('\t');
+				// checkbox/radio 只在勾选时才写入存档，恢复时直接置为勾选
+				if (v[2] == 'checkbox' || v[2] == 'radio') {
+					data.push([v[0], v[3] || '', 'checked']);
+				} else if (v[3] !== undefined) {
+					data.push([v[0], v[3], '']);
+				}
+			});
+		}
+		if (!data || !data.length) return;
+		data.forEach(function (r) {
+			var sel = '[name="' + String(r[0]).replace(/"/g, '\\"') + '"]';
+			form.querySelectorAll(sel).forEach(function (el) {
+				if (r[2] === 'checked') {
+					el.checked = true;
+				} else if (el.type == 'checkbox' || el.type == 'radio') {
+					el.checked = el.value == r[1];
+				} else if (el.value !== undefined) {
+					el.value = r[1];
+					el.dispatchEvent(new Event('input'));
+				}
+			});
+		});
+		var n = document.getElementById('mdui_rstnotice');
+		n && (n.style.display = 'none');
+		!quiet && mduiTip('已恢复上次未提交的数据');
+	}
+	// 恢复提示条：按钮用 document 级委托（mdui 组件内部节点点击更可靠），防止点击无效
+	var rst = document.getElementById('mdui_rstnotice');
+	document.addEventListener('click', function (e) {
+		var target = e.target.closest ? e.target.closest('#mdui_rst_restore, #mdui_rst_clear') : null;
+		if (!target) return;
+		e.preventDefault();
+		if (target.id == 'mdui_rst_restore') {
+			loadData(false);
+		} else {
+			try { localStorage.removeItem(key); } catch (e2) {}
+			rst && (rst.style.display = 'none');
+			mduiTip('已清除自动保存的数据');
+		}
+	});
+	<!--{if !empty($_GET['cedit']) && $_GET['cedit'] == 'yes'}-->
+	// 发帖类型切换页（cedit=yes）对齐 PC 版直接静默恢复
+	loadData(true);
+	<!--{else}-->
+	// 普通进页：有存档只显示提示，由用户选择恢复或清除
+	(function () {
+		var raw;
+		try { raw = localStorage.getItem(key); } catch (e) {}
+		rst && raw && raw.length > 4 && (rst.style.display = '');
+	})();
+	<!--{/if}-->
+	// 每 30 秒存一次（对齐 PC 版 savedataInterval=30），离开页面再存一次，存完刷新状态行
+	setInterval(function () { saveData(false); savedTip(); }, 30000);
+	window.addEventListener('beforeunload', function () { saveData(false); });
 })();
 </script>
 <!--{eval $nofooter = true;}-->

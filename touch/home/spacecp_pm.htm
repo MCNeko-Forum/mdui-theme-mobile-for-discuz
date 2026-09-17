@@ -14,7 +14,10 @@
 		<div style="padding:1rem 1rem 5.5rem">
 			<mdui-card variant="outlined" style="display:grid;gap:1rem;padding:1rem">
 				<!--{if !$touid}--><mdui-text-field id="username" name="username" autocomplete="off" label="{lang addressee}"></mdui-text-field><!--{/if}-->
-				<mdui-text-field id="sendmessage" name="message" autocomplete="off" textarea rows="8" label="{lang thread_content}"></mdui-text-field>
+				<div style="display:flex;align-items:end;gap:.25rem">
+					<mdui-text-field id="sendmessage" name="message" autocomplete="off" textarea rows="8" label="{lang thread_content}" style="flex:1"></mdui-text-field>
+					<mdui-button-icon icon="sentiment_satisfied" type="button" onclick="mduiPmSmile('sendmessage')" title="{lang smilies}"></mdui-button-icon>
+				</div>
 				<!--{if $secqaacheck || $seccodecheck}--><div><!--{subtemplate common/seccheck}--></div><!--{/if}-->
 				<input type="hidden" name="referer" value="{echo dreferer();}" />
 				<input type="hidden" name="pmsubmit" value="true" />
@@ -23,5 +26,6 @@
 			</mdui-card>
 		</div>
 	</form>
+	<!--{template home/space_pm_smiley}-->
 <!--{/if}-->
 <!--{template common/footer}-->

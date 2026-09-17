@@ -23,6 +23,8 @@
 		</div>
 	<!--{/loop}-->
 	</div>
+
+	<!-- 未使用图片/附件提示卡已上移到 post.htm 标题输入框上方，与恢复提示条并列；本文件仅保留弹窗与 JS -->
 </div>
 <!--{/if}-->
 
@@ -352,6 +354,16 @@
 <!--{if $_G['group']['maxprice']}-->
 	<span id="mdui_price_title" style="display:none">{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['title']}</span>
 <!--{/if}-->
+
+<!-- 未使用附件/图片查看弹窗：attachoption(type, 2) 打开，内容由 JS 克隆填充 -->
+<mdui-dialog id="mdui_unused_dlg" close-on-esc close-on-overlay-click>
+	<div id="mdui_unused_body" style="max-height:50dvh;overflow:auto;font-size:.875rem"></div>
+	<div style="margin-top:.75rem">
+		<mdui-checkbox id="mdui_unused_chkall" checked onchange="attachoption(window.__unusedType, 3)">{lang select_all}</mdui-checkbox>
+	</div>
+	<mdui-button slot="action" variant="text" id="mdui_unused_close">{lang cancel}</mdui-button>
+	<mdui-button slot="action" variant="tonal" id="mdui_unused_use">{lang attach_use}</mdui-button>
+</mdui-dialog>
 
 <style>
 /* 上传图片区：独立成块置于功能区之上 */
@@ -739,5 +751,126 @@ window.mduiInsert = function (type) {
 		});
 		input.value = '';
 	});
+
+	// ===== 未使用附件/图片：对齐电脑版 forum_post.js 的 attachoption =====
+	// op: 0=删除选中项 1=使用（未使用转已用） 2=弹窗查看 3=弹窗内全选
+	var unusedDlg = getID('mdui_unused_dlg');
+	var escHtml = function (s) {
+		return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	};
+	// 把未使用项转成已用项 UI：图片缩略图进 #imglist，附件卡片进 #attlist，并补 attachnew 字段
+	// 未使用附件本就存在 unused 表，提交时后端 updateattach() 靠 attachnew[aid] 自动转正
+	function convertToUsed(type, item) {
+		var aid = item.getAttribute('data-aid');
+		if (type == 'img') {
+			var node = document.createElement('div');
+			node.setAttribute('data-aid', aid);
+			node.style.cssText = 'position:relative;width:72px;height:72px';
+			node.innerHTML =
+				'<img src="' + escHtml(item.getAttribute('data-url')) + '" onclick="postInsert(\'[attachimg]' + aid + '[/attachimg]\')" style="width:72px;height:72px;object-fit:cover;border-radius:.5rem">' +
+				'<button type="button" class="mdui-img-del" style="position:absolute;top:3px;left:3px;padding:0;border:0;cursor:pointer;color:#fff">' +
+				'<mdui-icon name="cancel"></mdui-icon></button>' +
+				'<div class="mdui-post-ins-tip">点击插入图片</div>';
+			getID('imglist').appendChild(node);
+		} else {
+			var name = item.getAttribute('data-name');
+			var media = /\.mp3$/i.test(name)
+				? '<mdui-button variant="text" onclick="postInsert(\'[audio]attach://' + aid + '.mp3[/audio]\')">{lang e_audio}</mdui-button>'
+				: (/\.mp4$/i.test(name)
+					? '<mdui-button variant="text" onclick="postInsert(\'[media=x,500,375]attach://' + aid + '.mp4[/media]\')">{lang e_video}</mdui-button>'
+					: '');
+			var card = document.createElement('div');
+			card.setAttribute('data-aid', aid);
+			card.setAttribute('data-up', '0');
+			card.style.cssText = 'display:block;border:1px solid var(--mdui-color-outline-variant);border-radius:12px;padding:.5rem;margin-bottom:.5rem';
+			card.innerHTML =
+				'<div style="display:flex;align-items:center;gap:.25rem">' +
+				'<span style="flex-grow:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(name) + '</span>' +
+				media +
+				'<mdui-button variant="text" onclick="postInsert(\'[attach]' + aid + '[/attach]\')">{lang forum_post_insert}</mdui-button>' +
+				'<button type="button" class="mdui-att-del" style="all:unset;cursor:pointer"><mdui-icon name="delete"></mdui-icon></button>' +
+				'</div>' +
+				'<mdui-text-field name="attachnew[' + aid + '][description]" variant="outlined" label="{lang description}" style="margin-top:.5rem"></mdui-text-field>' +
+				(allowPerm ? permTpl.replace(/__AID__/g, aid) : '') +
+				(allowPrice ? '<mdui-text-field name="attachnew[' + aid + '][price]" type="number" variant="outlined" label="{lang price}" suffix="' + escHtml(priceTitle) + '" style="margin-top:.5rem"></mdui-text-field>' : '');
+			var attlist = getID('attlist');
+			attlist.insertBefore(card, attlist.firstChild);
+		}
+		addUploadFields(aid);
+	}
+	// 操作后刷新计数，用完则收起提示卡
+	function refreshUnused(type) {
+		var n = getID('unusedlist_' + type).querySelectorAll('label').length;
+		getID('unusednum_' + type).innerHTML = n;
+		if (!n) getID('attachnotice_' + type).style.display = 'none';
+	}
+	// 弹窗里勾选状态同步回原列表（克隆节点与原列表按 aid 对应）
+	function syncDialogChecks(type) {
+		var list = getID('unusedlist_' + type);
+		getID('mdui_unused_body').querySelectorAll('label').forEach(function (lab) {
+			var orig = list.querySelector('#unused' + lab.getAttribute('data-aid'));
+			if (orig) orig.querySelector('input').checked = lab.querySelector('input').checked;
+		});
+	}
+	window.attachoption = function (type, op) {
+		var list = getID('unusedlist_' + type);
+		if (!list) return;
+		if (op == 2) {
+			window.__unusedType = type;
+			unusedDlg.setAttribute('headline', type == 'img' ? '未使用的图片' : '未使用的附件');
+			getID('mdui_unused_body').innerHTML = list.innerHTML;
+			unusedDlg.open = true;
+			return;
+		}
+		if (op == 3) {
+			var all = getID('mdui_unused_chkall').checked;
+			getID('mdui_unused_body').querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = all; });
+			return;
+		}
+		// 弹窗打开时「使用」先同步勾选状态回原列表再走同一流程
+		if (op == 1 && unusedDlg.open) {
+			syncDialogChecks(type);
+			unusedDlg.open = false;
+		}
+		var aids = [];
+		list.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) { aids.push(c.value); });
+		if (!aids.length) { mduiTip(op == 1 ? '请先勾选要使用的项目' : '没有可删除的项目', true); return; }
+		if (op == 1) {
+			aids.forEach(function (aid) {
+				var item = getID('unused' + aid);
+				if (item) {
+					convertToUsed(type, item);
+					item.parentNode.removeChild(item);
+				}
+			});
+			refreshUnused(type);
+			return;
+		}
+		// op == 0：删除，先二次确认再走后端 deleteattach（未使用附件 pid=0，只需 formhash + uid 归属校验）
+		mdui.confirm({
+			headline: '删除未使用的' + (type == 'img' ? '图片' : '附件'),
+			description: '确定要删除选中的 ' + aids.length + ' 项吗？删除后不可恢复。',
+			confirmText: '删除',
+			cancelText: '{lang cancel}',
+			onConfirm: function () {
+				var url = 'forum.php?mod=ajax&action=deleteattach&inajax=yes&formhash={FORMHASH}' +
+					'&tid=' + (POSTUPLOAD.tid || 0) + '&pid=' + (POSTUPLOAD.pid || 0) +
+					aids.map(function (a) { return '&aids[]=' + a; }).join('');
+				fetch(url, {credentials: 'same-origin'})
+					.then(function () {
+						aids.forEach(function (aid) {
+							var item = getID('unused' + aid);
+							item && item.parentNode.removeChild(item);
+						});
+						refreshUnused(type);
+					})
+					.catch(function () { mduiTip('{lang networkerror}', true); });
+			}
+		});
+	};
+	if (unusedDlg) {
+		getID('mdui_unused_close').addEventListener('click', function () { unusedDlg.open = false; });
+		getID('mdui_unused_use').addEventListener('click', function () { attachoption(window.__unusedType, 1); });
+	}
 })();
 </script>

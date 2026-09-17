@@ -151,8 +151,8 @@ MDUI 没做的页面会自动回落到 Discuz 自带的 `template/default/touch`
 | 我的日志    | `home/space_blog_list` / `space_blog_view`                            |  √  |
 
 - □ 编辑日志的站点分类、个人分类、标签回填，以及新建个人分类的显隐需进行页面回归。
-  \| 通知提醒 | `home/space_notice` | √ |
-  \| 私信 | `home/space_pm` / `space_pm_node` | √ |
+  \| 通知提醒 | `home/space_notice` | √ 手机版无 `view` 参数时显示分类入口菜单（彩色圆形图标 + 各分类未读徽标），带上 `view` 后才进列表 |
+  \| 私信 | `home/space_pm` / `space_pm_node` / `space_pm_smiley` | √ 列表页有「我的消息 / 公共消息」两个标签页（`filter=announcepm`），会话与详情页不显示标签页；回复框挂论坛表情面板（`smilies_type`/`smilies_array`，插表情原码，发送时由 `spacecp/pm.php` 转 `[img]`） |
   \| 记录 | `home/space_doing` / `space_doing_form` / `space_doing_li` / `spacecp_doing` | √ |
 | 访客记录 | `home/space_click` | |
   \| 留言板 / 评论片段 | `home/space_wall` / `space_comment_li` | √ |
