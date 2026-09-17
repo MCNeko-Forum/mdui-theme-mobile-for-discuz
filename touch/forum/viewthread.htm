@@ -146,7 +146,7 @@
 				<mdui-menu>
 					<!--{if $post['first'] && $_G['forum']['ismoderator']}-->
 						<!--{if $_G['group']['allowdelpost']}-->
-						<mdui-menu-item icon="delete" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=delete&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_deletethread}</mdui-menu-item>
+						<mdui-menu-item icon="delete" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=delete&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_deletethread}（管理）</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowbumpthread'] && !$_G['forum_thread']['is_archived']}-->
 						<mdui-menu-item icon="swap_vert" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=bump&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_updown}</mdui-menu-item>

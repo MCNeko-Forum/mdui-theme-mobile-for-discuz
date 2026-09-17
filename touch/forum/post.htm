@@ -11,6 +11,9 @@
 	<!--{if $_G['uid'] && $_G['group']['allowsave'] && ($_GET['action'] == 'newthread' && empty($modnewthreads) || $_GET['action'] == 'edit' && $isfirstpost && empty($modnewreplies) && $thread['displayorder'] == -4)}-->
 		<mdui-button id="mdui_save_draft" variant="text" style="margin-right:.5rem">{lang save_draft}</mdui-button>
 	<!--{/if}-->
+	<!--{if $_GET['action'] == 'edit' && $isorigauthor && ($isfirstpost && $thread['replies'] < 1 || !$isfirstpost) && !$rushreply && $_G['setting']['editperdel']}-->
+		<mdui-button-icon id="mdui_delete_post" icon="delete" style="margin-right:.5rem" onclick="mdui.confirm({headline:'确认删除',description:'确定要删除本帖吗？删除后无法恢复。',confirmText:'删除',cancelText:'取消',onConfirm:()=>{var fd=new FormData(document.getElementById('postform'));fd.set('delete','1');fd.delete('save');this.loading=true;fetch(document.getElementById('postform').getAttribute('action')+'&handlekey=postform&inajax=1&ajaxdata=json',{method:'POST',body:fd,credentials:'same-origin'}).then(r=>r.json()).then(j=>{mduiTip(j.message);if(j.data){try{localStorage.removeItem('Discuz_forum_{$_G['uid']}');}catch(e){}setTimeout(()=>location.href='forum.php?mod=forumdisplay&fid={$_G['fid']}',800);}else{this.loading=false;}}).catch(()=>{mduiTip('{lang networkerror}',true);this.loading=false;})}})"></mdui-button-icon>
+	<!--{/if}-->
 	<mdui-button id="postsubmit" variant="filled" style="margin-right:.5rem">
 		<!--{if $_GET['action'] == 'newthread'}-->
 			<!--{if $special == 0}-->{lang send_thread}
@@ -190,10 +193,6 @@
 		<!-- 自动保存状态行：倒计时 + 已保存提示，贴在正文输入框下方右侧（对齐电脑版编辑器底栏 svdsecond） -->
 		<div id="mdui_as_stat" style="text-align:right;font-size:.75rem;opacity:.55;margin-top:.25rem;min-height:1.1em"></div>
 
-		<!--{if $_GET['action'] == 'edit' && $isorigauthor && ($isfirstpost && $thread['replies'] < 1 || !$isfirstpost) && !$rushreply && $_G['setting']['editperdel']}-->
-			<mdui-checkbox name="delete" value="1" style="margin-top:.75rem">{lang post_delpost}</mdui-checkbox>
-		<!--{/if}-->
-
 		<!--{hook/post_middle_mobile}-->
 
 		<!--{subtemplate forum/post_editor_attribute}-->
@@ -249,6 +248,7 @@ window.postInsert = function (code) {
 	var form = document.getElementById('postform');
 	var btn = document.getElementById('postsubmit');
 	var draftBtn = document.getElementById('mdui_save_draft');
+	var deleteBtn = document.getElementById('mdui_delete_post');
 	var save = document.getElementById('mdui_postsave');
 	var subject = document.getElementById('needsubject');
 	var message = document.getElementById('needmessage');
@@ -269,6 +269,7 @@ window.postInsert = function (code) {
 		<!--{if $showthreadsorts}-->
 		if (!isDraft && typeof validateextra == 'function' && !validateextra()) return;
 		<!--{/if}-->
+		
 		save.value = isDraft ? '1' : '';
 		button.loading = true;
 		fetch(form.getAttribute('action') + '&handlekey=postform&inajax=1&ajaxdata=json', {
@@ -329,6 +330,8 @@ window.postInsert = function (code) {
 
 	btn.addEventListener('click', function () { gateSec(btn, false); });
 	draftBtn && draftBtn.addEventListener('click', function () { gateSec(draftBtn, true); });
+
+
 })();
 
 // ===== 帖子自动保存：对齐 PC 版 saveData/loadData（forum_post.js + common.js） =====
