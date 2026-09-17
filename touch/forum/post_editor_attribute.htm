@@ -805,11 +805,12 @@ window.mduiInsert = function (type) {
 		if (!n) getID('attachnotice_' + type).style.display = 'none';
 	}
 	// 弹窗里勾选状态同步回原列表（克隆节点与原列表按 aid 对应）
+	// 勾选框是 mdui-checkbox（原生 input 在 shadow DOM 里），读写要用组件自身的 checked/value 属性
 	function syncDialogChecks(type) {
 		var list = getID('unusedlist_' + type);
 		getID('mdui_unused_body').querySelectorAll('label').forEach(function (lab) {
 			var orig = list.querySelector('#unused' + lab.getAttribute('data-aid'));
-			if (orig) orig.querySelector('input').checked = lab.querySelector('input').checked;
+			if (orig) orig.querySelector('mdui-checkbox').checked = lab.querySelector('mdui-checkbox').checked;
 		});
 	}
 	window.attachoption = function (type, op) {
@@ -820,18 +821,14 @@ window.mduiInsert = function (type) {
 			unusedDlg.setAttribute('headline', type == 'img' ? '未使用的图片' : '未使用的附件');
 			var body = getID('mdui_unused_body');
 			body.innerHTML = list.innerHTML;
-			// 图片弹窗用缩略图网格排列，附件保持纵向列表
-			body.style.display = type == 'img' ? 'flex' : 'block';
-			if (type == 'img') {
-				body.style.flexWrap = 'wrap';
-				body.style.gap = '.5rem';
-			}
+			// 图片与附件统一样式一行一个，弹窗只是加宽展示
+			body.style.display = 'block';
 			unusedDlg.open = true;
 			return;
 		}
 		if (op == 3) {
 			var all = getID('mdui_unused_chkall').checked;
-			getID('mdui_unused_body').querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = all; });
+			getID('mdui_unused_body').querySelectorAll('mdui-checkbox').forEach(function (c) { c.checked = all; });
 			return;
 		}
 		// 弹窗打开时「使用」先同步勾选状态回原列表再走同一流程
@@ -840,7 +837,7 @@ window.mduiInsert = function (type) {
 			unusedDlg.open = false;
 		}
 		var aids = [];
-		list.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) { aids.push(c.value); });
+		list.querySelectorAll('mdui-checkbox').forEach(function (c) { if (c.checked) aids.push(c.value); });
 		if (!aids.length) { mduiTip(op == 1 ? '请先勾选要使用的项目' : '没有可删除的项目', true); return; }
 		if (op == 1) {
 			aids.forEach(function (aid) {
