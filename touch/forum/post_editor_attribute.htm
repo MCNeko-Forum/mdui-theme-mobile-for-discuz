@@ -818,7 +818,14 @@ window.mduiInsert = function (type) {
 		if (op == 2) {
 			window.__unusedType = type;
 			unusedDlg.setAttribute('headline', type == 'img' ? '未使用的图片' : '未使用的附件');
-			getID('mdui_unused_body').innerHTML = list.innerHTML;
+			var body = getID('mdui_unused_body');
+			body.innerHTML = list.innerHTML;
+			// 图片弹窗用缩略图网格排列，附件保持纵向列表
+			body.style.display = type == 'img' ? 'flex' : 'block';
+			if (type == 'img') {
+				body.style.flexWrap = 'wrap';
+				body.style.gap = '.5rem';
+			}
 			unusedDlg.open = true;
 			return;
 		}

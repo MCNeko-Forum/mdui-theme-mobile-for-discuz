@@ -125,9 +125,9 @@
 			<div id="unusedlist_img" style="display:none">
 				<!--{loop $imgattachs['unused'] $temp}-->
 					<!--{if !empty($temp['aid'])}-->
-						<label id="unused{$temp['aid']}" data-aid="{$temp['aid']}" data-url="{$temp['url']}/$temp['attachment']" data-name="<!--{echo dhtmlspecialchars($temp['filename']);}-->">
+						<label id="unused{$temp['aid']}" data-aid="{$temp['aid']}" data-url="{$temp['url']}/$temp['attachment']" data-name="<!--{echo dhtmlspecialchars($temp['filename']);}-->" style="display:flex;flex-direction:column;align-items:center;gap:.25rem">
 							<input type="checkbox" value="{$temp['aid']}" checked>
-							<span>$temp['filename']</span>
+							<img src="{$temp['url']}/$temp['attachment']" loading="lazy" style="width:72px;height:72px;object-fit:cover;border-radius:.5rem">
 						</label>
 					<!--{/if}-->
 				<!--{/loop}-->
