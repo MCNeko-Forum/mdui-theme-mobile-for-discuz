@@ -634,7 +634,13 @@
 					mi.innerHTML = '<span style="display:inline-block;width:2.5rem;height:1rem;' +
 						'border-radius:2px;background:' + bg + '"></span>';
 				} else {
-					mi.textContent = op.textContent.trim() || '{lang default}';
+					// option 文本为空时（如 "0"/"1" 选项只有 value 没 text），从 value 和内容推测
+					var txt = op.textContent.trim();
+					if (!txt || /^\d+$/.test(txt)) {
+						// 尝试完整取 li 文本再去掉前缀数字（"0 不限" → "不限"）
+						txt = op.value;
+					}
+					mi.textContent = txt || '{lang default}';
 				}
 				ms.appendChild(mi);
 			});
@@ -702,7 +708,16 @@
 				mr.style.display = 'block';
 				// 选项文字在同一行的 .tit 里
 				var tit = li && li.querySelector('.tit');
+				// .tit 存在就取文本，否则回退到 rd.value（0/1 等数字）
 				mr.textContent = tit ? tit.textContent.trim() : rd.value;
+				// 如果文本还是纯数字（原始 option 没文本只有 value），从同行其他节点找描述文本
+				if (!tit || !mr.textContent || /^\d+$/.test(mr.textContent)) {
+					var label = li && (li.textContent.replace(/\s+/g, ' ').trim());
+					// 去掉前置的 value 数字（如 "0 不限" → "不限"）
+					if (label && label !== rd.value) {
+						mr.textContent = label.replace(new RegExp('^' + rd.value + '\\s*'), '');
+					}
+				}
 				if (rd.checked) group.value = rd.value;
 				// 升降那组把 switchitemcp() 挂在外层 <label> 的 onclick 上，转发过来
 				var row = li && li.parentNode.tagName === 'LABEL' ? li.parentNode : li;

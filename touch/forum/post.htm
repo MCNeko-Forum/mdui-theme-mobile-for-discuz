@@ -164,16 +164,19 @@
 		<!--{/if}-->
 
 		<!--{if $_GET['action'] == 'reply' && !empty($_GET['addtrade']) || $_GET['action'] == 'edit' && $thread['special'] == 2 && !$postinfo['first']}-->
-			<input name="subject" type="hidden" value="">
-		<!--{elseif $_GET['action'] != 'reply'}-->
-			<mdui-text-field id="needsubject" name="subject" variant="outlined" autocomplete="off" maxlength="80" counter label="{lang thread_subject}" value="$postinfo['subject']"></mdui-text-field>
-		<!--{else}-->
-			<!-- 回帖时标题由后端自动生成，这里只展示回复对象 -->
-			<mdui-card variant="filled" style="display:block;padding:.75rem;font-size:.875rem">
-				<div style="opacity:.6">RE: {$thread['subject']}</div>
-				<!--{if $quotemessage}--><div style="margin-top:.5rem;opacity:.8;white-space:pre-wrap">$quotemessage</div><!--{/if}-->
-			</mdui-card>
-		<!--{/if}-->
+		<input name="subject" type="hidden" value="">
+	<!--{elseif $_GET['action'] == 'edit' && !$isfirstpost}-->
+		<!-- 编辑回帖时：subject 字段可选，后端留空时取原值，所以输入框不强制填写 -->
+		<mdui-text-field name="subject" variant="outlined" autocomplete="off" maxlength="80" counter label="{lang thread_subject}" helper="{lang optional}" value="$postinfo['subject']"></mdui-text-field>
+	<!--{elseif $_GET['action'] != 'reply'}-->
+		<mdui-text-field id="needsubject" name="subject" variant="outlined" autocomplete="off" maxlength="80" counter label="{lang thread_subject}" value="$postinfo['subject']"></mdui-text-field>
+	<!--{else}-->
+		<!-- 回帖时标题由后端自动生成，这里只展示回复对象 -->
+		<mdui-card variant="filled" style="display:block;padding:.75rem;font-size:.875rem">
+			<div style="opacity:.6">RE: {$thread['subject']}</div>
+			<!--{if $quotemessage}--><div style="margin-top:.5rem;opacity:.8;white-space:pre-wrap">$quotemessage</div><!--{/if}-->
+		</mdui-card>
+	<!--{/if}-->
 
 		<!--{if $isfirstpost && !empty($_G['forum']['threadtypes']['types'])}-->
 			<mdui-select id="typeid" name="typeid" variant="outlined" placeholder="主题分类" value="{if $thread['typeid']}$thread['typeid']{elseif $_GET['typeid']}$_GET['typeid']{else}0{/if}" style="margin-top:1rem">
@@ -254,8 +257,9 @@ window.postInsert = function (code) {
 	var message = document.getElementById('needmessage');
 
 	// 标题和内容都有值才放开正常发表，草稿按钮不复用这个限制
+	// 编辑回帖时 subject 不存在，只检查正文即可
 	function refresh() {
-		btn.disabled = !(message.value.trim() && (!subject || subject.value.trim()));
+		btn.disabled = !(message.value.trim() && (!subject || !subject.offsetParent || subject.value.trim()));
 	}
 	message.addEventListener('input', refresh);
 	subject && subject.addEventListener('input', refresh);
