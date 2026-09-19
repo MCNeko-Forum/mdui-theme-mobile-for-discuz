@@ -129,9 +129,45 @@ function mdui_thread_items($type, $limit = 10) {
 			'views' => $thread['views'],
 			'replies' => $thread['replies'],
 			'tid' => $thread['tid'],
+			'digest' => $thread['digest'],
+			'heats' => $thread['heats'],
+			'replycredit' => $thread['replycredit'],
+			'icon' => $thread['icon'],
+			'special' => $thread['special'],
+			'folder' => intval($thread['closed']) == 1 ? 'lock' : '',
 		);
 	}
 	return $list;
+}
+
+function mdui_fill_thread_flags(&$lists) {
+	$tids = array();
+	foreach ($lists as $list) {
+		foreach ($list as $item) {
+			if (!empty($item['tid'])) {
+				$tids[intval($item['tid'])] = intval($item['tid']);
+			}
+		}
+	}
+	if (!$tids) {
+		return;
+	}
+	$threads = C::t('forum_thread')->fetch_all($tids);
+	foreach ($lists as $lk => $list) {
+		foreach ($list as $ik => $item) {
+			$tid = intval($item['tid']);
+			if (!$tid || empty($threads[$tid])) {
+				continue;
+			}
+			$th = $threads[$tid];
+			$lists[$lk][$ik]['digest'] = $th['digest'];
+			$lists[$lk][$ik]['heats'] = $th['heats'];
+			$lists[$lk][$ik]['replycredit'] = $th['replycredit'];
+			$lists[$lk][$ik]['icon'] = $th['icon'];
+			$lists[$lk][$ik]['special'] = $th['special'];
+			$lists[$lk][$ik]['folder'] = intval($th['closed']) == 1 ? 'lock' : '';
+		}
+	}
 }
 
 $mdui_slide = mdui_block_items($mdui_blocks['slide']);
@@ -172,6 +208,13 @@ foreach ($mdui_feed as $key => $item) {
 		$mdui_feed[$key]['images'] = $mdui_feedimages[$item['tid']];
 	}
 }
+
+$mdui_flag_lists = $mdui_tabs;
+$mdui_flag_lists['feed'] = $mdui_feed;
+mdui_fill_thread_flags($mdui_flag_lists);
+$mdui_feed = $mdui_flag_lists['feed'];
+unset($mdui_flag_lists['feed']);
+$mdui_tabs = $mdui_flag_lists;
 
 // 公告：缓存已按日期过滤过，直接用
 loadcache('announcements');

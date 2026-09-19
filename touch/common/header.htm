@@ -282,4 +282,17 @@
 			<mdui-list-item href="member.php?mod=logging&action=logout&formhash={FORMHASH}" icon="logout" rounded>{lang logout}</mdui-list-item>
 		<!--{/if}-->
 	</mdui-list>
+	<!--{if $_G['basescript'] == 'portal'}-->
+	<!--{eval $mdui_flinks = C::t('common_friendlink')->fetch_all_by_displayorder(8);}-->
+	<!--{if $mdui_flinks}-->
+	<div style="padding:.5rem .75rem 1rem;font-size:.875rem;line-height:1.8">
+		<div style="opacity:.6;margin-bottom:.25rem">友情链接</div>
+		<!--{loop $mdui_flinks $flink}-->
+		<!--{if !empty($flink['name']) && !empty($flink['url'])}-->
+		<div><a href="{$flink['url']}" target="_blank" rel="noopener">{$flink['name']}</a></div>
+		<!--{/if}-->
+		<!--{/loop}-->
+	</div>
+	<!--{/if}-->
+	<!--{/if}-->
 </mdui-navigation-drawer>

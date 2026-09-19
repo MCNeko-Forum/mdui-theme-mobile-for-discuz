@@ -52,7 +52,7 @@
 					<!--{loop $threadlist $thread}-->
 						<mdui-card variant="outlined" class="mdui-tagitem-card">
 							<a class="mdui-tagitem-main" href="forum.php?mod=viewthread&tid=$thread['tid']">
-								<div class="mdui-tagitem-title">$thread['subject']</div>
+								<div class="mdui-tagitem-title"><!--{subtemplate forum/threadlist_badges}-->$thread['subject']</div>
 								<div class="mdui-tagitem-meta"><span>$thread['author']</span><span>$thread['dateline']</span><span>$thread['forumname']</span><span>查看 $thread['views']</span><span>回复 $thread['replies']</span></div>
 							</a>
 						</mdui-card>

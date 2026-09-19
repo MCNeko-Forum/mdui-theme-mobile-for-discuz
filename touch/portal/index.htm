@@ -113,7 +113,7 @@
 					<!--{eval $rank++;}-->
 					<mdui-list-item href="{$it['url']}" rounded>
 						<span slot="icon" class="pt_rank{if $rank < 4} pt_rank_top{/if}">$rank</span>
-						<!--{echo cutstr($it['title'], 34, '')}-->
+						<!--{eval $thread = $it;}--><!--{subtemplate forum/threadlist_badges}--><!--{echo cutstr($it['title'], 34, '')}-->
 						<span slot="description">
 							<!--{if $it['authorid']}-->{$it['author']}<!--{else}-->{$_G['setting']['anonymoustext']}<!--{/if}-->
 							<!--{if $tabtype == 'hot'}--> · {$it['views']} {lang mobrenqi}<!--{else}--> · {$it['dateline']}<!--{/if}-->
@@ -143,7 +143,7 @@
 					<div style="font-size:.75rem;opacity:.6">{$fd['dateline']}</div>
 				</div>
 			</div>
-			<div class="pt_feed_title">{$fd['title']}</div>
+			<div class="pt_feed_title"><!--{eval $thread = $fd;}--><!--{subtemplate forum/threadlist_badges}-->{$fd['title']}</div>
 			<!--{if $fd['pic']}-->
 			<div class="pt_feed_pic1" style="background-image:url({$fd['pic']})"></div>
 			<!--{elseif $fd['images']}-->

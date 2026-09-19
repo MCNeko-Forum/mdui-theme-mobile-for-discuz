@@ -23,14 +23,14 @@
 	<!--{loop $attentionthread $groupid $threads}-->
 	<mdui-card variant="filled" style="display:block;margin:.75rem;overflow:hidden">
 		<mdui-list-subheader>{$usergroups['groups'][$groupid]}<a href="forum.php?mod=group&fid={$groupid}" style="float:right">{lang more}</a></mdui-list-subheader>
-		<!--{loop $threads $tid $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid={$tid}&extra={$extra}">{$thread['subject']}<span slot="description">{$thread['lastposter']} · {$thread['lastpost']} · {$thread['views']} / {$thread['replies']}</span></mdui-list-item><!--{/loop}-->
+		<!--{loop $threads $tid $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid={$tid}&extra={$extra}"><!--{subtemplate forum/threadlist_badges}-->{$thread['subject']}<span slot="description">{$thread['lastposter']} · {$thread['lastpost']} · {$thread['views']} / {$thread['replies']}</span></mdui-list-item><!--{/loop}-->
 	</mdui-card>
 	<!--{/loop}-->
 	<!--{/if}-->
 	<mdui-card variant="filled" style="display:block;margin:.75rem;overflow:hidden">
 		<mdui-list-subheader><!--{if $view == 'groupthread'}-->{lang last_topic_in_group}<!--{else}-->{lang my_last_topic_in_group}<!--{/if}--></mdui-list-subheader>
 		<!--{if $groupthreadlist}-->
-		<!--{loop $groupthreadlist $tid $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid={$tid}&extra={$extra}">{$thread['subject']}<span slot="description">{$thread['groupname']} · {$thread['views']} / {$thread['replies']}</span></mdui-list-item><!--{/loop}-->
+		<!--{loop $groupthreadlist $tid $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid={$tid}&extra={$extra}"><!--{subtemplate forum/threadlist_badges}-->{$thread['subject']}<span slot="description">{$thread['groupname']} · {$thread['views']} / {$thread['replies']}</span></mdui-list-item><!--{/loop}-->
 		<!--{else}--><div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang no_related_posts}</div><!--{/if}-->
 	</mdui-card>
 	<!--{elseif $view == 'manager' || $view == 'join'}-->

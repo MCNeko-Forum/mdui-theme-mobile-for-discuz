@@ -1,0 +1,25 @@
+<!--{eval}-->
+if(empty($_G['cache']['stamps'])) {
+	loadcache('stamps');
+}
+if(empty($_mdui_bl)) {
+	$_mdui_bl = lang('forum/template');
+}
+if(empty($thread['folder']) && isset($thread['closed']) && intval($thread['closed']) == 1) {
+	$thread['folder'] = 'lock';
+}
+if(intval($thread['heats']) > 0 && !empty($_G['setting']['heatthread']['iconlevels'])) {
+	$thread['heatlevel'] = 0;
+	foreach($_G['setting']['heatthread']['iconlevels'] as $_mdui_hk => $_mdui_hi) {
+		if($thread['heats'] > $_mdui_hi) {
+			$thread['heatlevel'] = $_mdui_hk + 1;
+			break;
+		}
+	}
+}
+<!--{/eval}-->
+<!--{if $thread['replycredit'] > 0}--><span class="mdui-tbadge mdui-tbadge-hongbao" title="<!--{echo $_mdui_bl['replycredit']}-->">红包</span><!--{/if}-->
+<!--{if $thread['digest'] > 0}--><span class="mdui-tbadge mdui-tbadge-digest"><!--{echo $_mdui_bl['thread_digest']}--></span><!--{/if}-->
+<!--{if $thread['heatlevel']}--><span class="mdui-tbadge mdui-tbadge-heat" title="<!--{echo $_mdui_bl['heats']}-->: {$thread['heats']}"><!--{echo $_mdui_bl['heats_icon']}--><!--{if $thread['heatlevel'] > 1}-->..<!--{/if}--><!--{if $thread['heatlevel'] > 2}-->.<!--{/if}--></span><!--{/if}-->
+<!--{if $thread['icon'] >= 0 && $_G['cache']['stamps'][$thread['icon']]['text']}--><span class="mdui-tbadge mdui-tbadge-type">{$_G['cache']['stamps'][$thread['icon']]['text']}</span><!--{/if}-->
+<!--{if $thread['folder'] == 'lock'}--><span class="mdui-tbadge mdui-tbadge-lock">关闭</span><!--{elseif $thread['special'] == 1}--><span class="mdui-tbadge"><!--{echo $_mdui_bl['thread_poll']}--></span><!--{elseif $thread['special'] == 2}--><span class="mdui-tbadge"><!--{echo $_mdui_bl['thread_trade']}--></span><!--{elseif $thread['special'] == 3}--><span class="mdui-tbadge"><!--{echo $_mdui_bl['thread_reward']}--></span><!--{elseif $thread['special'] == 4}--><span class="mdui-tbadge"><!--{echo $_mdui_bl['thread_activity']}--></span><!--{elseif $thread['special'] == 5}--><span class="mdui-tbadge"><!--{echo $_mdui_bl['thread_debate']}--></span><!--{/if}-->

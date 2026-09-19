@@ -6,13 +6,7 @@
 				<mdui-avatar class="mdui-guide-thread-avatar" src="<!--{avatar($thread['authorid'], 'middle', true)}-->"></mdui-avatar>
 				<div class="mdui-guide-thread-content">
 					<div class="mdui-guide-thread-title">
-						<!--{if $thread['folder'] == 'lock'}--><mdui-icon name="lock" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
-						<!--{elseif $thread['special'] == 1}--><mdui-icon name="poll" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
-						<!--{elseif $thread['special'] == 2}--><mdui-icon name="storefront" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
-						<!--{elseif $thread['special'] == 3}--><mdui-icon name="workspace_premium" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
-						<!--{elseif $thread['special'] == 4}--><mdui-icon name="event" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
-						<!--{elseif $thread['special'] == 5}--><mdui-icon name="forum" style="font-size:1rem;flex:0 0 auto"></mdui-icon>
-						<!--{/if}-->
+						<!--{subtemplate forum/threadlist_badges}-->
 						<span $thread['highlight']>{$thread['subject']}</span>
 					</div>
 					<!--{if $guide_attach[$thread['tid']]['message']}--><div class="mdui-guide-thread-summary">$guide_attach[$thread['tid']]['message']</div><!--{/if}-->

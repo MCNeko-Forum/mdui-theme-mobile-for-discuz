@@ -40,7 +40,7 @@
 <div style="padding:.75rem 0 88px">
 	<!--{if $newthreadlist['dateline']['data']}-->
 	<mdui-card variant="filled" style="display:block;margin:.75rem;overflow:hidden"><mdui-list>
-	<!--{loop $newthreadlist['dateline']['data'] $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid={$thread['tid']}" rounded><mdui-icon slot="icon" name="<!--{if $thread['folder'] == 'lock'}-->lock<!--{elseif $thread['folder'] == 'new'}-->fiber_new<!--{else}-->article<!--{/if}-->"></mdui-icon>{$thread['subject']}<span slot="description">{$thread['author']} · {$thread['dateline']} · {$thread['views']} / {$thread['allreplies']}</span><mdui-icon slot="end-icon" name="chevron_right"></mdui-icon></mdui-list-item><!--{/loop}-->
+	<!--{loop $newthreadlist['dateline']['data'] $thread}--><mdui-list-item href="forum.php?mod=viewthread&tid={$thread['tid']}" rounded><mdui-icon slot="icon" name="<!--{if $thread['folder'] == 'lock'}-->lock<!--{elseif $thread['folder'] == 'new'}-->fiber_new<!--{else}-->article<!--{/if}-->"></mdui-icon><!--{subtemplate forum/threadlist_badges}-->{$thread['subject']}<span slot="description">{$thread['author']} · {$thread['dateline']} · {$thread['views']} / {$thread['allreplies']}</span><mdui-icon slot="end-icon" name="chevron_right"></mdui-icon></mdui-list-item><!--{/loop}-->
 	</mdui-list></mdui-card>
 	<!--{else}--><div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang group_no_latest_feeds}</div><!--{/if}-->
 </div>

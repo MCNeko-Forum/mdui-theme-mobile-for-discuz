@@ -38,7 +38,7 @@
 					<!--{loop $grids['newthread'] $thread}-->
 						<!--{if !$thread['forumstick'] && $thread['closed'] > 1 && ($thread['isgroup'] == 1 || $thread['fid'] != $_G['fid'])}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
 						<mdui-list-item href="forum.php?mod=viewthread&tid=$thread['tid']" rounded>
-							{$thread['oldsubject']}
+							<!--{subtemplate forum/threadlist_badges}-->{$thread['oldsubject']}
 							<span slot="description">$thread['dateline']</span>
 						</mdui-list-item>
 					<!--{/loop}-->
@@ -49,7 +49,7 @@
 					<!--{loop $grids['newreply'] $thread}-->
 						<!--{if !$thread['forumstick'] && $thread['closed'] > 1 && ($thread['isgroup'] == 1 || $thread['fid'] != $_G['fid'])}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
 						<mdui-list-item href="forum.php?mod=viewthread&tid=$thread['tid']" rounded>
-							{$thread['oldsubject']}
+							<!--{subtemplate forum/threadlist_badges}-->{$thread['oldsubject']}
 							<span slot="description">$thread['replies'] {lang reply}</span>
 						</mdui-list-item>
 					<!--{/loop}-->
@@ -63,7 +63,7 @@
 						<!--{eval $rank++;}-->
 						<mdui-list-item href="forum.php?mod=viewthread&tid=$thread['tid']" rounded>
 							<span slot="icon" style="width:1.5rem;text-align:center;font-weight:500;{if $rank < 4}color:rgb(var(--mdui-color-error)){else}opacity:.5{/if}">$rank</span>
-							{$thread['oldsubject']}
+							<!--{subtemplate forum/threadlist_badges}-->{$thread['oldsubject']}
 							<span slot="description">$thread['views'] {lang mobrenqi}</span>
 						</mdui-list-item>
 					<!--{/loop}-->
@@ -74,7 +74,7 @@
 					<!--{loop $grids['digest'] $thread}-->
 						<!--{if !$thread['forumstick'] && $thread['closed'] > 1 && ($thread['isgroup'] == 1 || $thread['fid'] != $_G['fid'])}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
 						<mdui-list-item href="forum.php?mod=viewthread&tid=$thread['tid']" rounded>
-							{$thread['oldsubject']}
+							<!--{subtemplate forum/threadlist_badges}-->{$thread['oldsubject']}
 							<span slot="description">$thread['author']</span>
 						</mdui-list-item>
 					<!--{/loop}-->

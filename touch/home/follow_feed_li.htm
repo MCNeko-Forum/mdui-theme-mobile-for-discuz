@@ -14,7 +14,7 @@
 		</div>
 		<!--{if $feed['note']}--><div style="margin-bottom:.75rem">$feed['note']</div><!--{/if}-->
 		<!--{if !empty($thread) && $thread['displayorder'] >= 0}-->
-			<!--{if $thread['fid'] != $_G['setting']['followforumid']}--><a href="forum.php?mod=viewthread&tid=$content['tid']&extra=page%3D1" style="display:block;font-weight:500;color:inherit;text-decoration:none;margin-bottom:.5rem">$thread['subject']</a><!--{/if}-->
+			<!--{if $thread['fid'] != $_G['setting']['followforumid']}--><a href="forum.php?mod=viewthread&tid=$content['tid']&extra=page%3D1" style="display:block;font-weight:500;color:inherit;text-decoration:none;margin-bottom:.5rem"><!--{subtemplate forum/threadlist_badges}-->$thread['subject']</a><!--{/if}-->
 			<div id="original_content_$feed['feedid']" class="mdui-prose" style="font-size:.875rem">$content['content']</div>
 			<!--{if $thread['special'] && $thread['fid'] != $_G['setting']['followforumid']}--><a href="forum.php?mod=viewthread&tid=$content['tid']&extra=page%3D1" style="display:block;margin-top:.5rem">{lang follow_special_thread_tip}</a><!--{/if}-->
 			<div style="display:flex;align-items:center;gap:.5rem;margin-top:.75rem;font-size:.75rem">

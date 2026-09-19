@@ -23,6 +23,9 @@
 			<span class="mdui-blog-stats">{lang views} $blog['viewnum'] · {lang reply} $blog['replynum']</span>
 		</div>
 		<div class="mdui-prose mdui-blog-message">$blog[message]</div>
+		<!--{if $blog['friend'] != 3 && !$blog['noreply']}-->
+		<div class="mdui-blog-click"><!--{subtemplate home/space_click}--></div>
+		<!--{/if}-->
 	</mdui-card>
 
 	<div class="mdui-blog-actions">

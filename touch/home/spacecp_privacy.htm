@@ -92,6 +92,35 @@
 		</mdui-card>
 	<!--{/if}-->
 	</form>
+	<!--{if $operation == 'filter' && helper_access::check_module('friend')}-->
+	<mdui-card variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">
+		<div style="font-size:1.05rem;margin-bottom:.375rem">{lang my_blacklist}</div>
+		<p style="opacity:.7">{lang blacklist_message}</p>
+		<form method="post" autocomplete="off" action="home.php?mod=spacecp&ac=friend&op=blacklist&referer=home.php%3Fmod%3Dspacecp%26ac%3Dprivacy%26op%3Dfilter">
+			<mdui-text-field name="username" label="{lang username}" clearable style="width:100%"></mdui-text-field>
+			<input type="hidden" name="blacklistsubmit" value="true" />
+			<input type="hidden" name="formhash" value="{FORMHASH}" />
+			<mdui-button type="submit" name="blacklistsubmit_btn" value="true" full-width style="margin-top:1rem">{lang add}</mdui-button>
+		</form>
+		<!--{if $mdui_blacklist}-->
+		<mdui-list style="padding-top:.5rem">
+			<!--{loop $mdui_blacklist $key $value}-->
+			<mdui-list-item rounded onclick="location.href='home.php?mod=space&uid=$value['uid']'">
+				<mdui-avatar slot="icon" src="<!--{avatar($value['uid'], 'small', true)}-->"></mdui-avatar>
+				$value['username']
+				<mdui-button slot="end-icon" variant="text" onclick="event.stopPropagation();document.getElementById('mdui_privacy_blacklist_delete_$value[uid]').open=true">{lang delete_blacklist}</mdui-button>
+			</mdui-list-item>
+			<mdui-dialog id="mdui_privacy_blacklist_delete_$value[uid]" close-on-esc close-on-overlay-click>
+				<div slot="headline">{lang delete_blacklist}</div>
+				<div slot="description">{lang delete_blacklist}</div>
+				<mdui-button slot="action" variant="text" onclick="document.getElementById('mdui_privacy_blacklist_delete_$value[uid]').open=false">{lang cancel}</mdui-button>
+				<mdui-button slot="action" variant="text" data-href="home.php?mod=spacecp&ac=friend&op=blacklist&subop=delete&uid=$value[uid]&referer=home.php%3Fmod%3Dspacecp%26ac%3Dprivacy%26op%3Dfilter">{lang determine}</mdui-button>
+			</mdui-dialog>
+			<!--{/loop}-->
+		</mdui-list>
+		<!--{/if}-->
+	</mdui-card>
+	<!--{/if}-->
 	<!--{hook/spacecp_privacy_bottom}-->
 </div>
 <!--{template common/footer}-->

@@ -54,7 +54,7 @@
 	<!--{loop $list $key $value}-->
 		<mdui-list-item class="mdui-notice-item" rounded $value['rowid'] notice="$value['id']">
 			<!--{if $value['authorid']}--><mdui-avatar slot="icon" src="<!--{avatar($value['authorid'], 'small', true)}-->"></mdui-avatar><!--{else}--><mdui-icon slot="icon" name="notifications"></mdui-icon><!--{/if}-->
-			<div class="mdui-notice-content" style="$value['style']">$value['note']</div>
+			<div class="mdui-notice-content<!--{if $value['new']}--> mdui-notice-unread<!--{/if}-->">$value['note']</div>
 			<span slot="description"><!--{date($value['dateline'], 'u')}--><!--{if $value['from_num']}--> · {lang ignore_same_notice_message}<!--{/if}--></span>
 			<!--{if $value['authorid']}--><mdui-button slot="end-icon" variant="text" onclick="document.getElementById('mdui_notice_ignore_$value[id]').open=true">{lang shield}</mdui-button><!--{/if}-->
 		</mdui-list-item>

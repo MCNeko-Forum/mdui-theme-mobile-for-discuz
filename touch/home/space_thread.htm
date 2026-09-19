@@ -55,10 +55,9 @@
 				<!--{elseif $_GET['filter'] == 'aduit'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">待审核</mdui-chip>
 				<!--{elseif $_GET['filter'] == 'ignored'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">已忽略</mdui-chip>
 				<!--{elseif $_GET['filter'] == 'recyclebin'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">回收站</mdui-chip><!--{/if}-->
-				<!--{if $thread['folder'] == 'lock'}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">已关闭</mdui-chip><!--{elseif $thread['special'] == 1}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_poll}</mdui-chip><!--{elseif $thread['special'] == 2}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_trade}</mdui-chip><!--{elseif $thread['special'] == 3}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_reward}</mdui-chip><!--{elseif $thread['special'] == 4}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_activity}</mdui-chip><!--{elseif $thread['special'] == 5}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_debate}</mdui-chip><!--{/if}-->
-				<!--{if $thread['attachment'] == 2 && $_G['setting']['mobile']['mobilesimpletype'] == 1}--><mdui-icon name="image" style="font-size:1rem;vertical-align:middle"></mdui-icon><!--{/if}-->
 				<!--{if in_array($thread['displayorder'], array(1, 2, 3, 4))}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_sticky}</mdui-chip><!--{/if}-->
-				<!--{if $thread['digest'] > 0}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_digest}</mdui-chip><!--{/if}-->
+				<!--{subtemplate forum/threadlist_badges}-->
+				<!--{if $thread['attachment'] == 2 && $_G['setting']['mobile']['mobilesimpletype'] == 1}--><mdui-icon name="image" style="font-size:1rem;vertical-align:middle"></mdui-icon><!--{/if}-->
 				<span $thread['highlight']>{$thread['subject']}</span>
 			</div>
 		</a>
