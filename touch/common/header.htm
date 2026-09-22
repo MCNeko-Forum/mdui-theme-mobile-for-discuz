@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="mdui-theme-auto">
 <head>
-	<title><!--{if !empty($navtitle)}-->$navtitle - <!--{/if}--><!--{if empty($nobbname)}--> $_G['setting']['bbname'] - <!--{/if}--> {lang waptitle} - Powered by Discuz!</title>
+	<title><!--{if !empty($navtitle)}-->$navtitle<!--{if empty($nobbname)}--> - $_G['setting']['bbname']<!--{/if}--><!--{elseif empty($nobbname)}-->$_G['setting']['bbname']<!--{/if}--></title>
 	<meta charset="utf-8">
 	<script>
 	// 首帧前同步应用已保存的主题，避免夜间模式闪白（读取 mdui_theme cookie，默认 auto）
@@ -20,6 +20,7 @@
 	<meta name="description" content="{if !empty($metadescription)}{echo dhtmlspecialchars($metadescription)} {/if},$_G['setting']['bbname']" />
 	<meta name="theme-color" content="{if $_G['style']['mdui_color']}$_G['style']['mdui_color']{else}#2B7ACD{/if}" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<!--{hook/global_meta}-->
 	$_G['setting']['seohead']
 	<base href="{$_G['siteurl']}" />
 	<script type="text/javascript">var STYLEID = '{STYLEID}', STATICURL = '{STATICURL}', IMGDIR = '{IMGDIR}', VERHASH = '{VERHASH}', charset = '{CHARSET}', discuz_uid = '{$_G['uid']}', cookiepre = '{$_G['config']['cookie']['cookiepre']}', cookiedomain = '{$_G['config']['cookie']['cookiedomain']}', cookiepath = '{$_G['config']['cookie']['cookiepath']}', showusercard = '{$_G['setting']['showusercard']}', attackevasive = '{$_G['config']['security']['attackevasive']}', disallowfloat = '{$_G['setting']['disallowfloat']}', creditnotice = '<!--{if $_G['setting']['creditnotice']}-->$_G['setting']['creditnames']<!--{/if}-->', defaultstyle = '$_G['style']['defaultextstyle']', REPORTURL = '$_G['currenturl_encode']', SITEURL = '$_G['siteurl']', JSPATH = '$_G['setting']['jspath']';</script>

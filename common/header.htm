@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="mdui-theme-auto">
 <head>
-	<title><!--{if !empty($navtitle)}-->$navtitle - <!--{/if}--><!--{if empty($nobbname)}--> $_G['setting']['bbname'] - <!--{/if}--> {lang waptitle} - Powered by Discuz!</title>
+	<title><!--{if !empty($navtitle)}-->$navtitle<!--{if empty($nobbname)}--> - $_G['setting']['bbname']<!--{/if}--><!--{elseif empty($nobbname)}-->$_G['setting']['bbname']<!--{/if}--></title>
 	<meta charset="utf-8">
 	<meta http-equiv="Cache-control" content="{if $_G['setting']['mobile']['mobilecachetime'] > 0}{$_G['setting']['mobile']['mobilecachetime']}{else}no-cache{/if}" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">

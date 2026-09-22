@@ -7,8 +7,9 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         
         <!--=====设置页面标题=====-->
-        <title><!--{if !empty($navtitle)}-->$navtitle - <!--{/if}--><!--{if empty($nobbname)}--> $_G['setting']['bbname'] - <!--{/if}--> Powered by Discuz!</title>
+        <title><!--{if !empty($navtitle)}-->$navtitle<!--{if empty($nobbname)}--> - $_G['setting']['bbname']<!--{/if}--><!--{elseif empty($nobbname)}-->$_G['setting']['bbname']<!--{/if}--></title>
         $_G['setting']['seohead']
+	<!--{hook/global_meta}-->
         
         <!--=====以下参数均为 SEO 相关=====-->
         <meta name="keywords" content="{if !empty($metakeywords)}{echo dhtmlspecialchars($metakeywords)}{/if}" />
