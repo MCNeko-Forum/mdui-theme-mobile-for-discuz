@@ -50,14 +50,16 @@
 		<!--{if $new == 1}-->{lang no_new_notice} <a href="home.php?mod=space&do=notice&isread=1">{lang view_old_notice}</a><!--{else}-->{lang no_notice}<!--{/if}-->
 	</mdui-card>
 <!--{else}-->
-	<mdui-list class="mdui-notice-list">
+	<div class="mdui-notice-list">
 	<!--{loop $list $key $value}-->
-		<mdui-list-item class="mdui-notice-item" rounded $value['rowid'] notice="$value['id']">
-			<!--{if $value['authorid']}--><mdui-avatar slot="icon" src="<!--{avatar($value['authorid'], 'small', true)}-->"></mdui-avatar><!--{else}--><mdui-icon slot="icon" name="notifications"></mdui-icon><!--{/if}-->
-			<div class="mdui-notice-content<!--{if $value['new']}--> mdui-notice-unread<!--{/if}-->">$value['note']</div>
-			<span slot="description"><!--{date($value['dateline'], 'u')}--><!--{if $value['from_num']}--> · {lang ignore_same_notice_message}<!--{/if}--></span>
-			<!--{if $value['authorid']}--><mdui-button slot="end-icon" variant="text" onclick="document.getElementById('mdui_notice_ignore_$value[id]').open=true">{lang shield}</mdui-button><!--{/if}-->
-		</mdui-list-item>
+		<div class="mdui-notice-item" $value['rowid'] notice="$value['id']">
+			<!--{if $value['authorid']}--><mdui-avatar src="<!--{avatar($value['authorid'], 'small', true)}-->"></mdui-avatar><!--{else}--><mdui-icon name="notifications"></mdui-icon><!--{/if}-->
+			<div class="mdui-notice-main">
+				<div class="mdui-notice-content<!--{if $value['new']}--> mdui-notice-unread<!--{/if}-->">$value['note']</div>
+				<div class="mdui-notice-time"><!--{date($value['dateline'], 'u')}--><!--{if $value['from_num']}--> · {lang ignore_same_notice_message}<!--{/if}--></div>
+			</div>
+			<!--{if $value['authorid']}--><mdui-button variant="text" onclick="document.getElementById('mdui_notice_ignore_$value[id]').open=true">{lang shield}</mdui-button><!--{/if}-->
+		</div>
 		<!--{if $value['authorid']}-->
 		<mdui-dialog id="mdui_notice_ignore_$value[id]" close-on-esc close-on-overlay-click>
 			<div slot="headline">{lang shield}</div>
@@ -76,7 +78,7 @@
 		</mdui-dialog>
 		<!--{/if}-->
 	<!--{/loop}-->
-	</mdui-list>
+	</div>
 	<!--{if $view!='userapp' && $space['notifications']}--><div style="padding-top:1rem;text-align:center"><mdui-button variant="text" data-href="home.php?mod=space&do=notice&ignore=all">{lang ignore_same_notice_message}</mdui-button></div><!--{/if}-->
 	<!--{if $multi}--><div style="padding-top:1rem;text-align:center">$multi</div><!--{/if}-->
 <!--{/if}-->

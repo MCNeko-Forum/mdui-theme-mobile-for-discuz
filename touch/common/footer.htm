@@ -15,7 +15,7 @@
 	<mdui-navigation-bar-item value="group" icon="groups" href="group.php?mod=index">{$_G['setting']['navs'][3]['navname']}</mdui-navigation-bar-item>
 	<mdui-navigation-bar-item value="my" icon="person" href="{if $_G['uid']}home.php?mod=space&uid={$_G['uid']}&do=profile&mycenter=1{else}member.php?mod=logging&action=login{/if}">
 		{lang mobmy}
-		<!--{if $_G['uid'] && ($_G['member']['newpm'] || $_G['member']['newprompt'])}--><mdui-badge slot="badge"></mdui-badge><!--{/if}-->
+		<!--{if $_G['uid'] && ($_G['member']['newpm'] || $_G['member']['newprompt'] || !empty($_G['neko_clogin_hub_pending']))}--><mdui-badge slot="badge"></mdui-badge><!--{/if}-->
 	</mdui-navigation-bar-item>
 </mdui-navigation-bar>
 
@@ -261,6 +261,69 @@ window.mduiGet = function (url, done) {
 	document.addEventListener('DOMContentLoaded', function () {
 		window.mduiTip((rule ? rule + '：' : '') + parts.join('，'));
 	});
+})();
+</script>
+
+<div id="mdui_extlink" hidden style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.4)">
+	<div style="width:100%;max-width:20rem;padding:1.5rem;color:rgb(var(--mdui-color-on-surface));background:rgb(var(--mdui-color-surface-container-high));border-radius:1.75rem;animation:mdui-extlink-pop .2s ease">
+		<div style="font-size:1.375rem;line-height:2rem">即将离开本站</div>
+		<div style="margin-top:.5rem;color:rgb(var(--mdui-color-on-surface-variant))">即将前往以下链接，请确认是否继续访问。</div>
+		<div id="mdui_extlink_url" style="margin-top:.75rem;padding:.75rem;overflow-wrap:anywhere;font-size:.875rem;font-weight:400;line-height:1.4;background:rgb(var(--mdui-color-surface-container-highest));border-radius:.75rem"></div>
+		<div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.5rem">
+			<mdui-button variant="text" onclick="document.getElementById('mdui_extlink').hidden=true">取消</mdui-button>
+			<mdui-button id="mdui_extlink_go" variant="text" target="_blank">继续访问</mdui-button>
+		</div>
+	</div>
+</div>
+<style>
+#mdui_extlink[hidden] { display: none !important; }
+@keyframes mdui-extlink-pop {
+	from { opacity: 0; transform: scale(.92); }
+	to { opacity: 1; transform: scale(1); }
+}
+</style>
+<script>
+// 站外链接提醒：MDUI_EXTLINK=1 时拦截外链；MDUI_EXTLINK_WHITE 为域名白名单，逗号或换行分隔
+(function () {
+	var enabled = '{$_G[style][mdui_extlink]}';
+	if (enabled !== '1') return;
+	// 白名单来自后台多行文本，值里带换行，不能直接写进 JS 字符串，否则整段脚本语法错误、点击不会拦截
+	var white = {eval echo json_encode(preg_split('/[\s,，]+/', strtolower((string)$_G['style']['mdui_extlink_white']), -1, PREG_SPLIT_NO_EMPTY) ?: array());};
+	var host = location.hostname.replace(/^www\./, '').toLowerCase();
+	document.addEventListener('click', function (e) {
+		var path = e.composedPath ? e.composedPath() : [];
+		var go = (e.target.closest && e.target.closest('#mdui_extlink_go')) || path.some(function (node) {
+			return node && node.id === 'mdui_extlink_go';
+		});
+		if (go) {
+			document.getElementById('mdui_extlink').hidden = true;
+			return;
+		}
+		if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+		var link = e.target.closest && e.target.closest('a[href]');
+		if (!link) {
+			link = path.find(function (node) {
+				return node && node.matches && node.matches('a[href]');
+			});
+		}
+		if (!link || link.closest('#mdui_extlink')) return;
+		var href = link.getAttribute('href');
+		if (!href || href.charAt(0) === '#' || /^(javascript|mailto|tel):/i.test(href)) return;
+		var url;
+		try { url = new URL(href, location.href); } catch (err) { return; }
+		if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+		var dest = url.hostname.replace(/^www\./, '').toLowerCase();
+		if (dest === host) return;
+		if (white.some(function (item) {
+			item = item.replace(/^www\./, '');
+			return dest === item || dest.slice(-(item.length + 1)) === '.' + item;
+		})) return;
+		e.preventDefault();
+		e.stopPropagation();
+		document.getElementById('mdui_extlink_go').href = url.href;
+		document.getElementById('mdui_extlink_url').textContent = url.href;
+		document.getElementById('mdui_extlink').hidden = false;
+	}, true);
 })();
 </script>
 

@@ -44,6 +44,7 @@
 			<!--{else}-->
 			<mdui-card variant="filled" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">{lang no_corresponding_pm}</mdui-card>
 			<!--{/if}-->
+			<!--{if $multi}-->$multi<!--{/if}-->
 		</div>
 	<!--{elseif in_array($filter, array('privatepm'))}-->
 		<div style="padding:1rem 1rem 5.5rem">
@@ -61,6 +62,7 @@
 			<!--{else}-->
 			<mdui-card variant="filled" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">{lang no_corresponding_pm}</mdui-card>
 			<!--{/if}-->
+			<!--{if $multi}-->$multi<!--{/if}-->
 		</div>
 	<!--{elseif $_GET['subop'] == 'viewg'}-->
 		<div style="padding:1rem 1rem 5.5rem">
@@ -83,10 +85,10 @@
 		<div style="padding:1rem 1rem 6rem">
 			<!--{if !$list}--><mdui-card variant="filled" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">{lang no_corresponding_pm}</mdui-card><!--{else}-->
 				<div class="mdui-pm-messages"><!--{loop $list $key $value}--><!--{subtemplate home/space_pm_node}--><!--{/loop}--></div>
-				<!--{if $multi}--><div style="padding-top:1rem;text-align:center">$multi</div><!--{/if}-->
+				<!--{if $multi}-->$multi<!--{/if}-->
 			<!--{/if}-->
 		</div>
-		<form id="pmform" method="post" action="home.php?mod=spacecp&ac=pm&op=send&pmid=$pmid&daterange=$daterange&pmsubmit=yes&mobile=2" style="position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:.5rem;padding:.5rem 1rem;background:rgb(var(--mdui-color-surface-container))">
+		<form id="pmform" method="post" action="home.php?mod=spacecp&ac=pm&op=send&pmid=$pmid&daterange=$daterange&pmsubmit=yes&mobile=2" style="position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;align-items:center;gap:.5rem;box-sizing:border-box;width:100%;margin:0;padding:.5rem 1rem calc(.5rem + env(safe-area-inset-bottom));background:rgb(var(--mdui-color-surface-container))">
 			<input type="hidden" name="formhash" value="{FORMHASH}" />
 			<!--{if !$touid}--><input type="hidden" name="plid" value="$plid" /><!--{else}--><input type="hidden" name="touid" value="$touid" /><!--{/if}-->
 			<mdui-button-icon icon="sentiment_satisfied" type="button" onclick="mduiPmSmile('replymessage')" title="{lang smilies}"></mdui-button-icon>
