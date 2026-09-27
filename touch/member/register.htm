@@ -27,20 +27,19 @@
 				<mdui-text-field name="invitecode" label="{lang invite_code}<!--{if $_G['setting']['regstatus'] == 3}-->（非必填）<!--{/if}-->" icon="card_giftcard"
 					autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
 			<!--{/if}-->
-			<mdui-text-field name="{$_G['setting']['reginput']['username']}" label="{lang registerinputtip}"
-				icon="person" autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
+			<mdui-text-field id="mdui_register_username" name="{$_G['setting']['reginput']['username']}" label="{lang registerinputtip}"
+				icon="person" autocomplete="off" style="margin-bottom:.375rem"></mdui-text-field>
+			<div id="mdui_register_username_tip" class="mdui-register-tip" hidden></div>
 			<!--{eval $mdui_strongpw = is_array($_G['setting']['strongpw']) ? $_G['setting']['strongpw'] : array();}-->
 			<mdui-text-field id="mdui_register_password" type="password" name="{$_G['setting']['reginput']['password']}" label="{lang login_password}"
 				icon="lock" toggle-password required<!--{if $_G['setting']['pwlength']}--> minlength="{$_G['setting']['pwlength']}"<!--{/if}--> style="margin-bottom:.375rem"></mdui-text-field>
-			<!--{if $_G['setting']['pwlength'] || $mdui_strongpw}-->
-				<div id="mdui_register_password_tip" style="margin:0 0 1rem;font-size:.8125rem;line-height:1.6;color:rgb(var(--mdui-color-on-surface-variant))">
-					密码要求：<!--{if $_G['setting']['pwlength']}-->{lang register_password_length_tips1}{$_G['setting']['pwlength']}{lang register_password_length_tips2}<!--{/if}--><!--{if $_G['setting']['pwlength'] && $mdui_strongpw}-->，且包含<!--{/if}--><!--{if $mdui_strongpw}--><!--{if in_array(1, $mdui_strongpw)}-->{lang strongpw_1}<!--{/if}--><!--{if in_array(2, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw)}-->、<!--{/if}-->{lang strongpw_2}<!--{/if}--><!--{if in_array(3, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw) || in_array(2, $mdui_strongpw)}-->、<!--{/if}-->{lang strongpw_3}<!--{/if}--><!--{if in_array(4, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw) || in_array(2, $mdui_strongpw) || in_array(3, $mdui_strongpw)}-->、<!--{/if}-->{lang strongpw_4}<!--{/if}--><!--{/if}-->
-				</div>
-			<!--{/if}-->
+			<div id="mdui_register_password_tip" class="mdui-register-tip" hidden></div>
 			<mdui-text-field id="mdui_register_password2" type="password" name="{$_G['setting']['reginput']['password2']}" label="{lang registerpassword2}"
-				icon="lock_reset" toggle-password required style="margin-bottom:1rem"></mdui-text-field>
-			<mdui-text-field type="email" name="{$_G['setting']['reginput']['email']}" label="{lang registeremail}"
-				icon="mail" value="$hash[0]" autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
+				icon="lock_reset" toggle-password required style="margin-bottom:.375rem"></mdui-text-field>
+			<div id="mdui_register_password2_tip" class="mdui-register-tip" hidden></div>
+			<mdui-text-field id="mdui_register_email" type="email" name="{$_G['setting']['reginput']['email']}" label="{lang registeremail}"
+				icon="mail" value="$hash[0]" autocomplete="off" style="margin-bottom:.375rem"></mdui-text-field>
+			<div id="mdui_register_email_tip" class="mdui-register-tip" hidden></div>
 
 			<!--{loop $_G['cache']['fields_register'] $field}-->
 				<!--{if $htmls[$field['fieldid']]}-->
@@ -68,11 +67,23 @@
 		<mdui-button type="submit" name="regsubmit" value="true" full-width>{lang quickregister}</mdui-button>
 	</form>
 
+	<style>
+	.mdui-register-tip { margin: .25rem 0 1rem; font-size: .8125rem; line-height: 1.5; color: rgb(var(--mdui-color-error)); }
+	.mdui-register-tip[hidden] { display: none; }
+	</style>
 	<script>
 	(function () {
 		var form = document.getElementById('registerform');
+		var username = document.getElementById('mdui_register_username');
 		var password = document.getElementById('mdui_register_password');
 		var password2 = document.getElementById('mdui_register_password2');
+		var email = document.getElementById('mdui_register_email');
+		var tips = {
+			username: document.getElementById('mdui_register_username_tip'),
+			password: document.getElementById('mdui_register_password_tip'),
+			password2: document.getElementById('mdui_register_password2_tip'),
+			email: document.getElementById('mdui_register_email_tip')
+		};
 		var rules = {
 			length: {$_G['setting']['pwlength'] ? $_G['setting']['pwlength'] : 0},
 			digit: <!--{if in_array(1, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,
@@ -80,24 +91,92 @@
 			upper: <!--{if in_array(3, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,
 			symbol: <!--{if in_array(4, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->
 		};
-		function checkPassword() {
-			var value = password.value || '';
-			return (!rules.length || value.length >= rules.length)
-				&& (!rules.digit || /\d/.test(value))
-				&& (!rules.lower || /[a-z]/.test(value))
-				&& (!rules.upper || /[A-Z]/.test(value))
-				&& (!rules.symbol || /[^a-zA-Z0-9]/.test(value));
+		var lastUsername = '';
+		var lastEmail = '';
+		function fieldValue(field) {
+			var input = field.querySelector('input') || field;
+			return input.value || '';
 		}
-		form.addEventListener('submit', function (event) {
-			if (!checkPassword()) {
-				event.preventDefault();
-				mduiTip('密码不符合上方要求');
-				password.focus();
+		function showTip(name, text) {
+			tips[name].hidden = !text;
+			tips[name].textContent = text || '';
+		}
+		function passwordError() {
+			var value = fieldValue(password);
+			if (!value) return '';
+			if (rules.length && value.length < rules.length) return '密码太短，不得少于 ' + rules.length + ' 个字符';
+			var missing = [];
+			if (rules.digit && !/\d/.test(value)) missing.push('数字');
+			if (rules.lower && !/[a-z]/.test(value)) missing.push('小写字母');
+			if (rules.upper && !/[A-Z]/.test(value)) missing.push('大写字母');
+			if (rules.symbol && !/[^A-Za-z0-9]/.test(value)) missing.push('特殊符号');
+			return missing.length ? '密码太弱，密码中必须包含 ' + missing.join(',') : '';
+		}
+		function checkPassword() {
+			showTip('password', passwordError());
+			if (fieldValue(password2) && fieldValue(password) !== fieldValue(password2)) showTip('password2', '两次输入的密码不一致');
+			else if (fieldValue(password2)) showTip('password2', '');
+		}
+		function checkUsername() {
+			var value = fieldValue(username).trim();
+			if (!value || value === lastUsername) return;
+			lastUsername = value;
+			if (/[<>"'()]/.test(value)) {
+				showTip('username', '用户名包含敏感字符');
 				return;
 			}
-			if (password.value !== password2.value) {
+			var length = value.replace(/[^\x00-\xff]/g, '**').length;
+			if (length < 3) {
+				showTip('username', '用户名不得小于 3 个字符');
+				return;
+			}
+			if (length > 15) {
+				showTip('username', '用户名不得超过 15 个字符');
+				return;
+			}
+			showTip('username', '');
+			fetch('forum.php?mod=ajax&inajax=1&ajaxdata=json&action=checkusername&username=' + encodeURIComponent(value), {credentials: 'same-origin'})
+				.then(function (response) { return response.json(); })
+				.then(function (result) {
+					if (result && result.message) showTip('username', String(result.message).replace(/<[^>]+>/g, '').trim());
+				})
+				.catch(function () {});
+		}
+		function checkEmail() {
+			var value = fieldValue(email).trim();
+			if (!value || value === lastEmail) return;
+			lastEmail = value;
+			if (/[<"]/.test(value)) {
+				showTip('email', 'Email 包含敏感字符');
+				return;
+			}
+			showTip('email', '');
+			fetch('forum.php?mod=ajax&inajax=1&ajaxdata=json&action=checkemail&email=' + encodeURIComponent(value), {credentials: 'same-origin'})
+				.then(function (response) { return response.json(); })
+				.then(function (result) {
+					if (result && result.message) showTip('email', String(result.message).replace(/<[^>]+>/g, '').trim());
+				})
+				.catch(function () {});
+		}
+		username.addEventListener('blur', checkUsername);
+		password.addEventListener('input', checkPassword);
+		password.addEventListener('blur', checkPassword);
+		password2.addEventListener('input', checkPassword);
+		password2.addEventListener('blur', function () {
+			if (!fieldValue(password2)) showTip('password2', '请再次输入密码');
+			else checkPassword();
+		});
+		email.addEventListener('blur', checkEmail);
+		form.addEventListener('submit', function (event) {
+			checkUsername();
+			checkPassword();
+			checkEmail();
+			if (passwordError()) {
 				event.preventDefault();
-				mduiTip('两次输入的密码不一致');
+				password.focus();
+			} else if (fieldValue(password) !== fieldValue(password2)) {
+				event.preventDefault();
+				showTip('password2', fieldValue(password2) ? '两次输入的密码不一致' : '请再次输入密码');
 				password2.focus();
 			}
 		});

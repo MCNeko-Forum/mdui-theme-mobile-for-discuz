@@ -375,10 +375,11 @@ textarea.px {
 	padding: .5rem 1rem !important;
 	background: transparent;
 }
-#hornbox .tsmini_horn_content { width: 100%; border-collapse: collapse; }
+#hornbox .tsmini_horn_content { width: 100%; border-collapse: collapse; table-layout: fixed; }
 #hornbox .tsmini_horn_content tr { border-bottom: 1px solid rgb(var(--mdui-color-outline-variant)); }
 #hornbox .tsmini_horn_content tr:last-child { border-bottom: 0; }
-#hornbox .tsmini_horn_content td { padding: .625rem .25rem; vertical-align: top; }
+#hornbox .tsmini_horn_content td { padding: .625rem .25rem; vertical-align: top; overflow-wrap: anywhere; word-break: break-word; }
+#hornbox #boxmain { overflow-x: hidden; }
 #hornbox .tsmini_horn_avatar,
 #hornbox .tsmini_horn_avatar img { width: 2rem; height: 2rem; border-radius: 50%; object-fit: cover; }
 #hornbox .tsmini_horn_content a { color: inherit; font-weight: 700; text-decoration: none; }
@@ -1020,4 +1021,15 @@ p.d {
 .mdui-tbadge-top-3 { background: #d32f2f; color: #fff; }
 .mdui-tbadge-top-4 { background: #7b1fa2; color: #fff; }
 .mdui-tbadge-lock { background: transparent; color: #d32f2f; border: 1px solid #d32f2f; }
+.mdui-tbadge-hidden { background: transparent; color: #1565c0; border: 1px solid #1565c0; }
 .mdui-tbadge-type { background: transparent; color: #d32f2f; border: 1px solid #d32f2f; }
+.mdui-tbadge-ban { background: #d32f2f; color: #fff; }
+.mdui-tbadge-moved, .mdui-tbadge-file, .mdui-tbadge-perm { background: transparent; color: rgb(var(--mdui-color-on-surface-variant)); border: 1px solid rgb(var(--mdui-color-outline)); }
+.mdui-tbadge-solved { background: #2e7d32; color: #fff; }
+.mdui-tbadge-reward, .mdui-tbadge-price, .mdui-tbadge-rush { background: transparent; color: #ef6c00; border: 1px solid #ef6c00; }
+.mdui-tbadge-rec { background: #ef6c00; color: #fff; }
+.mdui-post-ban { margin: .5rem 0; padding: .625rem .75rem; border: 1px solid #d32f2f; border-radius: .5rem; background: transparent; color: #d32f2f; font-size: .875rem; line-height: 1.5; }
+
+/* 注册页字段下方的实时校验提示，对应电脑版 tipcol 红字 */
+.mdui-register-tip { margin: .25rem 0 1rem; font-size: .8125rem; line-height: 1.5; color: rgb(var(--mdui-color-error)); }
+.mdui-register-tip[hidden] { display: none; }

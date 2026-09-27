@@ -87,11 +87,13 @@
 			<!--{if $_G['forum_thread']['typeid'] && $_G['forum']['threadtypes']['types'][$_G['forum_thread']['typeid']]}--><span style="opacity:.7">[{$_G['forum']['threadtypes']['types'][$_G['forum_thread']['typeid']]}]</span><!--{/if}-->
 			<!--{if $threadsorts && $_G['forum_thread']['sortid']}--><span style="opacity:.7">[{$_G['forum']['threadsorts']['types'][$_G['forum_thread']['sortid']]}]</span><!--{/if}-->
 			{$_G['forum_thread']['subject']}
-			<!--{if $_G['forum_thread']['closed']}--><span style="display:inline-block;margin-left:.375rem;padding:.0625rem .375rem;border:1px solid #d32f2f;border-radius:.25rem;color:#d32f2f;font-size:.75rem;font-weight:500;vertical-align:middle;line-height:1.4">关闭</span><!--{/if}-->
-			<!--{if $_G['forum_thread']['displayorder'] == -2}--><span style="opacity:.6">({lang moderating})</span>
-			<!--{elseif $_G['forum_thread']['displayorder'] == -3}--><span style="opacity:.6">({lang have_ignored})</span>
-			<!--{elseif $_G['forum_thread']['displayorder'] == -4}--><span style="opacity:.6">({lang draft})</span>
+			<!--{if $hiddenreplies}--><span class="mdui-tbadge mdui-tbadge-hidden">{lang hiddenreplies}</span><!--{/if}-->
+			<!--{if $_G['forum_thread']['closed'] > 1}--><span class="mdui-tbadge mdui-tbadge-moved">{lang thread_moved}</span><!--{elseif $_G['forum_thread']['closed']}--><span class="mdui-tbadge mdui-tbadge-lock">关闭</span><!--{/if}-->
+			<!--{if $_G['forum_thread']['displayorder'] == -2}--><span class="mdui-tbadge mdui-tbadge-ban">{lang moderating}</span>
+			<!--{elseif $_G['forum_thread']['displayorder'] == -3}--><span class="mdui-tbadge mdui-tbadge-ban">{lang have_ignored}</span>
+			<!--{elseif $_G['forum_thread']['displayorder'] == -4}--><span class="mdui-tbadge mdui-tbadge-ban">{lang draft}</span>
 			<!--{/if}-->
+			<!--{if $_G['forum_thread']['special'] == 3 && $_G['forum_thread']['price'] < 0}--><span class="mdui-tbadge mdui-tbadge-solved">{lang reward_solved}</span><!--{elseif $_G['forum_thread']['special'] == 3 && $_G['forum_thread']['price'] > 0}--><span class="mdui-tbadge mdui-tbadge-reward">{lang thread_reward}{$_G['forum_thread']['price']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][2]]['unit']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][2]]['title']}</span><!--{elseif $_G['forum_thread']['price'] > 0 && !$_G['forum_thread']['special']}--><span class="mdui-tbadge mdui-tbadge-price">{lang price}{$_G['forum_thread']['price']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['unit']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['title']}</span><!--{/if}-->
 		</h1>
 		<!--{if $_G['forum_threadstamp']}-->
 		<img src="{STATICURL}image/stamp/{$_G['forum_threadstamp']['url']}" alt="{$_G['forum_threadstamp']['text']}" title="{$_G['forum_threadstamp']['text']}" style="height:2.75rem;flex-shrink:0">
@@ -233,17 +235,22 @@
 			<!--{if !$post['first'] && $post['replycredit'] > 0}-->
 			<div style="font-size:.8125rem;color:rgb(var(--mdui-color-primary));margin-bottom:.5rem">{lang replycredit} +{$post['replycredit']} {$_G['setting']['extcredits'][$_G['forum_thread']['replycredit_rule']['extcreditstype']]['unit']}{$_G['setting']['extcredits'][$_G['forum_thread']['replycredit_rule']['extcreditstype']]['title']}</div>
 			<!--{/if}-->
-			<!--{if $post['warned']}--><blockquote>{lang warn_get}</blockquote><!--{/if}-->
+			<!--{if $post['warned']}--><div class="mdui-post-ban">{lang warn_get}</div><!--{/if}-->
 			<!--{if !$post['first'] && !empty($post['subject']) && !$needhiddenreply}--><h3>{$post['subject']}</h3><!--{/if}-->
 			<!--{if $_G['adminid'] != 1 && $_G['setting']['bannedmessages'] & 1 && (($post['authorid'] && !$post['username']) || ($post['groupid'] == 4 || $post['groupid'] == 5) || $post['status'] == -1 || $post['memberstatus'])}-->
-				<blockquote>{lang message_banned}</blockquote>
+				<div class="mdui-post-ban">{lang message_banned}</div>
 			<!--{elseif $_G['adminid'] != 1 && $post['status'] & 1}-->
-				<blockquote>{lang message_single_banned}</blockquote>
+				<div class="mdui-post-ban">{lang message_single_banned}</div>
 			<!--{elseif $needhiddenreply}-->
 				<blockquote>{lang message_ishidden_hiddenreplies}</blockquote>
 			<!--{elseif $post['first'] && $_G['forum_threadpay']}-->
 				<!--{template forum/viewthread_pay}-->
 			<!--{else}-->
+				<!--{if $_G['setting']['bannedmessages'] & 1 && (($post['authorid'] && !$post['username']) || ($post['groupid'] == 4 || $post['groupid'] == 5) || $post['status'] == -1 || $post['memberstatus'])}-->
+					<div class="mdui-post-ban">{lang admin_message_banned}</div>
+				<!--{elseif $post['status'] & 1}-->
+					<div class="mdui-post-ban">{lang admin_message_single_banned}</div>
+				<!--{/if}-->
 				<!--{if $post['first'] && $threadsortshow}-->
 					<!--{if $threadsortshow['optionlist'] == 'expire'}-->
 						<blockquote>{lang has_expired}</blockquote>
