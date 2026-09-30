@@ -424,9 +424,6 @@ function checkoption(identifier, required, checktype, checkmaxnum, checkminnum, 
 				warning(ce, '{lang mob_sort_min}');
 				return false;
 			}
-		} else if (checktype == 'url' && !(/(http[s]?|ftp):\/\/[^\/\.]+?\..+\w[\/]?$/i.test(checkvalue))) {
-			warning(ce, '{lang mob_sort_urlerr}');
-			return false;
 		}
 		ce.innerHTML = '<span style="color:#2e7d32">&#10003;</span>';
 		ce.style.display = '';
