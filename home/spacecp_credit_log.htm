@@ -1,0 +1,60 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+<!--{subtemplate home/spacecp_credit_header}-->
+<!--{hook/spacecp_credit_top}-->
+
+<mdui-tabs value="{if $_GET['suboperation'] == 'creditrulelog'}creditrulelog{elseif $_GET['income'] == 1}income{elseif $_GET['income'] == -1}expense{else}all{/if}" style="margin-bottom:1rem">
+	<mdui-tab value="all" data-href="home.php?mod=spacecp&ac=credit&op=log">{lang all}</mdui-tab>
+	<mdui-tab value="income" data-href="home.php?mod=spacecp&ac=credit&op=log&income=1">{lang credit_income_1}</mdui-tab>
+	<mdui-tab value="expense" data-href="home.php?mod=spacecp&ac=credit&op=log&income=-1">{lang credit_income_2}</mdui-tab>
+	<mdui-tab value="creditrulelog" data-href="home.php?mod=spacecp&ac=credit&op=log&suboperation=creditrulelog">{lang credit_log_sys}</mdui-tab>
+</mdui-tabs>
+
+<!--{if $_GET['suboperation'] != 'creditrulelog'}-->
+	<!--{if $loglist}-->
+		<mdui-list class="mdui-credit-log-list">
+			<!--{loop $loglist $value}-->
+				<!--{eval $value = makecreditlog($value, $otherinfo);}-->
+				<mdui-list-item class="mdui-credit-log-item" rounded>
+					<span class="mdui-credit-log-title"><!--{if $value['operation']}--><a href="home.php?mod=spacecp&ac=credit&op=log&optype=$value['operation']">$value['optype']</a><!--{else}-->$value['title']<!--{/if}--></span>
+					<span slot="description" class="mdui-credit-log-description"><span><!--{if $value['operation']}-->$value['opinfo']<!--{else}-->$value['text']<!--{/if}--></span><time>$value['dateline']</time></span>
+					<span slot="end-icon" class="mdui-credit-log-amount">$value['credit']</span>
+				</mdui-list-item>
+			<!--{/loop}-->
+		</mdui-list>
+	<!--{else}-->
+		<div style="padding:2rem 1rem;text-align:center;opacity:.7">{lang doing_no_replay}</div>
+	<!--{/if}-->
+<!--{else}-->
+	<div style="overflow:auto">
+		<table style="width:100%;border-collapse:collapse;text-align:left">
+			<tr>
+				<th>{lang action_name}</th>
+				<th>{lang total_time}</th>
+				<th>{lang cycles_num}</th>
+				<!--{loop $_G['setting']['extcredits'] $creditid $credit}-->
+				<th>$credit[title]</th>
+				<!--{/loop}-->
+				<th>{lang last_award_time}</th>
+			</tr>
+			<!--{loop $list $logid $log}-->
+			<tr>
+				<td><a href="home.php?mod=spacecp&ac=credit&op=rule&rid=$log[rid]">$log[rulename]</a></td>
+				<td>$log[total]</td>
+				<td>$log[cyclenum]</td>
+				<!--{loop $_G['setting']['extcredits'] $creditid $credit}-->
+				<!--{eval $creditkey = 'extcredits'.$creditid;}-->
+				<td>$log[$creditkey]</td>
+				<!--{/loop}-->
+				<td><!--{date($log['dateline'], 'Y-m-d H:i')}--></td>
+			</tr>
+			<!--{/loop}-->
+		</table>
+	</div>
+<!--{/if}-->
+
+<!--{if $multi}--><div style="margin-top:1rem">$multi</div><!--{/if}-->
+<!--{hook/spacecp_credit_bottom}-->
+</div>
+<!--{template common/footer}-->

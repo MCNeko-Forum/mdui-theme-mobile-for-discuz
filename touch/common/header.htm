@@ -17,7 +17,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no" />
 	<meta name="keywords" content="{if !empty($metakeywords)}{echo dhtmlspecialchars($metakeywords)}{/if}" />
+	<!--{if empty($_G['setting']['plugins']['available']) || !in_array('neko_seo', $_G['setting']['plugins']['available'])}-->
 	<meta name="description" content="{if !empty($metadescription)}{echo dhtmlspecialchars($metadescription)} {/if},$_G['setting']['bbname']" />
+	<!--{/if}-->
 	<meta name="theme-color" content="{if $_G['style']['mdui_color']}$_G['style']['mdui_color']{else}#2B7ACD{/if}" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<!--{hook/global_meta}-->
@@ -167,6 +169,8 @@
 	</script>
 	<!-- 锚点平滑滚动仅使用主题本地脚本，不随 MDUI CDN 切换。 -->
 	<script src="{$_G['style']['styleimgdir']}/anchor-scroll.js?{VERHASH}" defer></script>
+	<!-- pjax 无刷新切换：站内链接无刷新换页，目标页不属于/不兼容模板时自动整页刷新 -->
+	<script src="{$_G['style']['styleimgdir']}/mdui_pjax.js?{VERHASH}" defer></script>
 	<script>mdui.setColorScheme('{if $_G['style']['mdui_color']}$_G['style']['mdui_color']{else}#2B7ACD{/if}');</script>
 	<!-- 折叠组件兼容：spoiler.js 在 head 中执行时按钮尚未渲染，改用事件委托按相邻关系开关内容，并拦截原脚本避免重复切换 -->
 	<script>
@@ -297,3 +301,5 @@
 	<!--{/if}-->
 	<!--{/if}-->
 </mdui-navigation-drawer>
+<!-- pjax 可替换区：抽屉/底栏/全局脚本在区外，只换页面自身内容 -->
+<div id="mdui_app">

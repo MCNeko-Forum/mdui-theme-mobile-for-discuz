@@ -1,0 +1,27 @@
+<!--{eval $nofooter = 1; $actives = array('account' => 1);}-->
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+
+<mdui-card id="neko_acct_box" variant="filled" style="display:block;padding:1rem">
+	<div style="font-size:.9375rem;margin-bottom:1rem">{lang action_account_security_type_freeze}</div>
+	<form method="post" autocomplete="off" action="home.php?mod=spacecp&ac=account&op=verify&method=$method&idstring=$idstring&sign=$sign&formhash={FORMHASH}">
+		<input type="hidden" name="submit" value="true">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<mdui-text-field name="freezereson" label="{lang freeze_reason}" rows="3" required style="margin-bottom:1rem">$validate['message']</mdui-text-field>
+		<!--{if $validate['submittimes']}-->
+		<div style="font-size:.8125rem;opacity:.7;margin-bottom:.5rem">
+			{lang action_account_security_type_freeze_submittime}: {date($validate['submitdate'], 'Y-m-d H:i')}<br>
+			{lang action_account_security_type_freeze_submittimes}: $validate['submittimes']
+		</div>
+		<!--{/if}-->
+		<!--{if $validate['status'] == 1 && $validate['remark']}-->
+		<div style="font-size:.8125rem;opacity:.7;margin-bottom:1rem">
+			{lang action_account_security_type_freeze_admin_remark}: $validate['remark']
+			<span style="display:block">{lang follow_post_by_time} {date($validate['moddate'], 'Y-m-d H:i')}</span>
+		</div>
+		<!--{/if}-->
+		<mdui-button type="submit" variant="filled" full-width>{lang action_account_security_submit}</mdui-button>
+	</form>
+</mdui-card>
+</div>
+<!--{template common/footer}-->

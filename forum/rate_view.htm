@@ -1,0 +1,32 @@
+<!--{template common/header}-->
+<!--{if empty($_GET['infloat'])}-->
+<div id="pt" class="bm cl"><div class="z"><a href="./" class="nvhm" title="{lang homepage}">$_G['setting']['bbname']</a> <em>&rsaquo;</em> $navigation</div></div>
+<!--{/if}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" aria-label="{lang back}" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang rate_view}</mdui-top-app-bar-title>
+</mdui-top-app-bar>
+<main class="mdui-rate-view">
+	<section class="mdui-rate-summary" aria-label="{lang total}">
+		<div class="mdui-rate-summary-label">{lang total}</div>
+		<div class="mdui-rate-summary-values">
+			<!--{loop $logcount $id $count}-->
+			<div class="mdui-rate-total"><span>{$_G['setting']['extcredits'][$id]['title']}</span><strong class="<!--{if $count >= 0}-->mdui-rate-positive<!--{else}-->mdui-rate-negative<!--{/if}-->"><!--{if $count > 0}-->+<!--{/if}-->$count {$_G['setting']['extcredits'][$id]['unit']}</strong></div>
+			<!--{/loop}-->
+		</div>
+	</section>
+	<section class="mdui-rate-records" aria-label="{lang rate_view}">
+		<div class="mdui-rate-table-head"><span>{lang username}</span><span>{lang credits}</span><span>{lang time}</span></div>
+		<!--{loop $loglist $log}-->
+		<article class="mdui-rate-record">
+			<a class="mdui-rate-user" href="home.php?mod=space&uid={$log['uid']}&do=profile"><mdui-avatar src="<!--{avatar($log['uid'], 'small', true)}-->" alt="{$log['username']}"></mdui-avatar><span>{$log['username']}</span></a>
+			<div class="mdui-rate-detail">
+				<div class="mdui-rate-score"><span>{$_G['setting']['extcredits'][$log['extcredits']]['title']}</span><strong class="<!--{if $log['score'] >= 0}-->mdui-rate-positive<!--{else}-->mdui-rate-negative<!--{/if}-->" dir="ltr">$log['score'] {$_G['setting']['extcredits'][$log['extcredits']]['unit']}</strong></div>
+				<time class="mdui-rate-time">{$log['dateline']}</time>
+				<!--{if $log['reason']}--><p class="mdui-rate-reason">{$log['reason']}</p><!--{/if}-->
+			</div>
+		</article>
+		<!--{/loop}-->
+	</section>
+</main>
+<!--{template common/footer}-->

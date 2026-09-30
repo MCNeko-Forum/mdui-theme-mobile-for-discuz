@@ -1,0 +1,118 @@
+<!--{eval $nofooter = 1;}-->
+<!--{eval $mdui_strongpw = is_array($mdui_strongpw) ? $mdui_strongpw : array();}-->
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{$_G['setting']['reglinkname']}</mdui-top-app-bar-title>
+</mdui-top-app-bar>
+
+<div style="padding:2rem 1.5rem;max-width:480px;margin:0 auto">
+	<form method="post" autocomplete="off" name="register" id="registerform"
+		action="member.php?mod={$_G['setting']['regname']}&mobile=2">
+		<input type="hidden" name="regsubmit" value="yes" />
+		<input type="hidden" name="formhash" value="{FORMHASH}" />
+		<!--{eval $dreferer = str_replace('&amp;', '&', dreferer());}-->
+		<input type="hidden" name="referer" value="$dreferer" />
+		<input type="hidden" name="activationauth" value="{if $_GET['action'] == 'activation'}$activationauth{/if}" />
+		<!--{if $_G['setting']['sendregisterurl']}-->
+			<input type="hidden" name="hash" value="$_GET['hash']" />
+		<!--{/if}-->
+
+		<!--{if $sendurl}-->
+			<mdui-text-field type="email" name="{$_G['setting']['reginput']['email']}" label="{lang registeremail}"
+				icon="mail" autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
+		<!--{else}-->
+			<!--{if empty($invite) && in_array($_G['setting']['regstatus'], array(2, 3))}-->
+				<mdui-text-field name="invitecode" label="{lang invite_code}<!--{if $_G['setting']['regstatus'] == 3}-->（非必填）<!--{/if}-->" icon="card_giftcard"
+					autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
+			<!--{/if}-->
+			<mdui-text-field name="{$_G['setting']['reginput']['username']}" label="{lang registerinputtip}"
+				icon="person" autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
+			<!--{eval $mdui_strongpw = is_array($_G['setting']['strongpw']) ? $_G['setting']['strongpw'] : array();}-->
+			<mdui-text-field id="mdui_register_password" type="password" name="{$_G['setting']['reginput']['password']}" label="{lang login_password}"
+				icon="lock" toggle-password required<!--{if $_G['setting']['pwlength']}--> minlength="{$_G['setting']['pwlength']}"<!--{/if}--> style="margin-bottom:.375rem"></mdui-text-field>
+			<!--{if $_G['setting']['pwlength'] || $mdui_strongpw}-->
+				<div id="mdui_register_password_tip" style="margin:0 0 1rem;font-size:.8125rem;line-height:1.6;color:rgb(var(--mdui-color-on-surface-variant))">
+					密码要求：<!--{if $_G['setting']['pwlength']}-->{lang register_password_length_tips1}{$_G['setting']['pwlength']}{lang register_password_length_tips2}<!--{/if}--><!--{if $_G['setting']['pwlength'] && $mdui_strongpw}-->，且包含<!--{/if}--><!--{if $mdui_strongpw}--><!--{if in_array(1, $mdui_strongpw)}-->{lang strongpw_1}<!--{/if}--><!--{if in_array(2, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw)}-->、<!--{/if}-->{lang strongpw_2}<!--{/if}--><!--{if in_array(3, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw) || in_array(2, $mdui_strongpw)}-->、<!--{/if}-->{lang strongpw_3}<!--{/if}--><!--{if in_array(4, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw) || in_array(2, $mdui_strongpw) || in_array(3, $mdui_strongpw)}-->、<!--{/if}-->{lang strongpw_4}<!--{/if}--><!--{/if}-->
+				</div>
+			<!--{/if}-->
+			<mdui-text-field id="mdui_register_password2" type="password" name="{$_G['setting']['reginput']['password2']}" label="{lang registerpassword2}"
+				icon="lock_reset" toggle-password required style="margin-bottom:1rem"></mdui-text-field>
+			<mdui-text-field type="email" name="{$_G['setting']['reginput']['email']}" label="{lang registeremail}"
+				icon="mail" value="$hash[0]" autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
+
+			<!--{loop $_G['cache']['fields_register'] $field}-->
+				<!--{if $htmls[$field['fieldid']]}-->
+					<div style="margin-bottom:1rem">$htmls[$field['fieldid']]</div>
+				<!--{/if}-->
+			<!--{/loop}-->
+		<!--{/if}-->
+		<!--{hook/register_input_mobile}-->
+
+		<!--{if $secqaacheck || $seccodecheck}-->
+		<!--{block sectpl}--><div class="rfm"><sec><br /><sec>: <sec><br /><sec></div><!--{/block}-->
+		<div style="margin-bottom:1rem"><!--{subtemplate common/seccheck}--></div>
+	<!--{/if}-->
+
+		<!--{if $bbrules}-->
+			<div style="display:flex;align-items:center;gap:.25rem;margin-bottom:1rem">
+				<mdui-checkbox id="mdui_agreebbrule" name="agreebbrule" value="{$bbrulehash}" required checked>{lang agree}</mdui-checkbox>
+				<mdui-button type="button" variant="text" onclick="document.getElementById('mdui_bbrule').open=true">{lang rulemessage}</mdui-button>
+			</div>
+			<mdui-dialog id="mdui_bbrule" close-on-esc close-on-overlay-click headline="{lang rulemessage}">
+				<div slot="description" style="max-height:60dvh;overflow:auto;line-height:1.7">$bbrulestxt</div>
+			</mdui-dialog>
+		<!--{/if}-->
+
+		<mdui-button type="submit" name="regsubmit" value="true" full-width>{lang quickregister}</mdui-button>
+	</form>
+
+	<script>
+	(function () {
+		var form = document.getElementById('registerform');
+		var password = document.getElementById('mdui_register_password');
+		var password2 = document.getElementById('mdui_register_password2');
+		var rules = {
+			length: {$_G['setting']['pwlength'] ? $_G['setting']['pwlength'] : 0},
+			digit: <!--{if in_array(1, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,
+			lower: <!--{if in_array(2, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,
+			upper: <!--{if in_array(3, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,
+			symbol: <!--{if in_array(4, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->
+		};
+		function checkPassword() {
+			var value = password.value || '';
+			return (!rules.length || value.length >= rules.length)
+				&& (!rules.digit || /\d/.test(value))
+				&& (!rules.lower || /[a-z]/.test(value))
+				&& (!rules.upper || /[A-Z]/.test(value))
+				&& (!rules.symbol || /[^a-zA-Z0-9]/.test(value));
+		}
+		form.addEventListener('submit', function (event) {
+			if (!checkPassword()) {
+				event.preventDefault();
+				mduiTip('密码不符合上方要求');
+				password.focus();
+				return;
+			}
+			if (password.value !== password2.value) {
+				event.preventDefault();
+				mduiTip('两次输入的密码不一致');
+				password2.focus();
+			}
+		});
+	})();
+	</script>
+	<!--{if $bbrules && $bbrulesforce}-->
+	<script>document.getElementById('mdui_bbrule').open = true;</script>
+	<!--{/if}-->
+
+	<div style="text-align:center;margin-top:1.5rem">
+		<mdui-button variant="text" href="member.php?mod=logging&action=login&referer={echo rawurlencode($dreferer)}">
+			{lang login_now}
+		</mdui-button>
+	</div>
+</div>
+
+<!--{hook/register_bottom_mobile}-->
+<!--{template common/footer}-->

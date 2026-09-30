@@ -340,7 +340,7 @@
 				<!--{loop $post['ratelog'] $uid $ratelog}-->
 					<mdui-avatar src="<!--{avatar($uid, 'small', true)}-->" title="{$ratelog['username']}" style="width:2rem;height:2rem"></mdui-avatar>
 				<!--{/loop}-->
-				<mdui-button variant="text" href="forum.php?mod=misc&action=viewratings&tid={$_G['tid']}&pid={$post['pid']}">查看全部打赏</mdui-button>
+				<mdui-button variant="text" href="forum.php?mod=misc&action=viewratings&tid={$_G['tid']}&pid={$post['pid']}">{lang rate_view}</mdui-button>
 			</div>
 			<!--{eval $vt_recent_rates = array_slice($post['ratelog'], 0, 5, true);}-->
 			<div style="margin-top:.5rem;font-size:.8125rem">

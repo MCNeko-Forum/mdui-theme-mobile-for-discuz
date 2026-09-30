@@ -29,11 +29,23 @@ a {
 	height: auto;
 	border-radius: 8px;
 }
+/* 表情是行内小图，不能套正文大图的圆角和行高，否则会拆行并把最后一个挤到底部 */
+.mdui-prose img[smilieid],
+.postmessage img[smilieid],
+.mtxt img[smilieid] {
+	max-width: none;
+	width: auto;
+	height: auto;
+	margin: 0;
+	border-radius: 0;
+	vertical-align: text-bottom;
+}
 
 .mdui-prose a {
 	color: inherit;
 	font-weight: 700;
-	text-decoration: none;
+	text-decoration: underline;
+	text-underline-offset: .15em;
 }
 
 /* 帖子编辑记录统一使用居中的灰色提示文字。 */
@@ -122,7 +134,8 @@ mdui-top-app-bar {
 .activity a {
 	color: inherit;
 	font-weight: 700;
-	text-decoration: none;
+	text-decoration: underline;
+	text-underline-offset: .15em;
 }
 
 /* 卡片型区块 */
@@ -1033,3 +1046,697 @@ p.d {
 /* 注册页字段下方的实时校验提示，对应电脑版 tipcol 红字 */
 .mdui-register-tip { margin: .25rem 0 1rem; font-size: .8125rem; line-height: 1.5; color: rgb(var(--mdui-color-error)); }
 .mdui-register-tip[hidden] { display: none; }
+
+.mdui-rate-view { width: min(100% - 2rem, 64rem); margin: 1rem auto 3rem; }
+.mdui-rate-summary { padding: 1rem; border-radius: .75rem; background: rgb(var(--mdui-color-surface-container)); }
+.mdui-rate-summary-label { margin-bottom: .5rem; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .875rem; }
+.mdui-rate-summary-values { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; }
+.mdui-rate-total, .mdui-rate-score { display: flex; align-items: baseline; gap: .375rem; }
+.mdui-rate-total strong, .mdui-rate-score strong { font-weight: 600; }
+.mdui-rate-positive { color: #2e7d32; }
+.mdui-rate-negative { color: #c62828; }
+.mdui-rate-records { margin-top: 1rem; }
+.mdui-rate-table-head { display: grid; grid-template-columns: minmax(10rem, 1.2fr) minmax(10rem, 1fr) minmax(10rem, .8fr); gap: 1rem; padding: .5rem 1rem; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .8125rem; }
+.mdui-rate-record { display: grid; grid-template-columns: minmax(10rem, 1.2fr) minmax(0, 1.8fr); gap: 1rem; padding: .875rem 1rem; border-top: 1px solid rgb(var(--mdui-color-outline-variant)); }
+.mdui-rate-user { display: flex; align-items: center; gap: .625rem; min-width: 0; font-weight: 600; }
+.mdui-rate-user mdui-avatar { width: 2.5rem; height: 2.5rem; flex: none; }
+.mdui-rate-detail { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .375rem 1rem; align-items: baseline; }
+.mdui-rate-score { min-width: 0; flex-wrap: wrap; }
+.mdui-rate-time { color: rgb(var(--mdui-color-on-surface-variant)); font-size: .8125rem; text-align: right; }
+.mdui-rate-reason { grid-column: 1 / -1; margin: 0; color: rgb(var(--mdui-color-on-surface-variant)); overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+	.mdui-rate-view { width: calc(100% - 1.5rem); margin-top: .75rem; }
+	.mdui-rate-record { grid-template-columns: 1fr; gap: .5rem; padding: .875rem .25rem; }
+	.mdui-rate-user mdui-avatar { width: 2.25rem; height: 2.25rem; }
+	.mdui-rate-detail { margin-left: 2.875rem; }
+	.mdui-rate-table-head { display: none; }
+}
+
+/* ===== 以下为 MDUI-PC 移植：帖子页相关样式（面包屑/卡片/楼层/作者栏/快速回复/分页） ===== */
+.wp { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+/* ===== 面包屑 ===== */
+.mduipc-crumb {
+	margin: 16px 0;
+	font-size: 14px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.mduipc-crumb-sep { margin: 0 6px; opacity: .5; }
+.mduipc-crumb em { margin: 0 6px; opacity: .5; font-style: normal; }
+
+/* ===== 卡片通用 ===== */
+mdui-card.mduipc-annc,
+mdui-card.mduipc-cat,
+mdui-card.mduipc-forum-head,
+mdui-card.mduipc-threadlist,
+mdui-card.mduipc-thread-head,
+mdui-card.mduipc-post-card,
+mdui-card.mduipc-fastpost,
+mdui-card.mduipc-empty {
+	display: block;
+	width: 100%;
+	padding: 16px 20px;
+	margin-bottom: 16px;
+	border-radius: 12px;
+}
+
+/* ===== 公告 ===== */
+.mduipc-annc-inner {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 32px;
+}
+.mduipc-annc-inner > .material-icons {
+	font-size: 22px;
+	color: rgb(var(--mdui-color-primary));
+}
+.mduipc-annc-list { flex: 1; overflow: hidden; }
+.mduipc-annc-list ul { margin: 0; padding: 0; list-style: none; }
+.mduipc-annc-list li { line-height: 1.8; }
+.mduipc-annc-inner > a { font-size: 13px; white-space: nowrap; }
+
+/* ===== 首页统计（同 bygsjw #chart：横排数据 + 右侧链接） ===== */
+.mduipc-chart {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px 40px;
+	padding: 12px 16px;
+	margin-bottom: 10px;
+	border: 1px solid rgb(var(--mdui-color-surface-variant));
+	border-radius: 12px;
+	background: rgb(var(--mdui-color-surface));
+}
+.mduipc-chart-list {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px 40px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.mduipc-chart-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	line-height: 24px;
+}
+.mduipc-chart-item .material-icons {
+	font-size: 20px;
+	color: rgb(var(--mdui-color-primary));
+}
+.mduipc-chart-item em {
+	font-style: normal;
+	font-weight: 600;
+	color: rgb(var(--mdui-color-primary));
+}
+.mduipc-chart-item em a { color: inherit; }
+.mduipc-chart-extra {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+}
+.mduipc-chart-pipe { opacity: .4; }
+
+/* ===== 首页 DIY 区域（同 bygsjw：四格 + 通栏 + 边栏） ===== */
+.mduipc-diy { margin-bottom: 16px; }
+.mduipc-diy .area { min-height: 0; }
+.mduipc-diy-top {
+	display: grid;
+	grid-template-columns: minmax(0, 4.12fr) minmax(0, 4.78fr) minmax(0, 3fr);
+	gap: 16px;
+	margin-bottom: 16px;
+}
+.mduipc-layout--side {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 300px;
+	gap: 24px;
+	align-items: start;
+}
+.mduipc-side { position: sticky; top: 72px; }
+.mduipc-side .mduipc-diy:last-child { margin-bottom: 0; }
+
+/* ===== 分类与版块 ===== */
+.mduipc-cat-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+.mduipc-cat-head h2 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+}
+.mduipc-cat-mod { font-size: 12px; color: rgb(var(--mdui-color-on-surface-variant)); }
+
+.mduipc-forum {
+	display: grid;
+	grid-template-columns: 1fr 300px;
+	gap: 8px 16px;
+	padding: 14px 0;
+	border-bottom: 1px solid rgba(var(--mdui-color-outline-variant), .5);
+}
+.mduipc-forum:last-child { border-bottom: none; }
+
+.mduipc-forum-main {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	min-width: 0;
+}
+.mduipc-forum-icon .material-icons {
+	font-size: 36px;
+	color: rgb(var(--mdui-color-primary));
+}
+.mduipc-forum-icon img { max-width: 48px; max-height: 48px; }
+.mduipc-forum-info { min-width: 0; flex: 1; }
+.mduipc-forum-info h3 {
+	margin: 0;
+	font-size: 15px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.mduipc-forum-info h3 mdui-badge { height: 18px; font-size: 11px; }
+.mduipc-forum-info p {
+	margin: 4px 0 0;
+	font-size: 13px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+.mduipc-forum-num {
+	display: flex;
+	gap: 4px;
+	font-size: 13px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+	white-space: nowrap;
+}
+.mduipc-forum-num span:first-child { color: rgb(var(--mdui-color-on-surface)); }
+
+.mduipc-forum-last { font-size: 13px; color: rgb(var(--mdui-color-on-surface-variant)); }
+.mduipc-last-subject {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.mduipc-last-meta { display: block; margin-top: 2px; opacity: .75; }
+
+/* ===== 版块页头部 ===== */
+.mduipc-forum-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+.mduipc-forum-head-main h1 {
+	margin: 0 0 6px;
+	font-size: 20px;
+	font-weight: 600;
+	color: rgb(var(--mdui-color-on-surface));
+}
+.mduipc-forum-head-meta {
+	display: flex;
+	gap: 16px;
+	font-size: 13px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+.mduipc-forum-head-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.mduipc-forum-rules {
+	margin-top: 10px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	font-size: 13px;
+	background-color: rgba(var(--mdui-color-surface-variant), .4);
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+
+/* ===== 帖子列表 ===== */
+.mduipc-threadlist { padding: 8px 0 0; }
+.mduipc-threadlist-header,
+.mduipc-thread {
+	display: grid;
+	grid-template-columns: 1fr 110px 220px;
+	gap: 16px;
+	align-items: center;
+}
+.mduipc-threadlist-header {
+	padding: 0 20px 8px;
+	font-size: 12px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+	border-bottom: 1px solid rgba(var(--mdui-color-outline-variant), .5);
+}
+.mduipc-thread {
+	padding: 12px 20px;
+	border-bottom: 1px solid rgba(var(--mdui-color-outline-variant), .35);
+	transition: background-color .15s;
+}
+.mduipc-thread:last-child { border-bottom: none; }
+.mduipc-thread:hover { background-color: rgba(var(--mdui-color-primary), .04); }
+
+.mduipc-thread-main {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	min-width: 0;
+}
+.mduipc-thread-icon .material-icons {
+	font-size: 22px;
+	margin-top: 3px;
+}
+.mduipc-thread-info { min-width: 0; flex: 1; }
+.mduipc-thread-subject {
+	display: inline;
+	font-size: 15px;
+	font-weight: 500;
+	color: rgb(var(--mdui-color-on-surface));
+}
+.mduipc-thread-subject:hover { color: rgb(var(--mdui-color-primary)); text-decoration: none; }
+
+/* 帖子行内标记：图章 / 状态 / 价格等 */
+.mduipc-thread-info { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+.mduipc-thread-stamp { height: 16px; vertical-align: middle; }
+.mduipc-thread-mark {
+	font-size: 12px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+	white-space: nowrap;
+}
+.mduipc-thread-mark.reward { color: rgb(var(--mdui-color-error)); text-decoration: none; }
+.mduipc-thread-mark.solved { color: rgb(var(--mdui-color-primary)); text-decoration: none; }
+.mduipc-thread-mark.rush { color: rgb(var(--mdui-color-tertiary)); }
+.mduipc-thread-mark a { color: inherit; }
+.mduipc-thread-attach { font-size: 15px !important; color: rgb(var(--mdui-color-on-surface-variant)); }
+.mduipc-thread-attach.digest, .mduipc-thread-attach.recommend { color: rgb(var(--mdui-color-primary)); }
+.mduipc-thread-attach.hot { color: rgb(var(--mdui-color-error)); }
+.mduipc-thread-new {
+	font-size: 11px;
+	font-weight: 700;
+	color: rgb(var(--mdui-color-on-primary));
+	background: rgb(var(--mdui-color-primary));
+	border-radius: 6px;
+	padding: 0 5px;
+	text-decoration: none;
+	line-height: 16px;
+}
+.mduipc-thread-pages { display: block; font-size: 12px; margin-top: 2px; }
+.mduipc-thread-pages a { margin-right: 4px; }
+.mduipc-thread-meta {
+	display: block;
+	margin-top: 2px;
+	font-size: 12px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+.mduipc-thread-meta a { color: inherit; }
+
+.mduipc-thread-num {
+	display: flex;
+	justify-content: space-between;
+	font-size: 13px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+.mduipc-thread-num span:first-child { color: rgb(var(--mdui-color-on-surface)); font-weight: 600; }
+
+.mduipc-thread-last { font-size: 13px; min-width: 0; }
+.mduipc-thread-last a {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+.mduipc-last-meta a { color: inherit; }
+
+.mduipc-empty {
+	text-align: center;
+	padding: 48px 20px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+.mduipc-empty .material-icons { font-size: 48px; opacity: .5; }
+
+/* ===== 帖子浏览 ===== */
+.mduipc-thread-head h1 {
+	margin: 0 0 8px;
+	font-size: 22px;
+	font-weight: 600;
+	color: rgb(var(--mdui-color-on-surface));
+	line-height: 1.4;
+	word-break: break-word;
+}
+.mduipc-thread-head-meta {
+	display: flex;
+	gap: 18px;
+	font-size: 13px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+.mduipc-thread-head-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.mduipc-thread-head-meta .material-icons { font-size: 16px; }
+.mduipc-thread-head-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 12px;
+	flex-wrap: wrap;
+}
+.mduipc-head-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+}
+.mduipc-head-icon:hover {
+	background-color: rgba(var(--mdui-color-primary), .08);
+	text-decoration: none;
+}
+.mduipc-thread-head-page { margin-top: 12px; }
+
+mdui-card.mduipc-post-card {
+	display: flex;
+	gap: 16px;
+}
+.mduipc-post-author {
+	flex: 0 0 170px;
+	text-align: center;
+	padding: 4px 16px 4px 0;
+	border-right: 1px solid rgba(var(--mdui-color-outline-variant), .8);
+}
+.mduipc-post-avatar img,
+.mduipc-post-avatar .avtm,
+.mduipc-post-avatar img.avtm {
+	width: 90px;
+	height: 90px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+.mduipc-post-avatar { display: block; margin: 8px auto 0; line-height: 0; }
+.mduipc-post-avatar img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; }
+.mduipc-post-username {
+	display: block;
+	margin-top: 6px;
+	font-weight: 600;
+	font-size: 14px;
+}
+.mduipc-post-title {
+	display: block;
+	font-size: 12px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+
+.mduipc-post-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mduipc-post-content .mduipc-post-ops { margin-top: auto; padding-top: 10px; }
+.mduipc-post-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+	margin-bottom: 8px;
+}
+.mduipc-post-info-l {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 10px;
+}
+.mduipc-post-message {
+	font-size: 15px;
+	line-height: 1.8;
+	word-break: break-word;
+	overflow-wrap: anywhere;
+}
+.mduipc-post-message img { max-width: 100%; height: auto; }
+.mduipc-post-message .mduipc-code {
+	padding: 0;
+	margin: 14px 0;
+	border: 1px solid rgb(var(--mdui-color-outline-variant));
+	border-radius: 10px;
+	background: rgb(var(--mdui-color-surface-container-low));
+	overflow: hidden;
+}
+.mduipc-code-head {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	min-height: 42px;
+	padding: 0 8px 0 14px;
+	border-bottom: 1px solid rgb(var(--mdui-color-outline-variant));
+	color: rgb(var(--mdui-color-on-surface-variant));
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+}
+.mduipc-code-head > .material-icons { font-size: 17px; color: rgb(var(--mdui-color-primary)); }
+.mduipc-code-copy { margin-left: auto; --mdui-comp-button-height: 32px; font-size: 12px; text-transform: none; }
+.mduipc-code-copy .material-icons { font-size: 16px; }
+.mduipc-code-body {
+	max-height: 30rem;
+	overflow: auto;
+	padding: 12px 14px 12px 42px;
+	font: 13px/1.75 Consolas, 'Cascadia Code', 'Courier New', monospace;
+	white-space: pre;
+	background: rgb(var(--mdui-color-surface-container-lowest));
+}
+.mduipc-code-body ol { margin: 0; padding-left: 24px; }
+.mduipc-code-body li { padding-left: 8px; min-width: max-content; }
+.mduipc-code-body li::marker { color: rgb(var(--mdui-color-on-surface-variant)); }
+.mduipc-post-message .blockcode:not(.mduipc-code),
+.mduipc-post-message pre {
+	padding: 12px;
+	border-radius: 8px;
+	background-color: rgba(var(--mdui-color-surface-variant), .5);
+	overflow-x: auto;
+	font-family: Consolas, 'Courier New', monospace;
+	font-size: 13px;
+}
+.mduipc-post-message .quote {
+	padding: 10px 14px;
+	margin: 8px 0;
+	border-left: 3px solid rgb(var(--mdui-color-primary));
+	border-radius: 6px;
+	background-color: rgba(var(--mdui-color-surface-variant), .4);
+	font-size: 14px;
+}
+.mduipc-post-message .locked { opacity: .55; }
+
+.mduipc-post-attachtip { margin-top: 8px; font-size: 12px; color: rgb(var(--mdui-color-on-surface-variant)); }
+.mduipc-post-attachimg { margin-top: 8px; }
+.mduipc-post-attachimg img { max-width: 100%; height: auto; border-radius: 8px; }
+.mduipc-post-attachfile {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 6px;
+	font-size: 14px;
+}
+.mduipc-attachsize { font-style: normal; font-size: 12px; opacity: .6; }
+.mduipc-post-sign {
+	margin-top: 12px;
+	padding-top: 10px;
+	border-top: 1px dashed rgba(var(--mdui-color-outline-variant), .6);
+	font-size: 13px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+	max-height: 120px;
+	overflow: hidden;
+}
+.mduipc-post-sign img { max-height: 100px; }
+
+/* ===== 楼层操作栏（右下角，MDUI tonal 按钮统一风格） ===== */
+.mduipc-post-op { margin-left: 10px; color: rgb(var(--mdui-color-primary)); text-decoration: none; }
+.mduipc-post-op:hover { text-decoration: underline; }
+.mduipc-post-ops {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 6px;
+	margin-top: 12px;
+	padding-top: 4px;
+	font-size: 13px;
+}
+.mduipc-post-ops mdui-button { --mdui-comp-button-height: 32px; font-size: 13px; }
+.mduipc-post-ops mdui-button .material-icons { font-size: 16px; }
+.mduipc-post-ops span { color: rgb(var(--mdui-color-on-surface-variant)); }
+a.mduipc-post-floor { color: rgb(var(--mdui-color-on-surface-variant)); text-decoration: none; font-weight: 600; }
+a.mduipc-post-floor:hover { color: rgb(var(--mdui-color-primary)); }
+.mduipc-post-lz {
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: rgb(var(--mdui-color-primary-container));
+	color: rgb(var(--mdui-color-on-primary-container));
+	font-size: 12px;
+}
+.mduipc-post-groupicon { height: 14px; vertical-align: -2px; }
+.mduipc-post-fj { display: inline-flex; align-items: center; gap: 2px; }
+.mduipc-post-fjinput {
+	width: 36px;
+	padding: 2px 4px;
+	border: 1px solid rgba(var(--mdui-color-outline), .8);
+	border-radius: 8px;
+	background: rgb(var(--mdui-color-surface-container));
+	color: rgb(var(--mdui-color-on-surface));
+	font-size: 12px;
+	text-align: center;
+}
+.mduipc-post-fj a { display: inline-flex; text-decoration: none; }
+.mduipc-post-fj .material-icons { font-size: 15px; color: rgb(var(--mdui-color-on-surface-variant)); }
+.mduipc-post-deleted { color: rgb(var(--mdui-color-on-surface-variant)); }
+
+/* ===== 帖子页作者栏（同 discuzx5/default：每层名字+大头像+资料+IP属地+关注/私信） ===== */
+.mduipc-post-author .tns { margin-top: 12px; }
+.mduipc-post-author .tns table { width: 100%; table-layout: fixed; }
+.mduipc-post-author .tns th,
+.mduipc-post-author .tns td { padding: 0 2px; border: 0; font-weight: 400; font-size: 12px; color: rgb(var(--mdui-color-on-surface-variant)); }
+.mduipc-post-author .tns p { margin: 0 0 4px; }
+.mduipc-post-author .tns p a { color: rgb(var(--mdui-color-on-surface)); text-decoration: none; font-size: 13px; font-weight: 500; }
+.mduipc-post-author .tns p a:hover { color: rgb(var(--mdui-color-primary)); }
+.mduipc-post-author .tns p a span { font-size: 13px; font-weight: 500; }
+/* 后台资料节点输出（用户组 / 星星 / 积分明细等 pil/xl 块）紧凑化 */
+.mduipc-post-author p { margin: 8px 0 0; font-size: 12px; }
+.mduipc-post-author p em { font-style: normal; }
+.mduipc-post-author dl.pil { margin: 8px 0 0; font-size: 12px; }
+.mduipc-post-author dl.pil dt { display: inline; color: rgb(var(--mdui-color-on-surface-variant)); }
+.mduipc-post-author dl.pil dd { display: inline; margin: 0 0 0 4px; }
+.mduipc-post-author dl.pil dd a { color: rgb(var(--mdui-color-on-surface)); font-size: 12px; text-decoration: none; }
+.mduipc-post-author .fico-star3,
+.mduipc-post-author .fico-star1 { font-size: 12px; }
+.mduipc-post-iploc { margin-top: 8px; font-size: 12px; color: rgb(var(--mdui-color-on-surface-variant)); }
+.mduipc-vt-userbtns { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.mduipc-vt-userbtns a {
+	padding: 4px 14px;
+	border-radius: 999px;
+	border: 1px solid rgba(var(--mdui-color-outline), .8);
+	font-size: 12px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+	text-decoration: none;
+}
+.mduipc-vt-userbtns a:hover { color: rgb(var(--mdui-color-primary)); border-color: rgb(var(--mdui-color-primary)); }
+
+/* showMenu 下拉（魔法道具等） */
+.p_pop {
+	position: absolute;
+	z-index: 340;
+	min-width: 150px;
+	margin: 0;
+	padding: 6px 0;
+	list-style: none;
+	background: rgb(var(--mdui-color-surface-container));
+	border-radius: 12px;
+	box-shadow: var(--mdui-elevation-level2);
+}
+.p_pop li a {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	font-size: 13px;
+	color: rgb(var(--mdui-color-on-surface));
+	text-decoration: none;
+	white-space: nowrap;
+}
+.p_pop li a:hover { background: rgb(var(--mdui-color-surface-container-high)); }
+.p_pop li img { width: 16px; height: 16px; }
+
+/* ===== 快速回复 ===== */
+.mduipc-fastpost form {
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+}
+.mduipc-fastpost-user img {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+.mduipc-fastpost-main { flex: 1; }
+.mduipc-fastpost-main textarea {
+	width: 100%;
+	min-height: 110px;
+	padding: 12px;
+	border: 1px solid rgba(var(--mdui-color-outline-variant), .8);
+	border-radius: 10px;
+	background: transparent;
+	font: inherit;
+	font-size: 15px;
+	color: rgb(var(--mdui-color-on-surface));
+	resize: vertical;
+	outline: none;
+}
+.mduipc-fastpost-main textarea:focus {
+	border-color: rgb(var(--mdui-color-primary));
+	box-shadow: 0 0 0 1px rgb(var(--mdui-color-primary));
+}
+.mduipc-fastpost-actions { display: flex; flex-direction: column; gap: 8px; }
+.mduipc-fastpost-btn {
+	min-width: 96px;
+	height: 42px;
+	border: none;
+	border-radius: 21px;
+	background-color: rgb(var(--mdui-color-primary));
+	color: rgb(var(--mdui-color-on-primary));
+	font-size: 15px;
+	cursor: pointer;
+	transition: filter .15s;
+}
+.mduipc-fastpost-btn:hover { filter: brightness(1.1); }
+
+/* ===== 分页（Discuz $multipage 结构） ===== */
+.mduipc-pagenav {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 16px 0 24px;
+}
+.mduipc-returnforum {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 14px;
+	color: rgb(var(--mdui-color-on-surface-variant));
+}
+.mduipc-returnforum .material-icons { font-size: 18px; }
+
+.pgs { margin: 0; }
+.pgs .pg {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+}
+.pgs .pg strong,
+.pgs .pg a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 32px;
+	height: 32px;
+	padding: 0 10px;
+	border-radius: 16px;
+	font-size: 14px;
+	font-weight: 400;
+	color: rgb(var(--mdui-color-on-surface));
+	background-color: rgba(var(--mdui-color-surface-container-high), .8);
+	text-decoration: none;
+}
+.pgs .pg strong {
+	background-color: rgb(var(--mdui-color-primary));
+	color: rgb(var(--mdui-color-on-primary));
+}
+.pgs .pg a:hover { background-color: rgba(var(--mdui-color-primary), .12); text-decoration: none; }
+.pgs .pg label { display: none; }
+

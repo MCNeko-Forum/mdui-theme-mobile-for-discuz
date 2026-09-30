@@ -1,0 +1,23 @@
+<!--{eval $nofooter = 1; $actives = array('account' => 1);}-->
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+
+<mdui-card id="neko_acct_box" variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">
+	<div style="font-size:.9375rem;margin-bottom:.75rem">{lang action_account_security_verify_type}</div>
+	<div style="display:flex;flex-direction:column;gap:.5rem">
+		<!--{if in_array('secmobile', $security_verify)}-->
+		<mdui-button variant="tonal" full-width data-href="home.php?mod=spacecp&ac=account&op=verify&method=$method&verify=secmobile&formhash={FORMHASH}">{lang action_account_security_verify_mobile}</mdui-button>
+		<!--{/if}-->
+		<!--{if in_array('email', $security_verify)}-->
+		<mdui-button variant="tonal" full-width data-href="home.php?mod=spacecp&ac=account&op=verify&method=$method&verify=email&formhash={FORMHASH}">{lang action_account_security_verify_email}</mdui-button>
+		<!--{/if}-->
+		<!--{if in_array('password', $security_verify)}-->
+		<mdui-button variant="tonal" full-width data-href="home.php?mod=spacecp&ac=account&op=verify&method=$method&verify=password&formhash={FORMHASH}">{lang action_account_security_verify_password}</mdui-button>
+		<!--{/if}-->
+		<!--{if in_array('appeal', $security_verify)}-->
+		<mdui-button variant="tonal" full-width data-href="home.php?mod=spacecp&ac=account&op=verify&method=$method&verify=appeal&formhash={FORMHASH}">{lang action_account_security_verify_appeal}</mdui-button>
+		<!--{/if}-->
+	</div>
+</mdui-card>
+</div>
+<!--{template common/footer}-->

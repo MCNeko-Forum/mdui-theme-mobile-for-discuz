@@ -1,0 +1,136 @@
+<!--{eval $actmanage = $post['invisible'] == 0 && ($_G['forum_thread']['authorid'] == $_G['uid'] || (in_array($_G['group']['radminid'], array(1, 2)) && $_G['group']['alloweditactivity']) || ($_G['group']['radminid'] == 3 && $_G['forum']['ismoderator'] && $_G['group']['alloweditactivity']));}-->
+
+<!--{if $activity['thumb']}-->
+<img src="$activity['thumb']" alt="" style="width:100%;border-radius:12px;margin:.75rem 0;display:block" />
+<!--{/if}-->
+
+<mdui-card variant="filled" style="display:block;margin:.75rem 0;padding:1rem">
+	<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
+		<mdui-icon name="event" style="color:rgb(var(--mdui-color-primary))"></mdui-icon>
+		<strong>{lang activity_type}: $activity['class']</strong>
+		<!--{if $activityclose}--><mdui-chip style="--mdui-comp-chip-height:24px;font-size:.75rem">{lang poll_finish}</mdui-chip><!--{/if}-->
+	</div>
+
+	<div style="display:flex;gap:.5rem;font-size:.875rem;padding:.1875rem 0"><span style="opacity:.6;flex-shrink:0">{lang activity_starttime}</span><span><!--{if $activity['starttimeto']}-->{lang activity_start_between}<!--{else}-->$activity['starttimefrom']<!--{/if}--></span></div>
+	<div style="display:flex;gap:.5rem;font-size:.875rem;padding:.1875rem 0"><span style="opacity:.6;flex-shrink:0">{lang activity_space}</span><span>$activity['place']</span></div>
+	<div style="display:flex;gap:.5rem;font-size:.875rem;padding:.1875rem 0"><span style="opacity:.6;flex-shrink:0">{lang gender}</span><span><!--{if $activity['gender'] == 1}-->{lang male}<!--{elseif $activity['gender'] == 2}-->{lang female}<!--{else}-->{lang unlimited}<!--{/if}--></span></div>
+	<!--{if $activity['cost']}-->
+	<div style="display:flex;gap:.5rem;font-size:.875rem;padding:.1875rem 0"><span style="opacity:.6;flex-shrink:0">{lang activity_payment}</span><span>$activity['cost'] {lang payment_unit}</span></div>
+	<!--{/if}-->
+
+	<!--{if !$_G['forum_thread']['is_archived']}-->
+		<!--{if $activity['expiration']}-->
+		<div style="display:flex;gap:.5rem;font-size:.875rem;padding:.1875rem 0"><span style="opacity:.6;flex-shrink:0">{lang post_closing}</span><span>$activity['expiration']</span></div>
+		<!--{/if}-->
+		<div style="display:flex;gap:.5rem;align-items:center;font-size:.875rem;padding:.1875rem 0;flex-wrap:wrap">
+			<span style="opacity:.6;flex-shrink:0">{lang activity_already}</span>
+			<span><strong style="color:rgb(var(--mdui-color-primary))">$allapplynum</strong> {lang activity_member_unit}<!--{if $activity['number']}--> · {lang activity_about_member} $aboutmembers {lang activity_member_unit}<!--{/if}--></span>
+			<!--{if $actmanage}-->
+			<mdui-button variant="text" href="forum.php?mod=misc&action=activityapplylist&tid=$_G['tid']&pid=$post['pid']{if $_GET['from']}&from=$_GET['from']{/if}&mobile=2">{lang manage}</mdui-button>
+			<!--{/if}-->
+		</div>
+
+		<!--{if $post['invisible'] == 0}-->
+			<!--{if $applied && $isverified < 2}-->
+				<div style="font-size:.8125rem;opacity:.7;margin-top:.5rem"><!--{if !$isverified}-->{lang activity_wait}<!--{else}-->{lang activity_join_audit}<!--{/if}--></div>
+			<!--{elseif !$_G['uid']}-->
+				<mdui-button variant="tonal" full-width href="member.php?mod=logging&action=login" style="margin-top:.75rem">{lang activity_join}</mdui-button>
+			<!--{/if}-->
+		<!--{/if}-->
+	<!--{/if}-->
+</mdui-card>
+
+<div class="mdui-prose" id="postmessage_$post['pid']">$post['message']</div>
+
+<!--{if $_G['uid'] && !$activityclose && $post['invisible'] == 0 && (!$applied || $isverified == 2)}-->
+	<!--{if $_G['forum']['status'] == 3 && helper_access::check_module('group') && $isgroupuser != 'isgroupuser'}-->
+	<mdui-card variant="outlined" style="display:block;margin:.75rem 0;padding:1rem">
+		<div style="font-size:.875rem;margin-bottom:.5rem">{lang activity_no_member}</div>
+		<mdui-button variant="tonal" full-width href="forum.php?mod=group&action=join&fid=$_G['fid']">{lang activity_join_group}</mdui-button>
+	</mdui-card>
+	<!--{elseif !$activity['number'] || $aboutmembers > 0 || $isverified == 2}-->
+	<mdui-card variant="outlined" style="display:block;margin:.75rem 0;padding:1rem">
+		<div style="font-weight:500;margin-bottom:.75rem"><!--{if $isverified == 2}-->{lang complete_data}<!--{else}-->{lang activity_join}<!--{/if}--></div>
+		<!--{if $_G['setting']['activitycredit'] && $activity['credit'] && !$applied}-->
+		<div style="font-size:.8125rem;color:rgb(var(--mdui-color-error));margin-bottom:.75rem">{lang activity_need_credit} $activity['credit'] {$_G['setting']['extcredits'][$_G['setting']['activitycredit']]['title']}</div>
+		<!--{/if}-->
+
+		<form method="post" autocomplete="off" action="forum.php?mod=misc&action=activityapplies&fid=$_G['fid']&tid=$_G['tid']&pid=$post['pid']{if $_GET['from']}&from=$_GET['from']{/if}&mobile=2">
+			<input type="hidden" name="formhash" value="{FORMHASH}" />
+
+			<!--{if $activity['cost']}-->
+			<div style="margin-bottom:1rem">
+				<div style="font-size:.8125rem;opacity:.6;margin-bottom:.25rem">{lang activity_paytype}</div>
+				<mdui-radio-group name="payment" value="0">
+					<mdui-radio value="0">{lang activity_pay_myself}</mdui-radio>
+					<mdui-radio value="1">{lang activity_would_payment}</mdui-radio>
+				</mdui-radio-group>
+				<mdui-text-field name="payvalue" type="number" label="{lang activity_payment}" suffix="{lang payment_unit}" style="margin-top:.5rem"></mdui-text-field>
+			</div>
+			<!--{/if}-->
+
+			<!--{if !empty($activity['ufield']['userfield'])}-->
+				<!--{loop $activity['ufield']['userfield'] $fieldid}-->
+				<!--{if $settings[$fieldid]['available']}-->
+				<div style="margin-bottom:1rem">
+					<div style="font-size:.8125rem;opacity:.6;margin-bottom:.25rem">$settings[$fieldid]['title'] <span style="color:rgb(var(--mdui-color-error))">*</span></div>
+					<!--{if $settings[$fieldid]['formtype'] != 'file'}-->
+						$htmls[$fieldid]
+					<!--{else}-->
+						<mdui-text-field name="$fieldid" label="{lang activity_enter_imgurl}"></mdui-text-field>
+					<!--{/if}-->
+				</div>
+				<!--{/if}-->
+				<!--{/loop}-->
+			<!--{/if}-->
+
+			<!--{if !empty($activity['ufield']['extfield'])}-->
+				<!--{loop $activity['ufield']['extfield'] $extname}-->
+				<mdui-text-field name="$extname" label="$extname" maxlength="200" value="{if !empty($ufielddata)}$ufielddata['extfield'][$extname]{/if}" style="margin-bottom:1rem"></mdui-text-field>
+				<!--{/loop}-->
+			<!--{/if}-->
+
+			<!-- maxlength 已经在浏览器层挡住 200 字，不用再写一份 JS 校验 -->
+			<mdui-text-field name="message" label="{lang leaveword}" rows="3" maxlength="200" counter value="$applyinfo['message']" style="margin-bottom:1rem"></mdui-text-field>
+
+			<!--{if $_G['setting']['activitycredit'] && $activity['credit'] && checklowerlimit(array('extcredits'.$_G['setting']['activitycredit'] => '-'.$activity['credit']), $_G['uid'], 1, 0, 1) !== true}-->
+				<div style="font-size:.875rem;color:rgb(var(--mdui-color-error))">{$_G['setting']['extcredits'][$_G['setting']['activitycredit']]['title']} {lang not_enough} $activity['credit']</div>
+			<!--{else}-->
+				<input type="hidden" name="activitysubmit" value="true" />
+				<mdui-button type="submit" full-width>{lang submit}</mdui-button>
+			<!--{/if}-->
+		</form>
+	</mdui-card>
+	<!--{/if}-->
+<!--{elseif $_G['uid'] && !$activityclose && $applied}-->
+<mdui-card variant="outlined" style="display:block;margin:.75rem 0;padding:1rem">
+	<div style="font-weight:500;margin-bottom:.75rem">{lang activity_join_cancel}</div>
+	<form method="post" autocomplete="off" action="forum.php?mod=misc&action=activityapplies&fid=$_G['fid']&tid=$_G['tid']&pid=$post['pid']{if $_GET['from']}&from=$_GET['from']{/if}&mobile=2">
+		<input type="hidden" name="formhash" value="{FORMHASH}" />
+		<mdui-text-field name="message" label="{lang leaveword}" maxlength="200" style="margin-bottom:1rem"></mdui-text-field>
+		<mdui-button type="submit" name="activitycancel" value="true" variant="outlined" full-width>{lang submit}</mdui-button>
+	</form>
+</mdui-card>
+<!--{/if}-->
+
+<!--{eval $actlists = array();
+if($applylist) $actlists[] = array('title' => lang('forum/template', 'activity_new_join'), 'num' => $applynumbers, 'list' => $applylist, 'showmsg' => 1);
+if($applylistverified) $actlists[] = array('title' => lang('forum/template', 'activity_new_signup'), 'num' => $noverifiednum, 'list' => $applylistverified, 'showmsg' => $_G['forum_thread']['authorid'] == $_G['uid']);
+}-->
+<!--{loop $actlists $actlist}-->
+<div style="margin:.75rem 0">
+	<div style="font-size:.875rem;font-weight:500;padding:.5rem .25rem">$actlist['title'] ($actlist['num'] {lang activity_member_unit})</div>
+	<mdui-list>
+		<!--{loop $actlist['list'] $apply}-->
+		<mdui-list-item href="home.php?mod=space&uid=$apply['uid']" rounded>
+			<mdui-avatar slot="icon" src="<!--{avatar($apply['uid'], 'small', true)}-->"></mdui-avatar>
+			$apply['username']
+			<div slot="description" style="font-size:.75rem">
+				$apply['dateline']<!--{if $activity['cost']}--> · <!--{if $apply['payment'] >= 0}-->$apply['payment'] {lang payment_unit}<!--{else}-->{lang activity_self}<!--{/if}--><!--{/if}-->
+				<!--{if $actlist['showmsg'] && $apply['message']}--><br />$apply['message']<!--{/if}-->
+			</div>
+		</mdui-list-item>
+		<!--{/loop}-->
+	</mdui-list>
+</div>
+<!--{/loop}-->

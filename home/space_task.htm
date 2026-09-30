@@ -1,0 +1,21 @@
+<!--{eval $nofooter = 1;}-->
+<!--{eval $mdui_task_item = $_GET['item'] ? $_GET['item'] : 'new';}-->
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang task}</mdui-top-app-bar-title>
+</mdui-top-app-bar>
+<div style="padding:1rem">
+	<mdui-tabs value="$mdui_task_item" full-width>
+		<mdui-tab value="new" data-href="home.php?mod=task&item=new">{lang task_new}</mdui-tab>
+		<mdui-tab value="doing" data-href="home.php?mod=task&item=doing">{lang task_doing}</mdui-tab>
+		<mdui-tab value="done" data-href="home.php?mod=task&item=done">{lang task_done}</mdui-tab>
+		<mdui-tab value="failed" data-href="home.php?mod=task&item=failed">{lang task_failed}</mdui-tab>
+	</mdui-tabs>
+	<!--{if empty($do)}-->
+		<!--{subtemplate home/space_task_list}-->
+	<!--{elseif $do == 'view'}-->
+		<!--{subtemplate home/space_task_detail}-->
+	<!--{/if}-->
+</div>
+<!--{template common/footer}-->

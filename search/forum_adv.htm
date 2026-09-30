@@ -1,0 +1,19 @@
+<!--{template common/header}-->
+<mdui-top-app-bar><mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon><mdui-top-app-bar-title>帖子高级搜索</mdui-top-app-bar-title></mdui-top-app-bar>
+<div style="padding:1rem 1rem 5.5rem">
+	<form method="post" action="search.php?mod=forum">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<mdui-card variant="outlined" style="padding:1rem;display:grid;gap:1rem">
+			<mdui-text-field name="srchtxt" value="$keyword" label="{lang keywords}" maxlength="40"></mdui-text-field>
+			<mdui-text-field name="srchuname" value="$srchuname" label="{lang author}" maxlength="40"></mdui-text-field>
+			<!--{if ($_G['group']['allowsearch'] & 32)}--><mdui-checkbox name="srchtype" value="fulltext" $fulltextchecked>{lang search_fulltext}</mdui-checkbox><!--{/if}-->
+			<div><div style="margin-bottom:.5rem">{lang search_thread_range}</div><mdui-radio-group name="srchfilter" value="$srchfilter"><mdui-radio value="all">{lang search_thread_range_all}</mdui-radio><mdui-radio value="digest">{lang search_thread_range_digest}</mdui-radio><mdui-radio value="top">{lang search_thread_range_top}</mdui-radio></mdui-radio-group></div>
+			<div><div style="margin-bottom:.5rem">{lang special_thread}</div><mdui-checkbox name="special[]" value="1" $specialchecked[1]>{lang special_poll}</mdui-checkbox><mdui-checkbox name="special[]" value="2" $specialchecked[2]>{lang special_trade}</mdui-checkbox><mdui-checkbox name="special[]" value="3" $specialchecked[3]>{lang special_reward}</mdui-checkbox><mdui-checkbox name="special[]" value="4" $specialchecked[4]>{lang special_activity}</mdui-checkbox><mdui-checkbox name="special[]" value="5" $specialchecked[5]>{lang special_debate}</mdui-checkbox></div>
+			<mdui-select name="srchfrom" label="{lang search_time}" value="$srchfrom"><mdui-menu-item value="0">{lang search_any_date}</mdui-menu-item><mdui-menu-item value="86400">{lang 1_days_ago}</mdui-menu-item><mdui-menu-item value="172800">{lang 2_days_ago}</mdui-menu-item><mdui-menu-item value="604800">{lang 7_days_ago}</mdui-menu-item><mdui-menu-item value="2592000">{lang 30_days_ago}</mdui-menu-item><mdui-menu-item value="7776000">{lang 90_days_ago}</mdui-menu-item><mdui-menu-item value="31536000">{lang 365_days_ago}</mdui-menu-item></mdui-select>
+			<mdui-select name="orderby" label="{lang search_orderby}" value="$orderby"><mdui-menu-item value="lastpost">{lang order_lastpost}</mdui-menu-item><mdui-menu-item value="dateline">{lang order_starttime}</mdui-menu-item><mdui-menu-item value="replies">{lang order_replies}</mdui-menu-item><mdui-menu-item value="views">{lang order_views}</mdui-menu-item></mdui-select>
+			<mdui-radio-group name="ascdesc" value="$ascdesc"><mdui-radio value="desc">{lang order_desc}</mdui-radio><mdui-radio value="asc">{lang order_asc}</mdui-radio></mdui-radio-group>
+			<input type="hidden" name="searchsubmit" value="yes"><mdui-button type="submit" full-width>{lang search}</mdui-button>
+		</mdui-card>
+	</form>
+</div>
+<!--{template common/footer}-->

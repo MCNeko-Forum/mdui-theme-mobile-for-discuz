@@ -1,0 +1,7 @@
+<!--{template common/header}-->
+<mdui-top-app-bar><mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon><mdui-top-app-bar-title>{lang portal}{lang search}</mdui-top-app-bar-title></mdui-top-app-bar>
+<div style="padding:1rem 1rem 5.5rem">
+	<form method="post" autocomplete="off" action="search.php?mod=portal"><input type="hidden" name="formhash" value="{FORMHASH}"><!--{subtemplate search/pubsearch}--></form>
+	<!--{if !empty($searchid) && submitcheck('searchsubmit', 1)}--><mdui-list style="margin-top:1rem"><mdui-list-subheader>{lang search_result}</mdui-list-subheader><!--{if empty($articlelist)}--><mdui-list-item>{lang search_nomatch}</mdui-list-item><!--{else}--><!--{loop $articlelist $article}--><mdui-list-item href="{echo fetch_article_url($article);}" rounded><!--{if $article['pic']}--><mdui-avatar slot="icon" src="$article[pic]"></mdui-avatar><!--{/if}-->$article[title]<span slot="description">$article[username] · $article[dateline] · {lang views} $article[viewnum]</span></mdui-list-item><!--{/loop}--><!--{/if}--></mdui-list><!--{if $multipage}--><div style="margin-top:1rem">$multipage</div><!--{/if}--><!--{/if}-->
+</div>
+<!--{template common/footer}-->
