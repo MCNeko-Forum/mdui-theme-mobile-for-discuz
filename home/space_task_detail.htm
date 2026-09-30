@@ -1,0 +1,15 @@
+<mdui-card variant="filled" class="mdui-center-detail">
+	<div style="display:flex;gap:1rem;align-items:center"><mdui-avatar src="$task['icon']"></mdui-avatar><div><div style="font-size:1.125rem;font-weight:600">$task['name']</div><div style="opacity:.7">$task['description']</div></div></div>
+	<div class="mdui-center-detail-section"><b>{lang task_complete_condition}</b>
+	<!--{if $task['viewmessage']}-->
+		<div class="mdui-prose">$task['viewmessage']</div>
+	<!--{else}-->
+		<div>{lang unlimited}</div>
+	<!--{/if}-->
+	</div>
+	<div class="mdui-center-detail-section"><b>{lang task_reward}</b><div><!--{if $task['reward'] == 'credit'}-->$_G['setting']['extcredits'][$task['prize']]['title'] $task['bonus'] $_G['setting']['extcredits'][$task['prize']]['unit']<!--{elseif $task['reward'] == 'magic'}-->{lang magics_title} $task['rewardtext'] $task['bonus'] {lang magics_unit}<!--{elseif $task['reward'] == 'medal'}-->{lang medals} $task['rewardtext']<!--{elseif $task['reward'] == 'group'}-->{lang usergroup} $task['rewardtext']<!--{else}-->{lang nothing}<!--{/if}--></div></div>
+	<!--{if $allowapply == '-1'}-->
+	<div class="mdui-task-progress"><div>{lang task_complete} <span>$task['csc']</span>%</div><mdui-linear-progress value="$task['csc']" max="100"></mdui-linear-progress></div>
+	<mdui-button variant="filled" href="home.php?mod=task&do=draw&id=$task['taskid']" full-width>{lang task_reward_get}</mdui-button>
+	<!--{elseif $allowapply > 0}--><mdui-button variant="filled" href="home.php?mod=task&do=apply&id=$task['taskid']" full-width>{lang task_newbie_apply}</mdui-button><!--{elseif $allowapply == '-5'}--><div style="margin-top:1rem;opacity:.7">{lang task_complete_on} $task['dateline']</div><!--{/if}-->
+</mdui-card>

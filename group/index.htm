@@ -1,0 +1,68 @@
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="menu" id="mdui_menu_btn"></mdui-button-icon>
+	<mdui-top-app-bar-title>{$_G['setting']['navs'][3]['navname']}</mdui-top-app-bar-title>
+	<div style="flex-grow:1"></div>
+	<!--{if helper_access::check_module('group')}--><mdui-button-icon icon="add" href="forum.php?mod=group&action=create" title="{lang group_create}"></mdui-button-icon><!--{/if}-->
+</mdui-top-app-bar>
+
+<div style="padding-bottom:88px">
+	<mdui-tabs value="recommend" full-width>
+		<mdui-tab value="recommend" icon="star">{lang recommend_group}</mdui-tab>
+		<mdui-tab value="categories" icon="category">{lang group_categories}</mdui-tab>
+		<mdui-tab value="mine" icon="person" data-href="group.php?mod=my">{lang my_group}</mdui-tab>
+
+		<mdui-tab-panel slot="panel" value="recommend">
+			<mdui-card variant="filled" style="display:block;margin:.75rem 1rem;overflow:hidden">
+				<!--{eval $mdui_group_recommend = dunserialize($_G['setting']['group_recommend']);}-->
+				<!--{if $mdui_group_recommend}-->
+				<mdui-list>
+					<!--{loop $mdui_group_recommend $group}-->
+					<mdui-list-item href="forum.php?mod=group&fid={$group['fid']}" rounded>
+						<!--{if $group['icon'] && !strstr($group['icon'], 'groupicon.gif')}--><mdui-avatar slot="icon" src="{$group['icon']}"></mdui-avatar><!--{else}--><mdui-icon slot="icon" name="groups"></mdui-icon><!--{/if}-->
+						{$group['name']}
+						<span slot="description"><!--{echo strip_tags($group['description']);}--></span>
+						<mdui-icon slot="end-icon" name="chevron_right"></mdui-icon>
+					</mdui-list-item>
+					<!--{/loop}-->
+				</mdui-list>
+				<!--{else}-->
+				<div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang no_group_join}</div>
+				<!--{/if}-->
+			</mdui-card>
+		</mdui-tab-panel>
+
+		<mdui-tab-panel slot="panel" value="categories">
+			<!--{if $first}-->
+			<!--{loop $first $groupid $group}-->
+			<mdui-card variant="filled" style="display:block;margin:.75rem 1rem;overflow:hidden">
+				<mdui-list-item href="group.php?gid={$groupid}" icon="folder_open" rounded>
+					<b>{$group['name']}</b>
+					<span slot="description">
+						<!--{loop $group['secondlist'] $sgid}--><a href="group.php?sgid={$sgid}" onclick="event.stopPropagation()" style="margin-right:.5rem;text-decoration:none;color:rgb(var(--mdui-color-primary))">{$second[$sgid]['name']}</a><!--{/loop}-->
+					</span>
+					<mdui-icon slot="end-icon" name="chevron_right"></mdui-icon>
+				</mdui-list-item>
+				<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;padding:.25rem .75rem .75rem">
+					<!--{loop $lastupdategroup[$groupid] $item}-->
+					<a href="forum.php?mod=group&fid={$item['fid']}" style="display:flex;align-items:center;gap:.5rem;min-width:0;padding:.625rem .5rem;border-radius:.5rem;background:rgb(var(--mdui-color-surface-variant));text-decoration:none;color:inherit">
+						<!--{if $item['icon'] && !strstr($item['icon'], 'groupicon.gif')}--><mdui-avatar src="{$item['icon']}" style="width:2rem;height:2rem;flex:none"></mdui-avatar><!--{else}--><mdui-icon name="groups" style="flex:none"></mdui-icon><!--{/if}-->
+						<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{$item['name']}</span>
+					</a>
+					<!--{/loop}-->
+				</div>
+			</mdui-card>
+			<!--{/loop}-->
+			<!--{else}-->
+			<div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang no_group_join}</div>
+			<!--{/if}-->
+		</mdui-tab-panel>
+
+		<mdui-tab-panel slot="panel" value="mine">
+			<div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang my_group}</div>
+		</mdui-tab-panel>
+	</mdui-tabs>
+</div>
+
+<!--{template common/footer}-->

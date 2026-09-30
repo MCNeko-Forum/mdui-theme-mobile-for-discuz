@@ -1,0 +1,17 @@
+<!--{if $value['msgfromid'] != $_G['uid']}-->
+<div class="mdui-pm-message mdui-pm-message-other">
+	<mdui-avatar src="<!--{avatar($value['msgfromid'], 'small', true)}-->"></mdui-avatar>
+	<div>
+		<mdui-card variant="filled" class="mdui-pm-bubble">$value['message']</mdui-card>
+		<div class="mdui-pm-time"><!--{date($value['dateline'], 'u')}--></div>
+	</div>
+</div>
+<!--{else}-->
+<div class="mdui-pm-message mdui-pm-message-self">
+	<div>
+		<mdui-card variant="elevated" class="mdui-pm-bubble">$value['message']</mdui-card>
+		<div class="mdui-pm-time"><!--{date($value['dateline'], 'u')}--></div>
+	</div>
+	<mdui-avatar src="<!--{avatar($value['msgfromid'], 'small', true)}-->"></mdui-avatar>
+</div>
+<!--{/if}-->

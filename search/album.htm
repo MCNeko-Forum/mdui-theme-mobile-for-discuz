@@ -1,0 +1,9 @@
+<!--{template common/header}-->
+<mdui-top-app-bar><mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon><mdui-top-app-bar-title>{lang search}</mdui-top-app-bar-title></mdui-top-app-bar>
+<div style="padding:1rem 1rem 5.5rem">
+	<form method="post" autocomplete="off" action="search.php?mod=album"><input type="hidden" name="formhash" value="{FORMHASH}"><!--{subtemplate search/pubsearch}--></form>
+	<!--{if !empty($searchid) && submitcheck('searchsubmit', 1)}-->
+	<mdui-list style="margin-top:1rem"><mdui-list-subheader>{lang search_result}</mdui-list-subheader><!--{if empty($albumlist)}--><mdui-list-item>{lang search_nomatch}</mdui-list-item><!--{else}--><!--{loop $albumlist $album}--><mdui-list-item href="home.php?mod=space&uid={$album['uid']}&do=album&id={$album['albumid']}" rounded><!--{if $album['pic']}--><mdui-avatar slot="icon" src="{$album['pic']}"></mdui-avatar><!--{/if}-->{$album['albumname']}<span slot="description">{lang album} · {$album['updatetime']}</span></mdui-list-item><!--{/loop}--><!--{/if}--></mdui-list><!--{if $multipage}--><div style="margin-top:1rem">$multipage</div><!--{/if}-->
+	<!--{/if}-->
+</div>
+<!--{template common/footer}-->

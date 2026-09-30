@@ -226,5 +226,36 @@ if (existsSync(join(root, smileyBack))) {
 	check('日志表情面板仍插 [em:N:]', smileySrc.includes("data-face=\"[em:' + index + ':]\"") && smileySrc.includes('comcom'));
 }
 
+const footerBack = existsSync(join(root, 'common/footer.htm')) ? 'common/footer.htm' : 'touch/common/footer.htm';
+const footerSrc = readFileSync(join(root, footerBack), 'utf8');
+const mobileFooterSrc = readFileSync(join(root, 'touch/common/footer.htm'), 'utf8');
+const styleSrc = readFileSync(join(root, 'static/style.css'), 'utf8');
+check('图片失败替换为加载失败并横向铺满', footerSrc.includes("box.textContent = '加载失败'") && footerSrc.includes('link.replaceChildren(box)'));
+check('复制链接成功有消息条', footerSrc.includes("mduiTip('复制链接成功')"));
+check('表情不被正文大图样式撑开', styleSrc.includes('img[smilieid]'));
+check('正文链接有下划线', /\.mdui-prose a \{[^}]*text-decoration: underline/.test(styleSrc));
+const pollSrc = existsSync(join(root, 'touch/forum/viewthread_poll.htm')) ? readFileSync(join(root, 'touch/forum/viewthread_poll.htm'), 'utf8') : '';
+check('单选投票用 mdui-radio-group 包裹（mdui-radio 自身不分组不提交）', pollSrc.includes('<mdui-radio-group name="pollanswers[]"') && pollSrc.includes('</mdui-radio-group>'));
+check('投票空选客户端拦截', pollSrc.includes('请先选择投票选项'));
+check('论坛图片预览模板存在', existsSync(join(root, 'touch/forum/viewthread_album.htm')));
+
+// 15. pjax 无刷新切换：容器边界、脚本、排除清单与兜底逻辑必须齐全
+check('mdui_pjax.js 存在', existsSync(join(root, 'static/mdui_pjax.js')));
+check('手机版 footer 加载 mdui_pjax.js', mobileFooterSrc.includes('/mdui_pjax.js?{VERHASH}'));
+check('手机版 header 在全局导航后开启 #mdui_app', /<\/mdui-navigation-drawer>\s*<div id="mdui_app">/.test(header));
+check('手机版 footer 开头闭合 #mdui_app', mobileFooterSrc.startsWith('</div><!-- /#mdui_app'));
+const pjaxSrc = existsSync(join(root, 'static/mdui_pjax.js')) ? readFileSync(join(root, 'static/mdui_pjax.js'), 'utf8') : '';
+check('PJAX 不含本地调试探针', !pjaxSrc.includes('127.0.0.1:7777'));
+check('pjax 导航时关闭侧栏和发布面板', pjaxSrc.includes("['mdui_drawer', 'mdui_post_sheet']") && pjaxSrc.includes('closeNavigationOverlays();'));
+check('pjax 缺容器时整页刷新兜底', pjaxSrc.includes("location.href = url; // 不属于/不兼容模板 → 整页刷新"));
+check('pjax 接管 MDUI 导航组件的 Shadow DOM 点击', pjaxSrc.includes('e.composedPath()') && pjaxSrc.includes('mdui-list-item[href], mdui-navigation-bar-item[href]'));
+check('pjax 排除登录/注册与管理操作', pjaxSrc.includes('member\\.php\\?mod=(logging|register)') && pjaxSrc.includes('modcp'));
+check('pjax 跟随 showmessage 跳转页', pjaxSrc.includes('meta[http-equiv="refresh"]'));
+check('pjax 重建脚本节点', pjaxSrc.includes("s.async = false"));
+check('footer data-href 委托走 mduiNav', mobileFooterSrc.includes('window.mduiNav ? mduiNav(link.dataset.href)'));
+check('pjax fetch 禁用缓存保证回帖后内容新鲜', pjaxSrc.includes("cache: 'no-store'"));
+check('pjax 对 bfcache 恢复强制重载', pjaxSrc.includes('e.persisted') && pjaxSrc.includes('location.reload()'));
+check('pjax 同步抽屉与底栏红点', pjaxSrc.includes("getElementById('mdui_drawer')") && pjaxSrc.includes("mdui-navigation-bar-item[value=my] mdui-badge"));
+
 console.log(failed === 0 ? 'OK 全部通过' : `${failed} 项失败`);
 process.exit(failed === 0 ? 0 : 1);

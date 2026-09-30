@@ -1,0 +1,85 @@
+<!--{template common/header}-->
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang myfavorite}</mdui-top-app-bar-title>
+	<div style="flex:1"></div>
+	<mdui-button-icon icon="home" href="index.php"></mdui-button-icon>
+</mdui-top-app-bar>
+
+<div style="padding:0 1rem 5.5rem">
+	<mdui-tabs value="<!--{if in_array($_GET['type'], array('thread','forum','group','blog','album','article'))}-->{$_GET['type']}<!--{else}-->all<!--{/if}-->" full-width>
+		<mdui-tab value="all" data-href="home.php?mod=space&uid={$_G['uid']}&do=favorite&view=me">{lang favorite_all}</mdui-tab>
+		<!--{if helper_access::check_module('forum')}-->
+		<mdui-tab value="thread" data-href="home.php?mod=space&uid={$_G['uid']}&do=favorite&view=me&type=thread">{lang favorite_thread}</mdui-tab>
+		<mdui-tab value="forum" data-href="home.php?mod=space&uid={$_G['uid']}&do=favorite&view=me&type=forum">{lang favorite_forum}</mdui-tab>
+		<!--{/if}-->
+		<!--{if helper_access::check_module('group')}--><mdui-tab value="group" data-href="home.php?mod=space&uid={$_G['uid']}&do=favorite&view=me&type=group">{lang favorite_group}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('blog')}--><mdui-tab value="blog" data-href="home.php?mod=space&uid={$_G['uid']}&do=favorite&view=me&type=blog">{lang favorite_blog}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('album')}--><mdui-tab value="album" data-href="home.php?mod=space&uid={$_G['uid']}&do=favorite&view=me&type=album">{lang favorite_album}</mdui-tab><!--{/if}-->
+		<!--{if helper_access::check_module('portal')}--><mdui-tab value="article" data-href="home.php?mod=space&uid={$_G['uid']}&do=favorite&view=me&type=article">{lang favorite_article}</mdui-tab><!--{/if}-->
+		<!--{hook/space_favorite_nav_extra_mobile}-->
+	</mdui-tabs>
+
+	<!--{if $list}-->
+	<form method="post" autocomplete="off" name="delform" id="delform" action="home.php?mod=spacecp&ac=favorite&op=delete&type=$_GET['type']&checkall=1">
+		<input type="hidden" name="formhash" value="{FORMHASH}" />
+		<input type="hidden" name="delfavorite" value="true" />
+		<mdui-list style="padding-top:1rem">
+			<!--{loop $list $k $value}-->
+			<mdui-list-item id="fav_$k" rounded>
+				<input slot="icon" type="checkbox" name="favorite[]" value="$k" vid="$value['id']" />
+				<a href="$value['url']" target="_blank">{$value['icon']}{$value['title']}</a>
+				<!--{if $value['description']}--><span slot="description">$value['description']</span><!--{/if}-->
+				<mdui-button slot="end-icon" variant="text" onclick="document.getElementById('mdui_favorite_delete_$k').open=true">{lang delete}</mdui-button>
+				<mdui-dialog id="mdui_favorite_delete_$k" close-on-esc close-on-overlay-click>
+					<div slot="headline">{lang delete}</div>
+					<div slot="description">{lang delete_favorite_message}</div>
+					<mdui-button slot="action" type="button" variant="text" onclick="document.getElementById('mdui_favorite_delete_$k').open=false">{lang cancel}</mdui-button>
+					<mdui-button slot="action" type="button" variant="text" onclick="mduiPost('home.php?mod=spacecp&ac=favorite&op=delete&favid=$k&type=$_GET[type]',{deletesubmit:'true'},function(){location.reload()})">{lang determine}</mdui-button>
+				</mdui-dialog>
+			</mdui-list-item>
+			<!--{/loop}-->
+		</mdui-list>
+		<div style="display:flex;align-items:center;gap:.5rem;padding:1rem 0">
+			<mdui-checkbox id="chkall">{lang select_all}</mdui-checkbox>
+			<mdui-button type="button" variant="outlined" onclick="delall_favorite()">{lang del_favorite}</mdui-button>
+			<!--{if $_GET['type'] == 'thread'}--><mdui-button type="button" variant="filled" onclick="collection_favorite()">{lang collection_favorite}</mdui-button><!--{/if}-->
+		</div>
+	</form>
+	<!--{if $multi}--><div style="padding-bottom:1rem;text-align:center">$multi</div><!--{/if}-->
+	<!--{else}-->
+	<mdui-card variant="outlined" style="display:block;margin-top:1rem;padding:2rem 1rem;text-align:center;opacity:.65">{lang no_favorite_yet}</mdui-card>
+	<!--{/if}-->
+</div>
+<script>
+function favorite_delete(favid) {
+	var el = document.getElementById('fav_' + favid);
+	if(el) el.style.display = 'none';
+}
+function delall_favorite() {
+	var form = document.getElementById('delform');
+	var checked = form && form.querySelector('input[name="favorite[]"]:checked');
+	if(checked) {
+		if(confirm('{lang del_select_favorite_confirm}')) form.submit();
+	} else {
+		mduiTip('{lang no_select_favorite}', true);
+	}
+}
+<!--{if $_GET['type'] == 'thread'}-->
+function collection_favorite() {
+	var form = document.getElementById('delform');
+	var selected = form ? form.querySelectorAll('input[name="favorite[]"]:checked') : [];
+	if(!selected.length) {
+		mduiTip('{lang no_select_favorite}', true);
+		return;
+	}
+	var tids = Array.prototype.map.call(selected, function(input) { return 'tids[]=' + encodeURIComponent(input.getAttribute('vid')); }).join('&');
+	location.href = 'forum.php?mod=collection&action=edit&op=addthread&' + tids;
+}
+<!--{/if}-->
+document.getElementById('chkall')?.addEventListener('change', function() {
+	document.querySelectorAll('input[name="favorite[]"]').forEach(function(input) { input.checked = this.checked; }, this);
+});
+</script>
+<!--{eval $nofooter = true;}-->
+<!--{template common/footer}-->

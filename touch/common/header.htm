@@ -17,7 +17,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="format-detection" content="telephone=no" />
 	<meta name="keywords" content="{if !empty($metakeywords)}{echo dhtmlspecialchars($metakeywords)}{/if}" />
+	<!--{if empty($_G['setting']['plugins']['available']) || !in_array('neko_seo', $_G['setting']['plugins']['available'])}-->
 	<meta name="description" content="{if !empty($metadescription)}{echo dhtmlspecialchars($metadescription)} {/if},$_G['setting']['bbname']" />
+	<!--{/if}-->
 	<meta name="theme-color" content="{if $_G['style']['mdui_color']}$_G['style']['mdui_color']{else}#2B7ACD{/if}" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<!--{hook/global_meta}-->
@@ -297,3 +299,4 @@
 	<!--{/if}-->
 	<!--{/if}-->
 </mdui-navigation-drawer>
+<div id="mdui_app">

@@ -1,0 +1,11 @@
+<mdui-card variant="filled" style="display:block;padding:1rem">
+	<form method="post" autocomplete="off" id="mdui_doing_addform" action="home.php?mod=spacecp&ac=doing&view=$_GET['view']">
+		<div style="display:flex;align-items:end;gap:.25rem">
+			<mdui-text-field id="mdui_doing_message" name="message" label="{$defaultstr}" rows="4" maxlength="200" counter required style="flex:1"></mdui-text-field>
+			<mdui-button-icon icon="sentiment_satisfied" type="button" onclick="mduiDoingSmile('mdui_doing_message')" title="{lang smilies}"></mdui-button-icon>
+		</div>
+		<!--{if $_G['group']['maxsigsize']}--><mdui-checkbox name="to_signhtml" value="1" style="margin-top:.75rem">{lang doing_update_personal_signature}</mdui-checkbox><!--{/if}-->
+		<input type="hidden" name="addsubmit" value="true"><input type="hidden" name="refer" value="$theurl"><input type="hidden" name="topicid" value="$topicid"><input type="hidden" name="formhash" value="{FORMHASH}">
+		<mdui-button type="submit" variant="filled" full-width style="margin-top:.75rem">{lang publish}</mdui-button>
+	</form>
+</mdui-card>

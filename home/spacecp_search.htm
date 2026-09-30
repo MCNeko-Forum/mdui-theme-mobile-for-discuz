@@ -1,0 +1,11 @@
+<!--{template common/header}-->
+<mdui-top-app-bar><mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon><mdui-top-app-bar-title><!--{if !empty($_GET['searchsubmit'])}-->用户搜索结果<!--{else}-->用户高级搜索<!--{/if}--></mdui-top-app-bar-title></mdui-top-app-bar>
+<div style="padding:1rem 1rem 5.5rem">
+	<!--{if !empty($_GET['searchsubmit'])}-->
+		<mdui-button variant="text" href="home.php?mod=spacecp&ac=search" icon="tune">修改搜索条件</mdui-button>
+		<mdui-list style="margin-top:.5rem"><mdui-list-subheader>{lang search_result}</mdui-list-subheader><!--{if empty($list)}--><mdui-list-item>{lang no_search_friend}</mdui-list-item><!--{else}--><!--{loop $list $member}--><mdui-list-item href="home.php?mod=space&uid=$member[uid]" rounded><mdui-avatar slot="icon" src="<!--{avatar($member['uid'], 'middle', true)}-->"></mdui-avatar>$member[username]<span slot="description">UID: $member[uid]</span></mdui-list-item><!--{/loop}--><!--{/if}--></mdui-list>
+	<!--{else}-->
+		<form action="home.php" method="get"><mdui-card variant="outlined" style="padding:1rem;display:grid;gap:1rem"><mdui-text-field name="username" label="{lang username}"></mdui-text-field><mdui-checkbox name="precision" value="1">{lang search_accuracy}</mdui-checkbox><mdui-text-field name="uid" label="{lang user_id}" type="number"></mdui-text-field><mdui-radio-group name="gender" value="0"><mdui-radio value="0">{lang random}</mdui-radio><mdui-radio value="1">{lang male}</mdui-radio><mdui-radio value="2">{lang female}</mdui-radio></mdui-radio-group><div style="display:flex;gap:.5rem"><mdui-text-field name="startage" label="最小年龄" type="number" style="flex:1"></mdui-text-field><mdui-text-field name="endage" label="最大年龄" type="number" style="flex:1"></mdui-text-field></div><mdui-checkbox name="avatarstatus" value="1">{lang uploaded_avatar}</mdui-checkbox><input type="hidden" name="mod" value="spacecp"><input type="hidden" name="ac" value="search"><input type="hidden" name="type" value="all"><input type="hidden" name="searchsubmit" value="true"><mdui-button type="submit" full-width>{lang search}</mdui-button></mdui-card></form>
+	<!--{/if}-->
+</div>
+<!--{template common/footer}-->

@@ -1,0 +1,15 @@
+<!-- 家园单条动态卡片，变量由 mkfeed 预处理，标题与正文内含链接 HTML -->
+<mdui-card variant="filled" style="display:block;margin-bottom:.75rem;padding:.875rem">
+	<div style="display:flex;align-items:flex-start;gap:.625rem">
+		<div class="mdui-prose" style="flex:1;min-width:0;font-size:.875rem">$value['title_template']<!--{if $value['new']}--> <span style="color:var(--mdui-color-error);font-size:.75rem;font-weight:600">New</span><!--{/if}--></div>
+		<div style="font-size:.75rem;opacity:.65;white-space:nowrap"><!--{eval echo dgmdate($value['dateline'], 'u');}--></div>
+	</div>
+	<!--{if $value['image_1']}--><img src="$value['image_1']" alt=""<!--{if $_G['style']['mdui_ladyload']}--> loading="lazy"<!--{/if}--> style="max-width:100%;height:auto;border-radius:.5rem;display:block;margin-top:.5rem"><!--{/if}-->
+	<!--{if $value['image_2']}--><img src="$value['image_2']" alt=""<!--{if $_G['style']['mdui_ladyload']}--> loading="lazy"<!--{/if}--> style="max-width:100%;height:auto;border-radius:.5rem;display:block;margin-top:.5rem"><!--{/if}-->
+	<!--{if $value['image_3']}--><img src="$value['image_3']" alt=""<!--{if $_G['style']['mdui_ladyload']}--> loading="lazy"<!--{/if}--> style="max-width:100%;height:auto;border-radius:.5rem;display:block;margin-top:.5rem"><!--{/if}-->
+	<!--{if $value['image_4']}--><img src="$value['image_4']" alt=""<!--{if $_G['style']['mdui_ladyload']}--> loading="lazy"<!--{/if}--> style="max-width:100%;height:auto;border-radius:.5rem;display:block;margin-top:.5rem"><!--{/if}-->
+	<!--{if $value['body_template']}--><div class="mdui-prose" style="font-size:.875rem;margin-top:.5rem">$value['body_template']</div><!--{/if}-->
+	<!--{if $value['body_data']['player']}--><div style="margin-top:.5rem">{$value['body_data']['player']}</div><!--{/if}-->
+	<!--{if $user_list[$value['hash_data']]}--><div style="margin-top:.5rem;font-size:.75rem;opacity:.7">{lang other_participants}<!--{eval echo implode(', ', $user_list[$value['hash_data']]);}--></div><!--{/if}-->
+	<!--{if trim(str_replace('&nbsp;', '', $value['body_general']))}--><mdui-card variant="outlined" style="display:block;margin-top:.5rem;padding:.5rem .75rem;font-size:.8125rem">$value['body_general']</mdui-card><!--{/if}-->
+</mdui-card>

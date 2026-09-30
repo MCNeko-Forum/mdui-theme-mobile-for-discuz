@@ -323,7 +323,6 @@
 							<div style="font-weight:500;margin-bottom:.25rem">
 								<!--{if in_array($thread['displayorder'], array(1, 2, 3, 4))}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang thread_sticky}</mdui-chip><!--{/if}-->
 								<!--{subtemplate forum/threadlist_badges}-->
-								<!--{if $thread['attachment'] == 2 && $_G['setting']['mobile']['mobilesimpletype'] == 1}--><mdui-icon name="image" style="font-size:1rem;vertical-align:middle"></mdui-icon><!--{/if}-->
 								<span $thread['highlight']>{$thread['subject']}</span>
 								<!--{if $thread['price'] > 0}--><!--{eval $fd_credit = $_G['setting']['extcredits'][$_G['setting']['creditstransextra'][$thread['special'] == 3 ? 2 : 1]];}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem"><!--{if $thread['special'] == 3}-->{lang thread_reward}<!--{else}-->{lang price}<!--{/if}--> {$thread['price']}{$fd_credit['unit']}{$fd_credit['title']}</mdui-chip><!--{elseif $thread['special'] == 3 && $thread['price'] < 0}--><mdui-chip elevated style="--mdui-comp-chip-height:20px;font-size:.7rem">{lang reward_solved}</mdui-chip><!--{/if}-->
 							</div>

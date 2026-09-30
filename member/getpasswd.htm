@@ -1,0 +1,39 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang getpassword}</mdui-top-app-bar-title>
+</mdui-top-app-bar>
+
+<div style="padding:2rem 1.5rem;max-width:480px;margin:0 auto">
+	<form id="mdui_getpasswd_form" method="post" autocomplete="off" action="member.php?mod=getpasswd&uid=$uid&id=$hashid&sign=$_GET['sign']">
+		<input type="hidden" name="formhash" value="{FORMHASH}">
+		<div style="margin-bottom:1rem;color:rgb(var(--mdui-color-on-surface-variant))">{lang username}：$member['username']</div>
+		<!--{eval $mdui_strongpw = is_array($_G['setting']['strongpw']) ? $_G['setting']['strongpw'] : array();}-->
+		<mdui-text-field id="mdui_getpasswd_password" name="newpasswd1" type="password" label="{lang new_password}" icon="lock" toggle-password required<!--{if $_G['setting']['pwlength']}--> minlength="{$_G['setting']['pwlength']}"<!--{/if}--> style="margin-bottom:.375rem"></mdui-text-field>
+		<!--{if $_G['setting']['pwlength'] || $mdui_strongpw}-->
+			<div style="margin:0 0 1rem;font-size:.8125rem;line-height:1.6;color:rgb(var(--mdui-color-on-surface-variant))">密码要求：<!--{if $_G['setting']['pwlength']}-->{lang register_password_length_tips1}{$_G['setting']['pwlength']}{lang register_password_length_tips2}<!--{/if}--><!--{if $_G['setting']['pwlength'] && $mdui_strongpw}-->，且包含<!--{/if}--><!--{if $mdui_strongpw}--><!--{if in_array(1, $mdui_strongpw)}-->{lang strongpw_1}<!--{/if}--><!--{if in_array(2, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw)}-->、<!--{/if}-->{lang strongpw_2}<!--{/if}--><!--{if in_array(3, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw) || in_array(2, $mdui_strongpw)}-->、<!--{/if}-->{lang strongpw_3}<!--{/if}--><!--{if in_array(4, $mdui_strongpw)}--><!--{if in_array(1, $mdui_strongpw) || in_array(2, $mdui_strongpw) || in_array(3, $mdui_strongpw)}-->、<!--{/if}-->{lang strongpw_4}<!--{/if}--><!--{/if}--></div>
+		<!--{/if}-->
+		<mdui-text-field id="mdui_getpasswd_password2" name="newpasswd2" type="password" label="{lang new_password_confirm}" icon="lock_reset" toggle-password required style="margin-bottom:1rem"></mdui-text-field>
+		<mdui-button type="submit" name="getpwsubmit" value="true" full-width>{lang submit}</mdui-button>
+	</form>
+</div>
+
+<script>
+(function () {
+	var form = document.getElementById('mdui_getpasswd_form');
+	var password = document.getElementById('mdui_getpasswd_password');
+	var password2 = document.getElementById('mdui_getpasswd_password2');
+	var rules = {length:{$_G['setting']['pwlength'] ? $_G['setting']['pwlength'] : 0},digit:<!--{if in_array(1, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,lower:<!--{if in_array(2, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,upper:<!--{if in_array(3, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->,symbol:<!--{if in_array(4, $mdui_strongpw)}-->true<!--{else}-->false<!--{/if}-->};
+	form.addEventListener('submit', function (event) {
+		var value = password.value || '';
+		if ((rules.length && value.length < rules.length) || (rules.digit && !/\d/.test(value)) || (rules.lower && !/[a-z]/.test(value)) || (rules.upper && !/[A-Z]/.test(value)) || (rules.symbol && !/[^a-zA-Z0-9]/.test(value))) {
+			event.preventDefault(); mduiTip('密码不符合上方要求'); password.focus(); return;
+		}
+		if (value !== password2.value) { event.preventDefault(); mduiTip('两次输入的密码不一致'); password2.focus(); }
+	});
+})();
+</script>
+
+<!--{template common/footer}-->

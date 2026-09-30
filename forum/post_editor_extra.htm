@@ -1,0 +1,24 @@
+<!--{if $sortid}-->
+	<input type="hidden" name="sortid" value="$sortid" />
+<!--{/if}-->
+
+<!--{if !$isfirstpost && $thread['special'] == 5 && empty($firststand) && $_GET['action'] != 'edit'}-->
+	<!-- 辩论帖回复必须选立场，后端靠 stand 判断正反方 -->
+	<mdui-select name="stand" id="stand" variant="outlined" value="{if $stand}$stand{else}{/if}" placeholder="{lang debate_viewpoint}" style="margin-top:1rem">
+		<mdui-menu-item value="0">{lang debate_neutral}</mdui-menu-item>
+		<mdui-menu-item value="1">{lang debate_square}</mdui-menu-item>
+		<mdui-menu-item value="2">{lang debate_opponent}</mdui-menu-item>
+	</mdui-select>
+<!--{/if}-->
+
+<!--{if $showthreadsorts}-->
+	<!--{template forum/post_sortoption}-->
+<!--{elseif $adveditor}-->
+	<!--{if $special == 1}--><!--{template forum/post_poll}-->
+	<!--{elseif $special == 2 && ($_GET['action'] != 'edit' || ($_GET['action'] == 'edit' && ($thread['authorid'] == $_G['uid'] && $_G['group']['allowposttrade'] || $_G['group']['allowedittrade'])))}--><!--{template forum/post_trade}-->
+	<!--{elseif $special == 3}--><!--{template forum/post_reward}-->
+	<!--{elseif $special == 4}--><!--{template forum/post_activity}-->
+	<!--{elseif $special == 5}--><!--{template forum/post_debate}-->
+	<!--{elseif $specialextra}--><div class="specialpost">$threadplughtml</div>
+	<!--{/if}-->
+<!--{/if}-->

@@ -1,0 +1,29 @@
+<!--{template common/header}-->
+<!--{if empty($_GET['showratetip'])}-->
+<!--{if $_GET['action'] == 'rate'}-->
+<mdui-dialog open id="mdui_rate_dialog" close-on-esc close-on-overlay-click>
+	<div slot="headline">{lang rate}</div>
+	<form id="rateform" method="post" autocomplete="off" action="forum.php?mod=misc&action=rate&ratesubmit=yes&infloat=yes&inajax=1">
+		<div slot="description">
+			<input type="hidden" name="formhash" value="{FORMHASH}" /><input type="hidden" name="tid" value="{$_G['tid']}" /><input type="hidden" name="pid" value="{$_GET['pid']}" /><input type="hidden" name="referer" value="$referer" /><input type="hidden" name="handlekey" value="rate">
+			<!--{loop $ratelist $id $options}-->
+			<!--{eval $rate_range_text = '（可输入范围：'.$_G['group']['raterange'][$id]['min'].' 至 '.$_G['group']['raterange'][$id]['max'].'）';}-->
+			<div style="margin-bottom:1rem"><div style="font-size:.875rem;margin-bottom:.25rem">{$_G['setting']['extcredits'][$id]['img']} {$_G['setting']['extcredits'][$id]['title']}<!--{if $_G['setting']['extcredits'][$id]['unit']}-->（{$_G['setting']['extcredits'][$id]['unit']}）<!--{/if}-->$rate_range_text</div><mdui-text-field name="score{$id}" id="score{$id}" value="0" min="$_G['group']['raterange'][$id]['min']" max="$_G['group']['raterange'][$id]['max']" label="输入{$_G['setting']['extcredits'][$id]['title']}数量" type="number" style="width:100%"></mdui-text-field></div>
+			<!--{/loop}-->
+			<!-- 后台常用理由本来输出 <option>，这里直接换成 mdui 菜单项，省掉前端转换 -->
+			<!--{eval $selectreason = str_replace(array('<option></option>', '<option value="', '</option>'), array('', '<mdui-menu-item value="', '</mdui-menu-item>'), modreasonselect(1, 'userreasons'));}-->
+			<div style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:1rem"><mdui-text-field name="reason" id="reason" label="{lang reason}" placeholder="{lang user_operation_explain}" style="flex:1;min-width:0"></mdui-text-field><!--{if $selectreason}--><mdui-dropdown placement="auto" style="display:block;flex:none;margin-bottom:.375rem"><mdui-button-icon slot="trigger" icon="arrow_drop_down" aria-label="选择常用理由" style="border:1px solid rgba(var(--mdui-color-outline),.45);border-radius:50%"></mdui-button-icon><!-- onchange 写成内联属性，弹窗里插入 HTML 时不执行 <script> 也照样生效 --><mdui-menu id="reason_menu" selects="single" style="display:block;max-height:min(18rem,50dvh);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch" onchange="this.closest('form').querySelector('[name=reason]').value = this.value">$selectreason</mdui-menu></mdui-dropdown><!--{/if}--></div>
+			<mdui-checkbox name="sendreasonpm" value="1"{if $_G['group']['reasonpm'] == 2 || $_G['group']['reasonpm'] == 3} checked disabled{/if} style="display:block;max-width:100%;white-space:normal">{lang admin_pm}</mdui-checkbox>
+		</div>
+	</form>
+</mdui-dialog>
+<script>
+(function () { function initReasons() { var source = document.getElementById('reason_options'); var menu = document.getElementById('reason_menu'); if (!source || !menu || menu.dataset.ready) return; menu.dataset.ready = '1'; Array.prototype.forEach.call(source.querySelectorAll('li'), function (li) { var text = li.textContent.trim(); if (!text) return; var item = document.createElement('mdui-menu-item'); item.textContent = text; item.addEventListener('click', function () { document.getElementById('reason').value = text; }); menu.appendChild(item); }); source.remove(); } if (window.customElements) customElements.whenDefined('mdui-menu').then(initReasons); else initReasons(); })();
+</script>
+<!--{elseif $_GET['action'] == 'removerate'}-->
+<mdui-dialog open id="mdui_rate_dialog" close-on-esc close-on-overlay-click><div slot="headline">{lang thread_removerate}</div><form id="rateform" method="post" autocomplete="off" action="forum.php?mod=misc&action=removerate&ratesubmit=yes&infloat=yes&inajax=1"><div slot="description"><input type="hidden" name="formhash" value="{FORMHASH}" /><input type="hidden" name="tid" value="$_G['tid']"><input type="hidden" name="pid" value="$_GET['pid']"><input type="hidden" name="referer" value="$referer" /><input type="hidden" name="handlekey" value="rate"><mdui-list style="max-height:18rem;overflow:auto"><!--{loop $ratelogs $ratelog}--><mdui-list-item><mdui-checkbox slot="icon" name="logidarray[]" value="$ratelog['uid'] $ratelog['extcredits'] $ratelog['dbdateline']"></mdui-checkbox>$ratelog['username']<span slot="description">{$_G['setting']['extcredits'][$ratelog['extcredits']]['title']} $ratelog['scoreview'] · $ratelog['dateline']<!--{if $ratelog['reason']}--> · $ratelog['reason']<!--{/if}--></span></mdui-list-item><!--{/loop}--></mdui-list><mdui-text-field name="reason" label="{lang reason}" placeholder="{lang admin_operation_explain}" style="width:100%;margin-top:1rem"></mdui-text-field><mdui-checkbox name="sendreasonpm" value="1"{if $_G['group']['reasonpm'] == 2 || $_G['group']['reasonpm'] == 3} checked disabled{/if} style="display:block;max-width:100%;white-space:normal;margin-top:1rem">{lang admin_pm}</mdui-checkbox></div><mdui-button slot="action" variant="text" type="button" onclick="document.getElementById('mdui_rate_dialog').open=false">{lang cancel}</mdui-button><mdui-button slot="action" variant="text" type="submit" name="ratesubmit" value="true">{lang submit}</mdui-button></form></mdui-dialog>
+<!--{/if}-->
+<!--{else}-->
+<mdui-dialog open><div slot="headline">{lang board_message}</div><div slot="description">{lang push_succeed}</div><mdui-button slot="action" variant="text" onclick="history.back()">{lang close}</mdui-button></mdui-dialog>
+<!--{/if}-->
+<!--{template common/footer}-->
