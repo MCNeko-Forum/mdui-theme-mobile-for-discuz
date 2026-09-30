@@ -1,4 +1,21 @@
+</div><!-- /#mdui_app pjax 可替换区结束 -->
 <!--{hook/global_footer_mobile}-->
+<script>
+function mduiCopyCode(id, button) {
+	var code = document.getElementById(id);
+	if (!code) return;
+	var text = Array.prototype.map.call(code.querySelectorAll('li'), function (line) { return line.textContent; }).join('\n');
+	var done = function () {
+		var label = button && button.querySelector('.mduipc-code-copy-label');
+		if (label) { label.textContent = '已复制'; setTimeout(function () { label.textContent = '复制代码'; }, 1400); }
+	};
+	var fallback = function () {
+		var input = document.createElement('textarea'); input.value = text; input.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(input); input.select();
+		try { document.execCommand('copy'); done(); } finally { input.remove(); }
+	};
+	if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(fallback); else fallback();
+}
+</script>
 <!--{if $_G['style']['mdui_footer']}--><!--{eval $mdui_footer = htmlspecialchars_decode($_G['style']['mdui_footer'], ENT_QUOTES);}-->$mdui_footer<!--{/if}-->
 
 <!--{if !$nofooter}-->
@@ -71,6 +88,20 @@ history.length < 2 && document.querySelectorAll('[onclick="history.back()"]').fo
 document.querySelector('#mdui_menu_btn')?.addEventListener('click', function () {
 	document.querySelector('#mdui_drawer').open = true;
 });
+// 侧边栏导航点击后收回抽屉，页面切换仍由 PJAX 统一接管
+(function () {
+	var drawer = document.querySelector('#mdui_drawer');
+	if (!drawer) return;
+	drawer.addEventListener('click', function (e) {
+		var item = e.target.closest && e.target.closest('mdui-list-item[href]');
+		if (!item && e.composedPath) {
+			item = e.composedPath().find(function (node) {
+				return node && node.matches && node.matches('mdui-list-item[href]');
+			});
+		}
+		if (item) drawer.open = false;
+	});
+})();
 // 从屏幕左边缘向右滑动打开侧边栏（参考触发区域 20px）
 (function () {
 	var drawer = document.querySelector('#mdui_drawer');
@@ -129,7 +160,7 @@ document.querySelector('#mdui_menu_btn')?.addEventListener('click', function () 
 			return node && node.matches && node.matches('[data-href]');
 		});
 	}
-	if (link && link.dataset.href) location.href = link.dataset.href;
+	if (link && link.dataset.href) window.mduiNav ? mduiNav(link.dataset.href) : (location.href = link.dataset.href);
 });
 // 激活项滚动进视野，让当前位置在长导航里可见
 document.querySelectorAll('mdui-tabs').forEach(function (tabs) {
@@ -153,6 +184,10 @@ document.querySelectorAll('mdui-tabs').forEach(function (tabs) {
 	sheet.addEventListener('close', function () {
 		btn.icon = 'add_circle';
 		document.body.classList.remove('mdui-post-sheet-open');
+	});
+	// 点任一入口后收回面板（跳转可能走 pjax 不刷新页面，必须手动关）
+	sheet.addEventListener('click', function (e) {
+		if (e.target.closest && e.target.closest('a[href]')) sheet.open = false;
 	});
 })();
 
@@ -268,10 +303,11 @@ window.mduiGet = function (url, done) {
 	<div style="width:100%;max-width:20rem;padding:1.5rem;color:rgb(var(--mdui-color-on-surface));background:rgb(var(--mdui-color-surface-container-high));border-radius:1.75rem;animation:mdui-extlink-pop .2s ease">
 		<div style="font-size:1.375rem;line-height:2rem">即将离开本站</div>
 		<div style="margin-top:.5rem;color:rgb(var(--mdui-color-on-surface-variant))">即将前往以下链接，请确认是否继续访问。</div>
-		<div id="mdui_extlink_url" style="margin-top:.75rem;padding:.75rem;overflow-wrap:anywhere;font-size:.875rem;font-weight:400;line-height:1.4;background:rgb(var(--mdui-color-surface-container-highest));border-radius:.75rem"></div>
+		<div id="mdui_extlink_url" style="margin-top:.75rem;padding:.75rem;overflow-wrap:anywhere;font-size:.875rem;font-weight:400;line-height:1.4;color:#fff;background:#222;border-radius:.75rem"></div>
 		<div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.5rem">
 			<mdui-button variant="text" onclick="document.getElementById('mdui_extlink').hidden=true">取消</mdui-button>
-			<mdui-button id="mdui_extlink_go" variant="text" target="_blank">继续访问</mdui-button>
+			<mdui-button id="mdui_extlink_copy" variant="text">复制</mdui-button>
+			<mdui-button id="mdui_extlink_go" variant="text">确定</mdui-button>
 		</div>
 	</div>
 </div>
@@ -295,6 +331,24 @@ window.mduiGet = function (url, done) {
 		var go = (e.target.closest && e.target.closest('#mdui_extlink_go')) || path.some(function (node) {
 			return node && node.id === 'mdui_extlink_go';
 		});
+		var copy = (e.target.closest && e.target.closest('#mdui_extlink_copy')) || path.some(function (node) {
+			return node && node.id === 'mdui_extlink_copy';
+		});
+		if (copy) {
+			var pending = document.getElementById('mdui_extlink_url').textContent;
+			var done = function () { mduiTip('复制链接成功'); };
+			var fallback = function () {
+				var t = document.createElement('textarea');
+				t.value = pending;
+				document.body.appendChild(t);
+				t.select();
+				try { document.execCommand('copy'); done(); } catch (err) { mduiTip('复制失败', true); }
+				t.remove();
+			};
+			if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(pending).then(done).catch(fallback);
+			else fallback();
+			return;
+		}
 		if (go) {
 			document.getElementById('mdui_extlink').hidden = true;
 			return;
@@ -314,9 +368,10 @@ window.mduiGet = function (url, done) {
 		if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
 		var dest = url.hostname.replace(/^www\./, '').toLowerCase();
 		if (dest === host) return;
+		// ponytail: 按用户要求做字符串后缀，111.cn 也会放过 1.1.123.cn；要收紧就改成仅相等或 '.'+item
 		if (white.some(function (item) {
 			item = item.replace(/^www\./, '');
-			return dest === item || dest.slice(-(item.length + 1)) === '.' + item;
+			return dest === item || dest.slice(-(item.length + 1)) === '.' + item || dest.slice(-item.length) === item;
 		})) return;
 		e.preventDefault();
 		e.stopPropagation();
@@ -324,6 +379,37 @@ window.mduiGet = function (url, done) {
 		document.getElementById('mdui_extlink_url').textContent = url.href;
 		document.getElementById('mdui_extlink').hidden = false;
 	}, true);
+})();
+</script>
+<script>
+// 图片加载失败：页面图和预览图都换成「加载失败」。头像、表情、图标不替换。
+(function () {
+	function broken(img) {
+		if (!img || img.dataset.mduiBroken || img.hasAttribute('smilieid')) return;
+		if (img.closest('mdui-avatar, mdui-icon, .post_attlist, .vt_atts')) return;
+		if ((img.getAttribute('src') || '').indexOf('data:') === 0) return;
+		img.dataset.mduiBroken = '1';
+		var album = img.closest('.mdui-album-item');
+		var link = !album && img.parentNode && img.parentNode.tagName === 'A' ? img.parentNode : null;
+		var box = document.createElement('span');
+		box.textContent = '加载失败';
+		box.style.cssText = album
+			? 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#222;color:#fff;font-size:2rem;text-align:center'
+			: 'display:flex;align-items:center;justify-content:center;width:100%;min-height:8rem;padding:1.5rem;box-sizing:border-box;background:#222;color:#fff;font-size:1.25rem;text-align:center';
+		if (link) {
+			link.style.display = 'flex';
+			link.style.width = '100%';
+			link.replaceChildren(box);
+		} else {
+			img.replaceWith(box);
+		}
+	}
+	document.addEventListener('error', function (e) {
+		if (e.target && e.target.tagName === 'IMG') broken(e.target);
+	}, true);
+	document.querySelectorAll('img').forEach(function (img) {
+		if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) broken(img);
+	});
 })();
 </script>
 

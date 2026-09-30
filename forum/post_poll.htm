@@ -1,0 +1,80 @@
+<!-- 投票主题的附加表单：字段名与 default/touch 版保持一致，后端不用改 -->
+<input type="hidden" name="polls" value="yes">
+<input type="hidden" name="fid" value="$_G['fid']">
+
+<mdui-card variant="outlined" style="display:block;padding:.75rem;margin-top:1rem">
+	<div style="font-size:.875rem;opacity:.6">{lang post_poll_options}</div>
+
+	<div style="display:flex;gap:.75rem;margin-top:.75rem">
+		<mdui-text-field type="number" min="1" name="maxchoices" id="maxchoices" variant="outlined" label="{lang post_poll_allowmultiple}" suffix="{lang post_option}" value="{if $_GET[action] == 'edit' && $poll[maxchoices]}$poll[maxchoices]{else}1{/if}"></mdui-text-field>
+		<!-- 记票天数：0 表示永不结束，编辑态可能是已关闭/已结束的文案，所以不限定 number -->
+		<mdui-text-field name="expiration" id="polldatas" variant="outlined" label="{lang post_poll_expiration}" suffix="{lang days}" value="{if $_GET[action] == 'edit'}{if !$poll[expiration]}0{elseif $poll[expiration] < 0}{lang poll_close}{elseif $poll[expiration] < TIMESTAMP}{lang poll_finish}{else}{echo (round(($poll[expiration] - TIMESTAMP) / 86400))}{/if}{/if}"></mdui-text-field>
+	</div>
+
+	<mdui-checkbox name="visibilitypoll" id="visibilitypoll" value="1" style="display:flex;margin-top:.5rem"{if $_GET['action'] == 'edit' && !$poll['visible']} checked{/if}>{lang poll_after_result}</mdui-checkbox>
+	<mdui-checkbox name="overt" id="overt" value="1" style="display:flex"{if $_GET['action'] == 'edit' && $poll['overt']} checked{/if}>{lang post_poll_overt}</mdui-checkbox>
+
+	<mdui-divider style="margin:.75rem 0"></mdui-divider>
+	<div style="font-size:.75rem;opacity:.6">{lang post_poll_comment}</div>
+
+	<!--{if $_GET[action] == 'newthread'}-->
+		<input type="hidden" name="tpolloption" value="1">
+	<!--{else}-->
+		<!-- 编辑态：已入库的选项要带上 polloptionid 和排序值，非 alloweditpoll 时只读 -->
+		<!--{loop $poll['polloption'] $key $option}-->
+			<!--{eval $ppid = $poll['polloptionid'][$key];}-->
+			<input type="hidden" name="polloptionid[{$ppid}]" value="$ppid">
+			<div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem">
+				<mdui-text-field type="number" name="displayorder[{$ppid}]" variant="outlined" label="{lang displayorder}" value="$poll['displayorder'][$key]" style="width:5rem;flex-shrink:0"></mdui-text-field>
+				<mdui-text-field name="polloption[{$ppid}]" variant="outlined" label="{lang post_poll_options}" value="$option"{if !$_G['group']['alloweditpoll']} readonly{/if}></mdui-text-field>
+				<!--{if $poll['isimage']}-->
+					<img src="{if $poll['imginfo'][$ppid]['small']}$poll['imginfo'][$ppid]['small']{else}{STATICURL}image/common/nophoto.gif{/if}" style="width:36px;height:36px;object-fit:cover;border-radius:.25rem">
+					<input type="hidden" name="pollimage[{$ppid}]" value="$poll['imginfo'][$ppid]['aid']">
+				<!--{/if}-->
+			</div>
+		<!--{/loop}-->
+	<!--{/if}-->
+
+	<!-- 新增选项挂在这里，删除时直接移除整行 -->
+	<div id="polloption_new"></div>
+	<mdui-button variant="text" icon="add" onclick="addpolloption()" style="margin-top:.5rem">{lang post_poll_add}</mdui-button>
+	<!--{hook/post_poll_extra}-->
+</mdui-card>
+
+<script>
+var maxoptions = parseInt('$_G[setting][maxpolloptions]');
+<!--{if $_GET[action] == 'newthread'}-->
+var curoptions = 0;
+<!--{else}-->
+var curoptions = <!--{echo count($poll['polloption'])}-->;
+<!--{/if}-->
+
+// 新增行的字段名一律用不带下标的数组形式，后端按顺序当新选项收
+function addpolloption() {
+	if (curoptions >= maxoptions) {
+		mduiTip('{lang post_poll_exceed}' + maxoptions);
+		return;
+	}
+	var row = document.createElement('div');
+	row.style.cssText = 'display:flex;align-items:center;gap:.5rem;margin-top:.5rem';
+	row.innerHTML =
+		<!--{if $_GET[action] != 'newthread'}-->
+		'<mdui-text-field type="number" name="displayorder[]" variant="outlined" placeholder="0" style="width:5rem;flex-shrink:0"></mdui-text-field>' +
+		<!--{/if}-->
+		'<mdui-text-field name="polloption[]" variant="outlined" placeholder="{lang post_poll_options}" autocomplete="off"></mdui-text-field>' +
+		'<mdui-button-icon icon="delete" onclick="delpolloption(this)"></mdui-button-icon>';
+	document.getElementById('polloption_new').appendChild(row);
+	curoptions++;
+}
+function delpolloption(btn) {
+	btn.parentNode.remove();
+	curoptions--;
+}
+
+<!--{if $_GET[action] == 'newthread'}-->
+// 新建投票默认给三个空选项
+addpolloption();
+addpolloption();
+addpolloption();
+<!--{/if}-->
+</script>

@@ -1,0 +1,44 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+<!--{subtemplate home/spacecp_header}-->
+	<!--{hook/spacecp_avatar_top_mobile}-->
+	<script type="text/javascript">
+		// avatar_mobile.js 依赖这几个全局函数名，不能改
+		function saveUserdata(name, data) {
+			try {
+				if (window.localStorage) {
+					localStorage.setItem('Discuz_' + name, data);
+				} else if (window.sessionStorage) {
+					sessionStorage.setItem('Discuz_' + name, data);
+				}
+			} catch (e) {}
+			setcookie('clearUserdata', '', -1);
+		}
+		function loadUserdata(name) {
+			if (window.localStorage) {
+				return localStorage.getItem('Discuz_' + name);
+			} else if (window.sessionStorage) {
+				return sessionStorage.getItem('Discuz_' + name);
+			}
+		}
+		function updateavatar() {
+			window.location.href = document.location.href.replace('&reload=1', '') + '&reload=1';
+		}
+		<!--{if !$reload}-->
+		saveUserdata('avatar_redirect', document.referrer);
+		<!--{/if}-->
+	</script>
+
+	<div style="margin-bottom:1rem;text-align:center">
+		<div style="margin-bottom:.75rem;font-size:.875rem;opacity:.8">{lang setting_avatar_message}</div>
+		<mdui-avatar class="comiis_edit_avatar" src="<!--{avatar($_G['uid'], 'middle', true)}-->" style="display:block;width:120px;height:120px;margin:0 auto;cursor:pointer" onclick="var f=document.getElementById('comiis_Clip_file_khnlmf');if(f)f.click();"></mdui-avatar>
+		<div class="comiis_edit_avatar" onclick="var f=document.getElementById('comiis_Clip_file_khnlmf');if(f)f.click();" style="margin-top:.75rem;color:rgb(var(--mdui-color-primary));font-size:1rem;font-weight:600;cursor:pointer">点击修改头像</div>
+	</div>
+
+	<form id="avatarform" enctype="multipart/form-data" method="post" autocomplete="off" action="home.php?mod=spacecp&ac=avatar&ref" style="display:none">
+		<!--{template home/spacecp_avatar_body}-->
+		<input type="hidden" name="formhash" value="{FORMHASH}" />
+	</form>
+	<!--{hook/spacecp_avatar_bottom}-->
+</div>
+<!--{template common/footer}-->

@@ -1,0 +1,63 @@
+<!--{if $param['login']}-->
+<!--{if $_G['inajax']}-->
+<!--{eval dheader('Location:member.php?mod=logging&action=login&inajax=1&infloat=1');exit;}-->
+<!--{else}-->
+<!--{eval dheader('Location:member.php?mod=logging&action=login');exit;}-->
+<!--{/if}-->
+<!--{/if}-->
+<!--{if $_G['inajax']}-->
+<!--{template common/header}-->
+<div class="tip">
+	<dt id="messagetext">
+		<p>$show_message</p>
+		<!--{if $_G['forcemobilemessage']}-->
+		<p>
+			<a href="{$_G['setting']['mobile']['pageurl']}">{lang continue}</a><br />
+			<a href="javascript:history.back();">{lang goback}</a>
+		</p>
+		<!--{/if}-->
+		<!--{if $url_forward && !$_GET['loc']}-->
+		<script type="text/javascript">
+			setTimeout(function() {
+				window.location.href = '$url_forward';
+			}, '3000');
+		</script>
+		<!--{/if}-->
+	</dt>
+</div>
+<!--{template common/footer}-->
+<!--{else}-->
+<!--{template common/header}-->
+
+<mdui-top-app-bar>
+	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
+	<mdui-top-app-bar-title>{lang mobtishi}</mdui-top-app-bar-title>
+</mdui-top-app-bar>
+
+<div style="padding:2.5rem 1.5rem;text-align:center">
+	<mdui-icon name="<!--{if $alerttype == 'alert_right'}-->check_circle<!--{elseif $alerttype == 'alert_error'}-->error<!--{else}-->info<!--{/if}-->" style="font-size:3.5rem;color:rgb(var(--mdui-color-<!--{if $alerttype == 'alert_right'}-->primary<!--{elseif $alerttype == 'alert_error'}-->error<!--{else}-->secondary<!--{/if}-->))"></mdui-icon>
+	<div style="margin-top:1rem;font-size:1rem;line-height:1.6">$show_message</div>
+
+	<!--{if $_G['forcemobilemessage']}-->
+	<div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:.5rem;align-items:center">
+		<mdui-button variant="tonal" href="{$_G['setting']['mobile']['pageurl']}">{lang continue}</mdui-button>
+		<mdui-button variant="text" onclick="history.back()">{lang goback}</mdui-button>
+	</div>
+	<!--{elseif $url_forward}-->
+	<div style="margin-top:1.5rem">
+		<mdui-button variant="tonal" href="$url_forward">{lang message_forward_mobile}</mdui-button>
+	</div>
+	<!-- dshowmessage 的自动跳转脚本带 !defined('IN_MOBILE') 条件，手机版不注入，
+     所以这里自己补。refreshtime 是后台「提示信息自动跳转时间」，为 0 表示不跳 -->
+	<!--{if $refreshtime}-->
+	<script>setTimeout(function () { location.href = '<!--{echo addslashes(str_replace('&amp;', '&', $url_forward))}-->'; }, $refreshtime);</script>
+	<!--{/if}-->
+	<!--{elseif $allowreturn}-->
+	<div style="margin-top:1.5rem">
+		<mdui-button variant="text" onclick="history.back()">{lang goback}</mdui-button>
+	</div>
+	<!--{/if}-->
+</div>
+
+<!--{template common/footer}-->
+<!--{/if}-->

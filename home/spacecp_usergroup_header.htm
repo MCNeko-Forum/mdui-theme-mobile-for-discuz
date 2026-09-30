@@ -1,0 +1,5 @@
+<mdui-tabs value="<!--{if $activeus[forum]}-->forum<!--{elseif $activeus[list] || $activeus[expiry]}-->list<!--{else}-->usergroup<!--{/if}-->" style="position:sticky;top:64px;z-index:9">
+	<mdui-tab value="usergroup" data-href="home.php?mod=spacecp&ac=usergroup">{lang my_usergroups}</mdui-tab>
+	<mdui-tab value="list" data-href="home.php?mod=spacecp&ac=usergroup&do=list">{lang usergroups_joinbuy}</mdui-tab>
+	<mdui-tab value="forum" data-href="home.php?mod=spacecp&ac=usergroup&do=forum">{lang my}{$_G['setting']['navs'][2]['navname']}{lang rights}</mdui-tab>
+</mdui-tabs>

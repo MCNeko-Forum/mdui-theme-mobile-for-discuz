@@ -1,0 +1,75 @@
+<!--{eval $tradecanedit = (($_G['forum']['ismoderator'] && $_G['group']['alloweditpost'] && (!in_array($post['adminid'], array(1, 2, 3)) || $_G['adminid'] <= $post['adminid'])) || ($_G['forum']['alloweditpost'] && $_G['uid'] && $post['authorid'] == $_G['uid'] && $_G['forum_thread']['closed'] == 0));}-->
+
+<!--{if count($trades) > 1 || $_G['uid'] == $_G['forum_thread']['authorid'] || $_G['group']['allowedittrade']}-->
+	<!--{if !$post['message'] && $tradecanedit}-->
+		<mdui-button variant="outlined" full-width href="forum.php?mod=post&action=reply&fid=$_G['fid']&tid=$_G['tid']&firstpid=$post['pid']&addtrade=yes{if !empty($_GET['from'])}&from=$_GET['from']{/if}">{lang viewthread_trade_message2}</mdui-button>
+	<!--{else}-->
+		<div class="mdui-prose">$post['message']</div>
+	<!--{/if}-->
+
+	<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.75rem 0;font-size:.8125rem">
+		<mdui-icon name="storefront" style="color:rgb(var(--mdui-color-primary))"></mdui-icon>
+		<span>{lang post_trade_totalnumber}: <strong>$tradenum</strong></span>
+		<!--{if !$post['message'] && $tradecanedit}-->
+			<mdui-button variant="text" href="forum.php?mod=post&action=edit&fid=$_G['fid']&tid=$_G['tid']&pid=$post['pid']{if !empty($_GET['modthreadkey'])}&modthreadkey=$_GET['modthreadkey']{/if}&page=$page">{lang post_add_aboutcounter}</mdui-button>
+		<!--{/if}-->
+		<mdui-button variant="text" href="forum.php?mod=misc&action=tradeorder&tid=$_G['tid']{if !empty($_GET['from'])}&from=$_GET['from']{/if}&mobile=2">{lang trade_displayorder}</mdui-button>
+		<!--{if $_G['uid'] == $_G['forum_thread']['authorid'] && $_G['group']['allowposttrade']}-->
+			<mdui-button variant="text" icon="add" href="forum.php?mod=post&action=reply&fid=$_G['fid']&tid=$_G['tid']&firstpid=$post['pid']&addtrade=yes{if !empty($_GET['from'])}&from=$_GET['from']{/if}">{lang trade_add_post}</mdui-button>
+		<!--{/if}-->
+	</div>
+
+	<!--{if $_G['uid'] == $_G['forum_thread']['authorid']}-->
+		<mdui-button variant="tonal" full-width href="home.php?mod=space&uid=$_G['uid']&do=trade&view=tradelog" style="margin-bottom:.75rem">{lang my_trade_stat}</mdui-button>
+	<!--{/if}-->
+<!--{/if}-->
+
+<!--{if $tradenum}-->
+	<!--{loop $trades $trade}-->
+	<!--{eval $tradeurl = 'forum.php?mod=viewthread&do=tradeinfo&tid='.$_G['tid'].'&pid='.$trade['pid'].(!empty($_GET['modthreadkey']) ? '&modthreadkey='.$_GET['modthreadkey'] : '');}-->
+	<!-- mdui-card 带 clickable 时内部有 ripple/锚点层，行内 display:flex 管不到子元素，所以套一层 flex 容器 -->
+	<mdui-card variant="filled" clickable href="$tradeurl" id="trade$trade['pid']" style="display:block;margin:.75rem 0;padding:.75rem;text-decoration:none;color:inherit">
+	<div style="display:flex;gap:.75rem;align-items:flex-start">
+		<img src="<!--{if $trade['thumb']}-->$trade['thumb']<!--{else}-->{STATICURL}image/common/nophotosmall.gif<!--{/if}-->" alt="$trade['subject']" style="width:5.5rem;height:5.5rem;object-fit:cover;border-radius:8px;flex-shrink:0;background:rgb(var(--mdui-color-surface-container-highest))" />
+		<div style="flex:1;min-width:0">
+			<div style="display:flex;align-items:center;gap:.375rem">
+				<!--{if $trade['displayorder'] > 0}--><mdui-chip style="--mdui-comp-chip-height:20px;font-size:.6875rem;flex-shrink:0">{lang post_trade_sticklist}</mdui-chip><!--{/if}-->
+				<strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">$trade['subject']</strong>
+			</div>
+			<div style="font-size:.75rem;opacity:.7;margin-top:.25rem">
+				{lang trade_type_viewthread}:
+				<!--{if $trade['quality'] == 1}-->{lang trade_new}<!--{elseif $trade['quality'] == 2}-->{lang trade_old}<!--{/if}-->
+				{lang trade_type_buy}
+			</div>
+			<div style="font-size:.75rem;opacity:.7;margin-top:.125rem">
+				{lang trade_remaindays}:
+				<!--{if $trade['closed'] || $trade['expiration'] == -1}-->
+					<span style="color:rgb(var(--mdui-color-error))">{lang trade_timeout}</span>
+				<!--{elseif $trade['expiration'] > 0}-->
+					{$trade['expiration']}{lang days}{$trade['expirationhour']}{lang trade_hour}
+				<!--{/if}-->
+			</div>
+			<div style="margin-top:.375rem;font-size:.9375rem">
+				<!--{if $trade['price'] > 0}-->
+					<strong style="color:rgb(var(--mdui-color-error))">$trade['price'] {lang payment_unit}</strong>
+				<!--{/if}-->
+				<!--{if $_G['setting']['creditstransextra'][5] != -1 && $trade['credit']}-->
+					<strong><!--{if $trade['price'] > 0}-->{lang trade_additional} <!--{/if}-->$trade['credit'] {$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][5]]['unit']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][5]]['title']}</strong>
+				<!--{/if}-->
+			</div>
+			<!--{if $trade['costprice'] > 0 || ($_G['setting']['creditstransextra'][5] != -1 && $trade['costcredit'] > 0)}-->
+			<div style="font-size:.75rem;opacity:.6">
+				<!--{if $trade['costprice'] > 0}--><del>$trade['costprice'] {lang payment_unit}</del><!--{/if}-->
+				<!--{if $_G['setting']['creditstransextra'][5] != -1 && $trade['costcredit'] > 0}-->
+					<del><!--{if $trade['costprice'] > 0}-->{lang trade_additional} <!--{/if}-->$trade['costcredit'] {$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][5]]['unit']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][5]]['title']}</del>
+				<!--{/if}-->
+			</div>
+			<!--{/if}-->
+		</div>
+	</div>
+	</mdui-card>
+	<!--{/loop}-->
+	<!--{if $post['counterdesc']}--><div class="mdui-prose" id="postmessage_$post['pid']">$post['counterdesc']</div><!--{/if}-->
+<!--{else}-->
+	<div style="padding:2rem 1rem;text-align:center;opacity:.6">{lang trade_nogoods}</div>
+<!--{/if}-->

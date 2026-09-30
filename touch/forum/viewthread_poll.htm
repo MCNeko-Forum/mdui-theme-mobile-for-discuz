@@ -25,6 +25,8 @@
 		<!--{/if}-->
 
 		<!--{eval $pollvotable = $_G['group']['allowvote'] && !$_G['forum_thread']['is_archived'];}-->
+		<!-- mdui-radio 自身无 name/表单关联，单选必须包在 mdui-radio-group 里才能分组互斥并随表单提交 -->
+		<!--{if $pollvotable && !$multiple}--><mdui-radio-group name="pollanswers[]" style="display:block"><!--{/if}-->
 		<!--{loop $polloptions $key $option}-->
 		<div style="margin-bottom:.75rem">
 			<!--{if $isimagepoll}-->
@@ -37,7 +39,7 @@
 				<!--{if $multiple}-->
 				<mdui-checkbox name="pollanswers[]" value="$option['polloptionid']">$key. $option['polloption']</mdui-checkbox>
 				<!--{else}-->
-				<mdui-radio name="pollanswers[]" value="$option['polloptionid']" form="poll">$key. $option['polloption']</mdui-radio>
+				<mdui-radio value="$option['polloptionid']">$key. $option['polloption']</mdui-radio>
 				<!--{/if}-->
 			<!--{else}-->
 			<div>$key. $option['polloption']</div>
@@ -51,6 +53,7 @@
 			<!--{/if}-->
 		</div>
 		<!--{/loop}-->
+		<!--{if $pollvotable && !$multiple}--></mdui-radio-group><!--{/if}-->
 
 		<!--{if $pollvotable}-->
 			<mdui-button type="submit" name="pollsubmit" value="true" full-width style="margin-top:.5rem">{lang submit}</mdui-button>
@@ -79,6 +82,23 @@
 			var full = boxes.filter(function (x) { return x.checked; }).length >= $maxchoices;
 			boxes.forEach(function (x) { x.disabled = full && !x.checked; });
 		});
+	});
+})();
+</script>
+<!--{/if}-->
+<!--{if $pollvotable}-->
+<script>
+// 空选提交直接客户端拦下，省一次服务端 thread_poll_invalid 往返
+(function () {
+	var form = document.getElementById('poll');
+	if (!form) return;
+	form.addEventListener('submit', function (e) {
+		var picked = form.querySelectorAll('mdui-checkbox[checked], mdui-radio-group mdui-radio[checked]').length;
+		if (!picked) {
+			e.preventDefault();
+			e.stopPropagation();
+			mdui.snackbar({ message: '请先选择投票选项', placement: 'top' });
+		}
 	});
 })();
 </script>

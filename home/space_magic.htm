@@ -1,0 +1,52 @@
+<!--{eval $nofooter = 1;}-->
+<!--{template common/header}-->
+<mdui-top-app-bar><mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon><mdui-top-app-bar-title>{lang magic}</mdui-top-app-bar-title></mdui-top-app-bar>
+<div style="padding:1rem"><mdui-tabs value="$action" full-width><!--{if $_G['group']['allowmagics']}--><mdui-tab value="shop" data-href="home.php?mod=magic&action=shop">{lang magics_shop}</mdui-tab><!--{/if}--><mdui-tab value="mybox" data-href="home.php?mod=magic&action=mybox">{lang magics_user}</mdui-tab><mdui-tab value="log" data-href="home.php?mod=magic&action=log&operation=uselog">{lang magics_log}</mdui-tab></mdui-tabs><!--{if $action == 'shop'}--><!--{subtemplate home/space_magic_shop}--><!--{elseif $action == 'mybox'}--><!--{subtemplate home/space_magic_mybox}--><!--{elseif $action == 'log'}--><!--{subtemplate home/space_magic_log}--><!--{/if}--></div>
+<mdui-dialog id="mdui_magic_operation" close-on-esc close-on-overlay-click>
+	<div id="mdui_magic_operation_body"></div>
+</mdui-dialog>
+<script>
+(function () {
+	var dialog = document.getElementById('mdui_magic_operation'), body = document.getElementById('mdui_magic_operation_body');
+	document.addEventListener('click', function (e) {
+		var trigger = e.target.closest && e.target.closest('.mdui_magic_operation');
+		if (!trigger) return;
+		e.preventDefault();
+		dialog.open = true;
+		body.innerHTML = '<div style="padding:1rem;text-align:center">正在加载…</div>';
+		fetch(trigger.dataset.url + '&infloat=yes&inajax=1&mobile=2', {credentials: 'same-origin'})
+			.then(function (response) { return response.text(); })
+			.then(function (html) {
+				var documentNode = new DOMParser().parseFromString(html, 'text/html'), form = documentNode.querySelector('form');
+				if (!form) { body.innerHTML = '<div style="padding:1rem">操作无法继续</div>'; return; }
+				form.removeAttribute('onsubmit');
+				body.innerHTML = form.outerHTML;
+				form = body.querySelector('form');
+				// 道具 show() 会输出原生文本框、密码框和多行输入；统一替换成 MDUI 字段，并保留 name/value 供后端读取。
+				form.querySelectorAll('input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=checkbox]):not([type=radio]), textarea').forEach(function (field) {
+					var input = document.createElement('mdui-text-field'), label = field.getAttribute('placeholder') || field.name || '请输入内容';
+					input.name = field.name;
+					input.value = field.value;
+					input.label = label;
+					if (field.type === 'password') input.type = 'password';
+					if (field.tagName === 'TEXTAREA') { input.setAttribute('textarea', ''); input.rows = field.rows || 3; }
+					field.replaceWith(input);
+				});
+				form.querySelectorAll('select').forEach(function (field) { field.classList.add('mdui-credit-select'); });
+				form.querySelectorAll('mdui-button[onclick*="history.back"]').forEach(function (button) {
+					button.onclick = function (cancelEvent) { cancelEvent.preventDefault(); dialog.open = false; };
+				});
+				form.addEventListener('submit', function (submitEvent) {
+					submitEvent.preventDefault();
+					mduiPost(form.action, Object.fromEntries(new FormData(form)), function (result) {
+						dialog.open = false;
+						mduiTip((result && result.message) || '操作成功');
+						setTimeout(function () { location.reload(); }, 1000);
+					});
+				});
+			})
+			.catch(function () { body.innerHTML = '<div style="padding:1rem">表单加载失败，请重试。</div>'; });
+	});
+})();
+</script>
+<!--{template common/footer}-->

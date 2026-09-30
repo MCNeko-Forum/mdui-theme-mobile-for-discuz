@@ -1,0 +1,21 @@
+<mdui-tabs value="$op" style="margin-bottom:1rem">
+	<mdui-tab value="base" data-href="home.php?mod=spacecp&ac=credit&op=base">{lang my_credits}</mdui-tab>
+	<!--{if ($_G['setting']['ec_ratio'] && $is_enable_pay) || $_G['setting']['card']['open']}-->
+		<mdui-tab value="buy" data-href="home.php?mod=spacecp&ac=credit&op=buy">{lang buy_credits}</mdui-tab>
+	<!--{/if}-->
+	<!--{if $_G['setting']['transferstatus'] && $_G['group']['allowtransfer']}-->
+		<mdui-tab value="transfer" data-href="home.php?mod=spacecp&ac=credit&op=transfer">{lang transfer_credits}</mdui-tab>
+	<!--{/if}-->
+	<!--{if $_G['setting']['exchangestatus']}-->
+		<mdui-tab value="exchange" data-href="home.php?mod=spacecp&ac=credit&op=exchange">{lang exchange_credits}</mdui-tab>
+	<!--{/if}-->
+	<mdui-tab value="log" data-href="home.php?mod=spacecp&ac=credit&op=log">{lang memcp_credits_log}</mdui-tab>
+	<mdui-tab value="rule" data-href="home.php?mod=spacecp&ac=credit&op=rule">{lang credit_rule}</mdui-tab>
+	<!--{if !empty($_G['setting']['plugins']['spacecp_credit'])}-->
+		<!--{loop $_G['setting']['plugins']['spacecp_credit'] $id $module}-->
+			<!--{if in_array($module['adminid'], array(0, -1)) || ($module['adminid'] && $_G['adminid'] > 0 && $module['adminid'] >= $_G['adminid'])}-->
+				<mdui-tab value="plugin$id" data-href="home.php?mod=spacecp&ac=plugin&op=credit&id=$id">$module['name']</mdui-tab>
+			<!--{/if}-->
+		<!--{/loop}-->
+	<!--{/if}-->
+</mdui-tabs>

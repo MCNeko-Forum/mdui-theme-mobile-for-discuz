@@ -1,0 +1,19 @@
+<!--{if $tasklist}-->
+<mdui-list class="mdui-center-list">
+<!--{loop $tasklist $task}-->
+	<mdui-list-item class="mdui-center-item" rounded>
+		<mdui-avatar slot="icon" src="$task['icon']"></mdui-avatar>
+		<a class="mdui-center-title" href="home.php?mod=task&do=view&id=$task['taskid']">$task['name']</a>
+		<span slot="description">$task['description']</span>
+		<!--{if $_GET['item'] == 'new'}-->
+			<!--{if !$task['noperm'] && !$task['appliesfull']}--><mdui-button slot="end-icon" variant="text" href="home.php?mod=task&do=apply&id=$task['taskid']">{lang task_newbie_apply}</mdui-button><!--{/if}-->
+		<!--{elseif $_GET['item'] == 'doing'}-->
+			<mdui-button slot="end-icon" variant="text" href="home.php?mod=task&do=draw&id=$task['taskid']">{lang task_reward_get}</mdui-button>
+		<!--{/if}-->
+	</mdui-list-item>
+	<!--{if $_GET['item'] == 'doing'}--><mdui-linear-progress value="$task['csc']" style="margin:-.5rem 1rem .5rem;width:calc(100% - 2rem)"></mdui-linear-progress><!--{/if}-->
+<!--{/loop}-->
+</mdui-list>
+<!--{else}-->
+<mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7"><!--{if $_GET['item'] == 'new'}-->{lang task_nonew}<!--{elseif $_GET['item'] == 'doing'}-->{lang task_nodoing}<!--{else}-->{lang data_nonexistence}<!--{/if}--></mdui-card>
+<!--{/if}-->

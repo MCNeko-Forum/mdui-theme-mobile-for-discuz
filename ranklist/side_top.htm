@@ -1,0 +1,15 @@
+<mdui-tabs value="$_GET['type']" style="position:sticky;top:64px;z-index:9;background:rgb(var(--mdui-color-surface));overflow:auto">
+	<mdui-tab value="index" data-href="misc.php?mod=ranklist">{lang all}</mdui-tab>
+	<!--{if $ranklist_setting['member']['available']}--><mdui-tab value="member" data-href="misc.php?mod=ranklist&type=member">{lang user}</mdui-tab><!--{/if}-->
+	<!--{if helper_access::check_module('forum') && $ranklist_setting['thread']['available']}--><mdui-tab value="thread" data-href="misc.php?mod=ranklist&type=thread&view=replies&orderby=thisweek">{lang posts}</mdui-tab><!--{/if}-->
+	<!--{if helper_access::check_module('blog') && $ranklist_setting['blog']['available']}--><mdui-tab value="blog" data-href="misc.php?mod=ranklist&type=blog&view=heats&orderby=thisweek">{lang blogs}</mdui-tab><!--{/if}-->
+	<!--{if helper_access::check_module('forum') && $ranklist_setting['poll']['available']}--><mdui-tab value="poll" data-href="misc.php?mod=ranklist&type=poll&view=heats&orderby=thisweek">{lang poll}</mdui-tab><!--{/if}-->
+	<!--{if helper_access::check_module('forum') && $ranklist_setting['activity']['available']}--><mdui-tab value="activity" data-href="misc.php?mod=ranklist&type=activity&view=heats&orderby=thismonth">{lang activity}</mdui-tab><!--{/if}-->
+	<!--{if helper_access::check_module('album') && $ranklist_setting['picture']['available']}--><mdui-tab value="picture" data-href="misc.php?mod=ranklist&type=picture&view=hot&orderby=thismonth">{lang pics}</mdui-tab><!--{/if}-->
+	<!--{if helper_access::check_module('forum') && $ranklist_setting['forum']['available']}--><mdui-tab value="forum" data-href="misc.php?mod=ranklist&type=forum&view=threads">{lang forum}</mdui-tab><!--{/if}-->
+	<!--{if helper_access::check_module('group') && $ranklist_setting['group']['available']}--><mdui-tab value="group" data-href="misc.php?mod=ranklist&type=group&view=credit">{lang group}</mdui-tab><!--{/if}-->
+	<!--{hook/ranklist_nav_extra}-->
+</mdui-tabs>
+<style>
+.mdui-rank-page{padding:1rem 1rem 5.5rem}.mdui-rank-tabs{margin:0 -1rem 1rem;overflow:auto}.mdui-rank-tabs mdui-tabs{min-width:max-content}.mdui-rank-list{display:grid;gap:.5rem}.mdui-rank-item{display:flex;gap:.75rem;align-items:center;padding:.75rem;text-decoration:none;color:inherit}.mdui-rank-no{width:2rem;text-align:center;font-weight:700;color:rgb(var(--mdui-color-on-surface-variant))}.mdui-rank-no-top{color:rgb(var(--mdui-color-primary))}.mdui-rank-body{min-width:0;flex:1}.mdui-rank-title{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mdui-rank-meta{margin-top:.25rem;font-size:.75rem;color:rgb(var(--mdui-color-on-surface-variant))}.mdui-rank-empty{padding:2rem 1rem;text-align:center;color:rgb(var(--mdui-color-on-surface-variant))}.mdui-rank-period{display:flex;gap:.5rem;overflow:auto;margin-bottom:1rem}.mdui-rank-period mdui-button{flex:0 0 auto}
+</style>

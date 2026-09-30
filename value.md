@@ -23,6 +23,8 @@
 | `mdui_footer`         | 全站 footer 自定义代码      | 空         |
 | `mdui_fonts`          | 全站自定义字体 CSS 链接（每行一个） | 空         |
 | `mdui_ladyload`       | 图片懒加载开关             | 空（关闭）     |
+| `mdui_extlink`        | 站外链接点击提示开关          | 空（关闭）     |
+| `mdui_extlink_white`  | 站外链接提示白名单（每行一个域名） | 空         |
 | `mdui_thread_autoload` | 主题帖页自动加载下一页          | 空（关闭）     |
 | `mdui_block_cache`    | 门户首页 DIY 模块缓存时间（秒）    | `30`      |
 
@@ -286,6 +288,16 @@ https://cdn.example.com/fonts/my-font.css
 `mdui_head` 的内容会原样输出到所有手机版页面的 `</head>` 前，`mdui_footer` 的内容会原样输出到公共页脚开始位置，适合放置可信任的全站 HTML、CSS 或 JavaScript 代码。
 
 只允许管理员填写可信内容，不要粘贴来源不明的代码；如果只需要追加 CSS，请继续使用 `mdui_addcss`。
+
+***
+
+## `mdui_extlink` / `mdui_extlink_white`：站外链接提示
+
+`mdui_extlink` 填 `1` 启用。启用后，点击 `http` / `https` 站外链接会先弹窗，深色区域显示完整地址，并提供取消、复制、确定。链接的 `href` 不改。
+
+当前页面域名不提示。白名单按域名后缀匹配，一行一个：填写 `111.cn` 时，`111.cn`、`123.111.cn`、`1.1.123.cn` 都不提示。`www.` 前缀会忽略。
+
+留空或非 `1` 即关闭。修改后请更新缓存。
 
 ## `mdui_addcss`：全站额外 CSS
 
