@@ -9,9 +9,11 @@
 
 	// 状态敏感或操作类页面直接整页跳转
 	var BLOCK = [
-		/member\.php\?mod=(logging|register)/, // 登录/注册/登出
+		/member\.php\?mod=logging&action=logout/, // 登出：需整页刷新清空登录态
 		/admincp\.php/,
-		/mod=(modcp|recyclebin|attachment)/ // 管理操作、回收站、附件下载
+		/mod=(modcp|recyclebin|attachment)/, // 管理操作、回收站、附件下载
+		/mod=(post|misc)(&|$)/, // 发帖/回帖/编辑（forum.php?mod=post）、表情等 misc 页，脚本重，整页加载最稳
+		/mod=topicadmin/ // 管理操作由 viewthread 自己 fetch 进对话框，绝不能被 PJAX 抢走（否则跳进 XML 页）
 	];
 
 	// 顶部加载进度条
@@ -95,6 +97,19 @@
 		var liveDrawer = document.getElementById('mdui_drawer');
 		var docDrawer = doc.getElementById('mdui_drawer');
 		if (liveDrawer && docDrawer) liveDrawer.innerHTML = docDrawer.innerHTML;
+		// 底栏：登录/注册/找回密码页 $nofooter=1 不渲染底栏，从这些页 PJAX 跳到普通页时
+		// 当前壳缺底栏 → 按目标页补上占位 div 与底栏（反向即普通页跳登录页时保留底栏，不改）
+		var liveNav = document.querySelector('mdui-navigation-bar');
+		var docNav = doc.querySelector('mdui-navigation-bar');
+		if (!liveNav && docNav) {
+			var spacer = document.createElement('div');
+			spacer.style.height = '80px';
+			app.parentNode.insertBefore(spacer, app.nextSibling);
+			app.parentNode.insertBefore(docNav.cloneNode(true), spacer.nextSibling);
+			liveNav = app.parentNode.querySelector('mdui-navigation-bar');
+		}
+		// 底栏高亮跟随目标页（只改 value，不重建导航，避免发布面板脚本持有的按钮引用失效）
+		if (liveNav && docNav && docNav.hasAttribute('value')) liveNav.setAttribute('value', docNav.getAttribute('value'));
 		var liveBadge = document.querySelector('mdui-navigation-bar-item[value=my] mdui-badge');
 		var docBadge = doc.querySelector('mdui-navigation-bar-item[value=my] mdui-badge');
 		if (docBadge && !liveBadge) {
@@ -113,6 +128,9 @@
 			s.async = false;
 			old.parentNode.replaceChild(s, old);
 		});
+		// 通知壳层/页面初始化逻辑重跑（头像懒加载、抽屉主题图标等），
+		// 让跨页导航时这些「数据」同步刷新
+		document.dispatchEvent(new CustomEvent('mduipjax:load', {detail: {url: url}}));
 		document.title = doc.title;
 		if (doc.body.id) document.body.id = doc.body.id;
 		if (doc.body.className) document.body.className = doc.body.className;
@@ -136,25 +154,47 @@
 		go(url.href, true);
 	};
 
+	// 从 composedPath（由内到外）里挑出最靠内的可接管链接：
+	// - 原生 <a href>
+	// - 带 href 的 MDUI 自定义组件（标签名含 "-"）：它把真实 <a> 渲染在 shadow root 内，
+	//   事件冒到 document 时 target 被 retarget 成宿主元素，path 里也拿不到那个 <a>
+	// 排除 SVG 的 <use>/<image href="#...">：它们不是自定义元素，不会被这里命中
+	function pickLink(path, node) {
+		for (var i = 0; i < path.length; i++) {
+			var el = path[i];
+			if (!el || !el.matches) continue;
+			if (el.matches('a[href]')) return el;
+			if (el.localName && el.localName.indexOf('-') !== -1 && el.hasAttribute && el.hasAttribute('href')) return el;
+		}
+		return node && node.closest ? node.closest('a[href]') : null;
+	}
+
 	document.addEventListener('click', function (e) {
 		if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 		var path = e.composedPath ? e.composedPath() : [];
 		var node = e.target;
-		var a = node && node.closest ? node.closest('a[href]') : null;
-		if (!a) a = path.find(function (item) {
-			return item && item.matches && item.matches('a[href], mdui-list-item[href], mdui-navigation-bar-item[href]');
-		});
 		var dataLink = node && node.closest ? node.closest('[data-href]') : null;
 		if (!dataLink) dataLink = path.find(function (item) {
 			return item && item.matches && item.matches('[data-href]');
 		});
 		if (dataLink && dataLink.dataset.href) {
+			// 被排除的 URL（topicadmin 管理操作等）不能整页跳走——这些元素有自己的
+			// fetch/对话框逻辑，这里直接放行让它们接管
+			if (!tryNav(dataLink.dataset.href)) return;
 			e.preventDefault();
 			mduiNav(dataLink.dataset.href);
 			return;
 		}
-		if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download') || a.closest('#mdui_app') === null) return;
-		var url = tryNav(a.getAttribute('href'));
+		var link = pickLink(path, node);
+		if (!link) return;
+		var href = link.getAttribute('href');
+		if (link.target && link.target !== '_self') return;
+		if (link.hasAttribute && link.hasAttribute('download')) return;
+		// 只接管「页面主体 / 侧边栏 / 底栏」内的链接（发布面板、站外提示等浮层不接管）。
+		// 用 e.target 而非 link 判断：link 可能是 shadow root 里的 <a>，
+		// closest() 不跨 shadow 边界会恒为 null；而 e.target 已 retarget 成宿主元素
+		if (!node || !node.closest || !node.closest('#mdui_app, mdui-navigation-drawer, mdui-navigation-bar')) return;
+		var url = tryNav(href);
 		if (!url) return;
 		e.preventDefault();
 		go(url.href, true);
