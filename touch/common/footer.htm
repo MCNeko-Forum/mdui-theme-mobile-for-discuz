@@ -69,8 +69,16 @@
 history.length < 2 && document.querySelectorAll('[onclick="history.back()"]').forEach(function (b) {
 	b.style.display = 'none';
 });
-document.querySelector('#mdui_menu_btn')?.addEventListener('click', function () {
-	document.querySelector('#mdui_drawer').open = true;
+// 菜单按钮用 document 事件委托：PJAX 换掉 #mdui_app 后按钮是新节点，直接绑定会失效。
+// 组件内部是 Shadow DOM，点击时 e.target 被 retarget 成宿主元素，用 composedPath 兜底
+document.addEventListener('click', function (e) {
+	var btn = (e.target.closest && e.target.closest('#mdui_menu_btn')) ||
+		(e.composedPath && e.composedPath().find(function (node) {
+			return node && node.id === 'mdui_menu_btn';
+		}));
+	if (!btn) return;
+	var drawer = document.querySelector('#mdui_drawer');
+	if (drawer) drawer.open = true;
 });
 // 从屏幕左边缘向右滑动打开侧边栏（参考触发区域 20px）
 (function () {
@@ -120,6 +128,40 @@ document.querySelector('#mdui_menu_btn')?.addEventListener('click', function () 
 	var m = document.cookie.match(/(?:^|;\s*)mdui_theme=(light|dark|auto)/);
 	m && mdui.setTheme(m[1]);
 	syncThemeItems();
+	// PJAX 换页时抽屉会被同步重建，重跑一次让主题图标/文字跟上当前模式
+	document.addEventListener('mduipjax:load', syncThemeItems);
+})();
+// Cloudflare Email Obfuscation 会把邮箱替换成 [email protected] + data-cfemail，
+// 官方解码脚本只处理首屏内容，PJAX 换页插进来的永远没人解码；
+// 这里自带同款解码算法，首次加载和每次 PJAX 后各跑一遍
+(function () {
+	function decodeCfEmail(hex) {
+		var key = parseInt(hex.substr(0, 2), 16), out = '';
+		for (var i = 2; i < hex.length; i += 2) {
+			out += String.fromCharCode(key ^ parseInt(hex.substr(i, 2), 16));
+		}
+		return out;
+	}
+	function decodeAll(root) {
+		(root || document).querySelectorAll('[data-cfemail]').forEach(function (el) {
+			var email = decodeCfEmail(el.getAttribute('data-cfemail'));
+			if (!email) return;
+			// 文本占位换回真实邮箱；外层若是 email-protection 链接顺手改成 mailto
+			el.textContent = email;
+			el.removeAttribute('data-cfemail');
+			var link = el.closest && el.closest('a[href*="/cdn-cgi/l/email-protection"]');
+			if (link) link.href = 'mailto:' + email;
+		});
+		// 邮箱在 href 里（如 mailto 被保护）的场景
+		(root || document).querySelectorAll('a[href*="/cdn-cgi/l/email-protection#"]').forEach(function (link) {
+			var hex = (link.getAttribute('href') || '').split('#')[1];
+			var email = hex && decodeCfEmail(hex);
+			if (email) link.href = 'mailto:' + email;
+		});
+	}
+	window.mduiDecodeEmails = decodeAll;
+	document.addEventListener('DOMContentLoaded', function () { decodeAll(document); });
+	document.addEventListener('mduipjax:load', function () { decodeAll(document); });
 })();
 // mdui-tab 没有 href 属性（不同于 mdui-navigation-bar-item），用 data-href 事件委托实现跳转
 // 使用 composedPath() 兼容点击组件内部 Shadow DOM 内容的情况
@@ -345,7 +387,7 @@ window.mduiGet = function (url, done) {
 <!--{/if}-->
 
 <!--{if $_G['setting']['statcode']}--><div style="display:none;">{$_G['setting']['statcode']}</div><!--{/if}-->
-<script src="{$_G['style']['styleimgdir']}/mdui_pjax.js?{VERHASH}" defer></script>
+<script src="{$_G['style']['styleimgdir']}/mdui_pjax.js?{VERHASH}&v=8" defer></script>
 </body>
 </html>
 <!--{eval updatesession();}-->
