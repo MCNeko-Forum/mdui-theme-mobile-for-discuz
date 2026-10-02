@@ -37,11 +37,12 @@
 		<!--{if helper_access::check_module('album')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=album&view=me"><mdui-button-icon icon="photo_library"></mdui-button-icon><span>{lang my}{lang album}</span></div><!--{/if}-->
 		<!--{if helper_access::check_module('doing')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=doing&view=me"><mdui-button-icon icon="edit_note"></mdui-button-icon><span>{lang doing}</span></div><!--{/if}-->
 		<!--{if helper_access::check_module('follow')}--><div data-href="home.php?mod=follow"><mdui-button-icon icon="rss_feed"></mdui-button-icon><span>{lang follow}</span></div><!--{/if}-->
-		<div data-href="home.php?mod=space&do=friend&view=visitor"><mdui-button-icon icon="location_on"></mdui-button-icon><span>{lang my_visitor}</span></div>
 	</div>
 
+	<!--{eval $mdui_visitors = $_G['uid'] ? array_column(C::t('home_visitor')->fetch_all_by_uid($_G['uid'], 0, 5), 'vuid') : array();}-->
 	<mdui-list class="mdui-mycenter-theme">
 		<mdui-list-item data-mdui-theme-cycle icon="dark_mode" rounded><span class="mdui-theme-label">夜间</span></mdui-list-item>
+		<mdui-list-item icon="visibility" data-href="home.php?mod=space&do=friend&view=visitor" rounded>{lang my_visitor}<!--{if $mdui_visitors}--><div slot="end-icon" class="mdui-visitor-avatars"><!--{loop $mdui_visitors $mdui_vuid}--><mdui-avatar src="<!--{avatar($mdui_vuid, 'small', true)}-->"></mdui-avatar><!--{/loop}--></div><!--{/if}--></mdui-list-item>
 		<!--{hook/space_profile_themecolor_mobile}-->
 	</mdui-list>
 

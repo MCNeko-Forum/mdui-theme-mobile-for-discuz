@@ -985,6 +985,13 @@ p.d {
 .mdui-mycenter-list { display: block; padding: .5rem; }
 .mdui-mycenter-list mdui-list-item { --mdui-comp-list-item-container-color: transparent; }
 .mdui-mycenter-list mdui-list-item + mdui-list-item { border-top: 1px solid rgb(var(--mdui-color-outline-variant)); }
+.mdui-mycenter-theme { display: block; padding: .5rem; }
+.mdui-mycenter-theme mdui-list-item { --mdui-comp-list-item-container-color: transparent; }
+.mdui-mycenter-theme mdui-list-item + mdui-list-item { border-top: 1px solid rgb(var(--mdui-color-outline-variant)); }
+/* 我的访客行尾：最新 5 位访客头像叠放 */
+.mdui-visitor-avatars { display: flex; align-items: center; }
+.mdui-visitor-avatars mdui-avatar { width: 1.75rem; height: 1.75rem; margin-left: -.625rem; box-shadow: 0 0 0 2px rgb(var(--mdui-color-surface)); }
+.mdui-visitor-avatars mdui-avatar:first-child { margin-left: 0; }
 
 .mdui-credit-rules { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
 .mdui-credit-rules th,
