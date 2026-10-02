@@ -9,7 +9,7 @@
 		<!--{/if}-->
 	</mdui-top-app-bar-title>
 	<div style="flex:1"></div>
-	<mdui-button-icon icon="home" href="index.php"></mdui-button-icon>
+	<mdui-button-icon icon="home" data-href="portal.php?mod=index"></mdui-button-icon>
 </mdui-top-app-bar>
 <!--{if $_G['uid'] == $space['uid'] && $_GET['type'] == 'thread'}-->
 <mdui-tabs value="<!--{if $_GET['filter']}-->{$_GET['filter']}<!--{else}-->all<!--{/if}-->" style="position:sticky;top:64px;z-index:10;background:rgb(var(--mdui-color-surface))">

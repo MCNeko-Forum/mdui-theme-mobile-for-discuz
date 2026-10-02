@@ -4,7 +4,7 @@
 	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
 	<mdui-top-app-bar-title><!--{if $do == 'following'}-->{lang follow_add}<!--{elseif $do == 'follower'}-->{lang follow_follower}<!--{else}-->{lang follow}<!--{/if}--></mdui-top-app-bar-title>
 	<div style="flex-grow:1"></div>
-	<mdui-button-icon icon="home" onclick="location.href='portal.php?mod=index'"></mdui-button-icon>
+	<mdui-button-icon icon="home" data-href="portal.php?mod=index"></mdui-button-icon>
 </mdui-top-app-bar>
 
 <!--{if in_array($do, array('feed', 'view'))}-->

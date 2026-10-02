@@ -11,7 +11,7 @@
 	<mdui-top-app-bar-title><!--{if $_GET['mycenter']}-->{lang my}<!--{elseif $_G['uid'] == $space['uid']}-->{lang myprofile}<!--{else}-->$space['username']{lang otherprofile}<!--{/if}--></mdui-top-app-bar-title>
 	<div style="flex-grow:1"></div>
 	<!--{if $_GET['mycenter']}--><mdui-button-icon icon="settings" onclick="location.href='home.php?mod=spacecp'"></mdui-button-icon><!--{elseif $_G['uid'] == $space['uid']}--><mdui-button-icon icon="settings" onclick="location.href='home.php?mod=spacecp'"></mdui-button-icon><!--{/if}-->
-	<mdui-button-icon icon="home" onclick="location.href='portal.php?mod=index'"></mdui-button-icon>
+	<mdui-button-icon icon="home" data-href="portal.php?mod=index"></mdui-button-icon>
 </mdui-top-app-bar>
 
 <!--{if $_GET['mycenter']}-->
