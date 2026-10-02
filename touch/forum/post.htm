@@ -338,7 +338,9 @@ window.postInsert = function (code) {
 				setTimeout(function () {
 					var isReply = '{$_GET['action']}' === 'reply';
 					location.href = isReply && j.data.pid
-						? 'forum.php?mod=redirect&goto=findpost&ptid=' + j.data.tid + '&pid=' + j.data.pid
+						// 回帖后跳回第一页，把新回复置顶展示在回帖列表最前（楼层号仍为真实楼层），
+						// 页面加载完会把 mdui_newpid 参数从地址栏移除，之后刷新即回到正常楼层位置
+						? 'forum.php?mod=viewthread&tid=' + j.data.tid + '&page=1&mdui_newpid=' + j.data.pid + '#mdui_newpid'
 						: 'forum.php?mod=viewthread&tid=' + j.data.tid + (j.data.pid ? '&pid=' + j.data.pid + '#pid' + j.data.pid : '');
 				}, 1000);
 			} else if (ok && isDraft) {

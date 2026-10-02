@@ -11,7 +11,7 @@
 	<mdui-button-icon icon="arrow_back" onclick="history.back()"></mdui-button-icon>
 	<mdui-top-app-bar-title><!--{eval echo strip_tags($_G['forum']['name']);}--></mdui-top-app-bar-title>
 	<div style="flex-grow:1"></div>
-	<mdui-button-icon icon="home" onclick="location.href='portal.php?mod=index'"></mdui-button-icon>
+	<mdui-button-icon icon="home" data-href="portal.php?mod=index"></mdui-button-icon>
 </mdui-top-app-bar>
 <!--{hook/viewthread_top_mobile}-->
 
@@ -70,7 +70,10 @@
 /* 已点赞：禁用但保持主题色，表达「已完成」而非「不可用」 */
 .vt_recadded { opacity:1; --mdui-color-on-surface:var(--mdui-color-primary); }
 .vt_title { font-size:1.375rem; font-weight:500; margin:0; line-height:1.4; flex:1; min-width:0; overflow-wrap:anywhere; word-break:break-word; }
-.vt_sort { box-sizing:border-box; max-width:100%; margin:.75rem 0; padding:.75rem; background:rgba(var(--mdui-color-surface-variant),.35); border-radius:.5rem; overflow:hidden; }
+/* 日间 --mdui-color-surface-variant 过浅（245,221,216），卡片底和表格边框叠在近白页面上几乎不可见；
+   改用容器色做底、描边色做边框。夜间 outline-variant 与 surface-variant 同值，观感不变。
+   局部重定义 surface-variant 是为了让 MDUI prose 自带的表格/单元格边框（含 :not() 选择器）一并跟随 */
+.vt_sort { box-sizing:border-box; max-width:100%; margin:.75rem 0; padding:.75rem; background:rgb(var(--mdui-color-surface-container-high)); border-radius:.5rem; overflow:hidden; --mdui-color-surface-variant:var(--mdui-color-outline-variant); }
 .vt_sort table { width:100%; max-width:100%; margin-top:.5rem; border-collapse:collapse; table-layout:fixed; font-size:.8125rem; }
 .vt_sort th, .vt_sort td { padding:.25rem 0; vertical-align:top; overflow-wrap:anywhere; word-break:break-word; }
 .vt_sort th { width:5.5rem; text-align:left; font-weight:500; }
@@ -117,6 +120,49 @@
 	<!--{/if}-->
 
 	<!--{eval $postcount = 0;}-->
+	<!--{if !empty($_GET['mdui_newpid'])}-->
+	<!--{eval
+	// 回帖成功后带 mdui_newpid 跳回第一页：把刚发的回复取出来置顶展示在回帖列表最前，
+	// 楼层号用真实 position，不受当前页影响；不带参数的正常访问完全不受影响
+	// 注意：Discuz 模板编译器会误解析 eval 里的花括号，这里必须用冒号语法
+	$mdui_newpost = array();
+	$mdui_newpid = intval($_GET['mdui_newpid']);
+	if ($mdui_newpid && !isset($postlist[$mdui_newpid])):
+		$mdui_newpost = C::t('forum_post')->fetch('tid:' . $_G['tid'], $mdui_newpid);
+		if ($mdui_newpost && $mdui_newpost['tid'] == $_G['tid'] && empty($mdui_newpost['first']) && $mdui_newpost['invisible'] == 0):
+			include_once libfile('function/discuzcode');
+			$mdui_newpost['message_fmt'] = discuzcode($mdui_newpost['message'], $mdui_newpost['smileyoff'], $mdui_newpost['bbcodeoff'], $mdui_newpost['htmlon'], $_G['forum']['allowsmilies'], $_G['forum']['allowbbcode'], $_G['forum']['allowimgcode'], 0, 0, 0, $mdui_newpost['authorid'], $_G['forum']['allowmediacode'], $mdui_newpid, 1, $mdui_newpost['dateline'], 0);
+			$mdui_newpost['dateline_fmt'] = dgmdate($mdui_newpost['dateline']);
+		else:
+			$mdui_newpost = array();
+		endif;
+	endif;
+	}-->
+	<!--{if $mdui_newpost}-->
+	<mdui-card variant="filled" id="mdui_newpid" style="display:block;margin:.75rem 1rem;padding:1rem;border:1.5px solid rgb(var(--mdui-color-primary))">
+		<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+			<mdui-avatar src="<!--{avatar($mdui_newpost['authorid'], 'small', true)}-->"></mdui-avatar>
+			<div style="flex:1;min-width:0">
+				<div style="font-weight:500"><a href="home.php?mod=space&uid={$mdui_newpost['authorid']}" style="color:inherit;text-decoration:none">{$mdui_newpost['author']}</a></div>
+				<div style="font-size:.8125rem;opacity:.6">{$mdui_newpost['dateline_fmt']}</div>
+			</div>
+			<mdui-chip elevated class="vt_floor_link" data-copy-url="forum.php?mod=redirect&amp;goto=findpost&amp;ptid={$_G['tid']}&amp;pid={$mdui_newpid}" title="点击复制本楼链接" style="--mdui-comp-chip-height:24px;cursor:pointer">{$mdui_newpost['position']}{$postno[0]}</mdui-chip>
+		</div>
+		<!--{if $mdui_newpost['subject']}--><div style="font-weight:500;margin-bottom:.5rem">{$mdui_newpost['subject']}</div><!--{/if}-->
+		<div class="pct" style="overflow-wrap:break-word">{$mdui_newpost['message_fmt']}</div>
+	</mdui-card>
+	<script>
+	// 展示完即从地址栏去掉 mdui_newpid，之后的刷新会回到该楼层的正常位置
+	(function () {
+		var u = new URL(location.href);
+		if (u.searchParams.has('mdui_newpid')) {
+			u.searchParams.delete('mdui_newpid');
+			history.replaceState(null, '', u.pathname + (u.searchParams.toString() ? '?' + u.searchParams : '') + u.hash);
+		}
+	})();
+	</script>
+	<!--{/if}-->
+	<!--{/if}-->
 	<div id="vt_post_list">
 	<!--{loop $postlist $post}-->
 	<!--{eval $needhiddenreply = ($hiddenreplies && $_G['uid'] != $post['authorid'] && $_G['uid'] != $_G['forum_thread']['authorid'] && !$post['first'] && !$_G['forum']['ismoderator']);}-->
@@ -148,60 +194,65 @@
 			<!--{if $post['first'] && $vt_show_rec}--><span id="recommendv_add" style="font-size:.75rem;opacity:.65;white-space:nowrap"><mdui-icon name="thumb_up" style="font-size:1rem;vertical-align:middle"></mdui-icon> {$_G['forum_thread']['recommend_add']}</span><!--{/if}-->
 			<!--{eval $vt_canreport = $_G['uid'] && $post['authorid'] && $post['authorid'] != $_G['uid'];}-->
 			<!--{eval $vt_canmod = $post['first'] ? ($modmenu['thread'] && $_G['forum']['ismoderator']) : ($modmenu['post'] && ($_G['forum']['ismoderator'] && ($_G['group']['allowdelpost'] || $_G['group']['allowbanpost'] || $_G['group']['allowwarnpost'] || $_G['group']['allowstickreply']) || $_G['forum_thread']['authorid'] == $_G['uid']));}-->
-			<!--{if $vt_canmod || $vt_canreport}-->
+			<!--{eval $vt_canedit = (($_G['forum']['ismoderator'] && $_G['group']['alloweditpost'] && (!in_array($post['adminid'], array(1, 2, 3)) || $_G['adminid'] <= $post['adminid'])) || ($_G['forum']['alloweditpost'] && $_G['uid'] && ($post['authorid'] == $_G['uid'] && $_G['forum_thread']['closed'] == 0) && !(!$alloweditpost_status && $edittimelimit && TIMESTAMP - $post['dbdateline'] > $edittimelimit)));}-->
+			<!--{if $vt_canmod || $vt_canreport || $vt_canedit}-->
 			<mdui-dropdown class="vt_moremenu" placement="auto">
 				<mdui-button-icon slot="trigger" icon="more_horiz"></mdui-button-icon>
 				<mdui-menu>
+					<!--{if $vt_canedit}-->
+					<mdui-menu-item icon="edit" href="forum.php?mod=post&action=edit&fid={$_G['fid']}&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">{lang edit}</mdui-menu-item>
+					<!--{if $vt_canmod}--><mdui-divider></mdui-divider><!--{/if}-->
+					<!--{/if}-->
 					<!--{if $post['first'] && $_G['forum']['ismoderator']}-->
 						<!--{if $_G['group']['allowdelpost']}-->
-						<mdui-menu-item icon="delete" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=delete&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_deletethread}（管理）</mdui-menu-item>
+						<mdui-menu-item icon="delete" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=delete&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_deletethread}（管理）</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowbumpthread'] && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="swap_vert" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=bump&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_updown}</mdui-menu-item>
+						<mdui-menu-item icon="swap_vert" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=bump&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_updown}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowstickthread'] && ($_G['forum_thread']['displayorder'] <= 3 || $_G['adminid'] == 1) && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="vertical_align_top" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=stick&optgroup=1&from={$_G['tid']}&mobile=2">{lang modmenu_stickthread}</mdui-menu-item>
+						<mdui-menu-item icon="vertical_align_top" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=stick&optgroup=1&from={$_G['tid']}&mobile=2">{lang modmenu_stickthread}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowlivethread'] && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="live_tv" class="vt_modact" href="forum.php?mod=topicadmin&action=live&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_live}</mdui-menu-item>
+						<mdui-menu-item icon="live_tv" class="vt_modact" data-href="forum.php?mod=topicadmin&action=live&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_live}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowhighlightthread'] && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="format_color_text" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=highlight&optgroup=1&from={$_G['tid']}&mobile=2">{lang modmenu_highlight}</mdui-menu-item>
+						<mdui-menu-item icon="format_color_text" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=highlight&optgroup=1&from={$_G['tid']}&mobile=2">{lang modmenu_highlight}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowdigestthread'] && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="star" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=digest&optgroup=1&from={$_G['tid']}&mobile=2">{lang modmenu_digestpost}</mdui-menu-item>
+						<mdui-menu-item icon="star" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=digest&optgroup=1&from={$_G['tid']}&mobile=2">{lang modmenu_digestpost}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowstampthread'] && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="approval" class="vt_modact" href="forum.php?mod=topicadmin&action=stamp&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_stamp}</mdui-menu-item>
+						<mdui-menu-item icon="approval" class="vt_modact" data-href="forum.php?mod=topicadmin&action=stamp&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_stamp}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowstamplist'] && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="label" class="vt_modact" href="forum.php?mod=topicadmin&action=stamplist&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_icon}</mdui-menu-item>
+						<mdui-menu-item icon="label" class="vt_modact" data-href="forum.php?mod=topicadmin&action=stamplist&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_icon}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowclosethread'] && !$_G['forum_thread']['is_archived'] && $_G['forum']['status'] != 3}-->
-						<mdui-menu-item icon="lock" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&from={$_G['tid']}&optgroup=4&mobile=2"><!--{if !$_G['forum_thread']['closed']}-->{lang modmenu_switch_off}<!--{else}-->{lang modmenu_switch_on}<!--{/if}--></mdui-menu-item>
+						<mdui-menu-item icon="lock" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&from={$_G['tid']}&optgroup=4&mobile=2"><!--{if !$_G['forum_thread']['closed']}-->{lang modmenu_switch_off}<!--{else}-->{lang modmenu_switch_on}<!--{/if}--></mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowmovethread'] && !$_G['forum_thread']['is_archived'] && $_G['forum']['status'] != 3}-->
-						<mdui-menu-item icon="drive_file_move" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=move&optgroup=2&from={$_G['tid']}&mobile=2">{lang modmenu_move}</mdui-menu-item>
+						<mdui-menu-item icon="drive_file_move" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=move&optgroup=2&from={$_G['tid']}&mobile=2">{lang modmenu_move}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowedittypethread'] && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="category" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=type&optgroup=2&from={$_G['tid']}&mobile=2">{lang modmenu_type}</mdui-menu-item>
+						<mdui-menu-item icon="category" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=type&optgroup=2&from={$_G['tid']}&mobile=2">{lang modmenu_type}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowsplitthread'] && !$_G['forum_thread']['is_archived'] && $_G['forum']['status'] != 3}-->
-						<mdui-menu-item icon="call_split" class="vt_modact" href="forum.php?mod=topicadmin&action=split&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_split}</mdui-menu-item>
+						<mdui-menu-item icon="call_split" class="vt_modact" data-href="forum.php?mod=topicadmin&action=split&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_split}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowrepairthread'] && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="build" class="vt_modact" href="forum.php?mod=topicadmin&action=repair&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_repair}</mdui-menu-item>
+						<mdui-menu-item icon="build" class="vt_modact" data-href="forum.php?mod=topicadmin&action=repair&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_repair}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['forum_firstpid']}-->
 							<!--{if $_G['group']['allowwarnpost']}-->
-							<mdui-menu-item icon="warning" class="vt_modact" href="forum.php?mod=topicadmin&action=warn&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_warn}</mdui-menu-item>
+							<mdui-menu-item icon="warning" class="vt_modact" data-href="forum.php?mod=topicadmin&action=warn&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_warn}</mdui-menu-item>
 							<!--{/if}-->
 							<!--{if $_G['group']['allowbanpost']}-->
-							<mdui-menu-item icon="visibility_off" class="vt_modact" href="forum.php?mod=topicadmin&action=banpost&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_banthread}</mdui-menu-item>
+							<mdui-menu-item icon="visibility_off" class="vt_modact" data-href="forum.php?mod=topicadmin&action=banpost&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_banthread}</mdui-menu-item>
 							<!--{/if}-->
 						<!--{/if}-->
 						<!--{if $_G['group']['allowremovereward'] && $_G['forum_thread']['special'] == 3 && !$_G['forum_thread']['is_archived']}-->
-						<mdui-menu-item icon="money_off" class="vt_modact" href="forum.php?mod=topicadmin&action=removereward&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_removereward}</mdui-menu-item>
+						<mdui-menu-item icon="money_off" class="vt_modact" data-href="forum.php?mod=topicadmin&action=removereward&fid={$_G['fid']}&tid={$_G['tid']}&topiclist[]={$_G['forum_firstpid']}&mobile=2">{lang modmenu_removereward}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowmanagetag']}-->
 						<mdui-menu-item icon="sell" href="forum.php?mod=tag&op=manage&tid={$_G['tid']}&mobile=2">{lang post_tag}</mdui-menu-item>
@@ -209,21 +260,21 @@
 					<!--{elseif !$post['first']}-->
 						<!--{if $_G['forum']['ismoderator']}-->
 							<!--{if $_G['group']['allowdelpost']}-->
-							<mdui-menu-item icon="delete" class="vt_modact" href="forum.php?mod=topicadmin&action=delpost&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_deletepost}</mdui-menu-item>
+							<mdui-menu-item icon="delete" class="vt_modact" data-href="forum.php?mod=topicadmin&action=delpost&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_deletepost}</mdui-menu-item>
 							<!--{/if}-->
 							<!--{if $_G['group']['allowbanpost']}-->
-							<mdui-menu-item icon="visibility_off" class="vt_modact" href="forum.php?mod=topicadmin&action=banpost&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_banpost}</mdui-menu-item>
+							<mdui-menu-item icon="visibility_off" class="vt_modact" data-href="forum.php?mod=topicadmin&action=banpost&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_banpost}</mdui-menu-item>
 							<!--{/if}-->
 							<!--{if $_G['group']['allowwarnpost']}-->
-							<mdui-menu-item icon="warning" class="vt_modact" href="forum.php?mod=topicadmin&action=warn&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_warn}</mdui-menu-item>
+							<mdui-menu-item icon="warning" class="vt_modact" data-href="forum.php?mod=topicadmin&action=warn&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_warn}</mdui-menu-item>
 							<!--{/if}-->
 						<!--{/if}-->
 						<!--{if ($_G['forum']['ismoderator'] && $_G['group']['allowstickreply']) || $_G['forum_thread']['authorid'] == $_G['uid']}-->
-						<mdui-menu-item icon="push_pin" class="vt_modact" href="forum.php?mod=topicadmin&action=stickreply&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_stickpost}</mdui-menu-item>
+						<mdui-menu-item icon="push_pin" class="vt_modact" data-href="forum.php?mod=topicadmin&action=stickreply&fid={$_G['fid']}&tid={$_G['tid']}&page={$page}&topiclist[]={$post['pid']}&mobile=2">{lang modmenu_stickpost}</mdui-menu-item>
 						<!--{/if}-->
 					<!--{/if}-->
 					<!--{if $vt_canreport}-->
-					<!--{if $vt_canmod}--><mdui-divider></mdui-divider><!--{/if}-->
+					<!--{if $vt_canmod || $vt_canedit}--><mdui-divider></mdui-divider><!--{/if}-->
 					<mdui-menu-item icon="flag" class="vt_report" data-pid="{$post['pid']}">{lang report}</mdui-menu-item>
 					<!--{/if}-->
 				</mdui-menu>
@@ -268,7 +319,7 @@
 					<!--{/if}-->
 				<!--{/if}-->
 				<!--{if $post['first'] && !$_G['forum_thread']['special'] && !empty($_G['setting']['guesttipsinthread']['flag']) && !$_G['uid'] && !$post['attachment'] && $_GET['from'] != 'preview'}-->
-					<div style="margin:.75rem 0;padding:.75rem;background:rgba(var(--mdui-color-surface-variant),.35);border-radius:.5rem">
+					<div style="margin:.75rem 0;padding:.75rem;background:rgb(var(--mdui-color-surface-container-high));border-radius:.5rem">
 						<strong><!--{if !empty($_G['setting']['guesttipsinthread']['text'])}-->{$_G['setting']['guesttipsinthread']['text']}<!--{else}-->{lang guesttipsinthread_text}<!--{/if}--></strong>
 						<div style="font-size:.8125rem;opacity:.7;margin-top:.25rem">{lang attach_nopermission_login}</div>
 					</div>
@@ -328,27 +379,36 @@
 		<!--{/if}-->
 
 		<!--{if $_GET['from'] != 'preview' && !empty($post['ratelog'])}-->
-		<div style="margin-top:.75rem;padding:.75rem;background:rgba(var(--mdui-color-surface-variant),.35);border-radius:.5rem">
-			<div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;margin-bottom:.5rem">
-				<strong>打赏</strong>
-				<span style="flex:1;opacity:.7">参与人数：{echo count($post['ratelog'])}</span>
+		<div style="margin-top:.75rem;padding:.75rem;background:rgb(var(--mdui-color-surface-container-high));border-radius:.5rem">
+			<div style="display:flex;flex-direction:column;align-items:center;gap:.375rem">
+				<!--{if $_G['group']['raterange'] && $post['authorid']}-->
+				<mdui-button variant="filled" class="vt_rate mdui-reward-btn" data-url="forum.php?mod=misc&action=rate&tid={$_G['tid']}&pid={$post['pid']}">赏</mdui-button>
+				<!--{else}-->
+				<mdui-button variant="filled" disabled class="mdui-reward-btn">赏</mdui-button>
+				<!--{/if}-->
+				<span style="font-size:.8125rem;opacity:.7">参与人数：{echo count($post['ratelog'])}</span>
+			</div>
+			<div style="display:flex;justify-content:flex-end;align-items:center;gap:.25rem;margin-top:.25rem">
 				<!--{if !empty($postlist[$post['pid']]['totalrate']) && $_G['forum']['ismoderator']}-->
 				<mdui-button variant="text" href="forum.php?mod=misc&action=removerate&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">撤销打赏</mdui-button>
 				<!--{/if}-->
-			</div>
-			<div style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap">
-				<!--{loop $post['ratelog'] $uid $ratelog}-->
-					<mdui-avatar src="<!--{avatar($uid, 'small', true)}-->" title="{$ratelog['username']}" style="width:2rem;height:2rem"></mdui-avatar>
-				<!--{/loop}-->
 				<mdui-button variant="text" href="forum.php?mod=misc&action=viewratings&tid={$_G['tid']}&pid={$post['pid']}">{lang rate_view}</mdui-button>
 			</div>
 			<!--{eval $vt_recent_rates = array_slice($post['ratelog'], 0, 5, true);}-->
-			<div style="margin-top:.5rem;font-size:.8125rem">
+			<div class="mdui-rate-records mdui-rate-compact" style="margin-top:.25rem">
 				<!--{loop $vt_recent_rates $uid $ratelog}-->
-					<div style="display:flex;gap:.5rem;padding:.25rem 0">
-						<a href="home.php?mod=space&uid={$uid}">{$ratelog['username']}</a>
-						<span style="flex:1;opacity:.7"><!--{loop $ratelog['score'] $extcredit $score}-->{$score} {$_G['setting']['extcredits'][$extcredit]['title']}<!--{/loop}--><!--{if $ratelog['reason']}--> · {$ratelog['reason']}<!--{/if}--></span>
+				<article class="mdui-rate-record">
+					<a class="mdui-rate-user" href="home.php?mod=space&uid={$uid}">
+						<mdui-avatar src="<!--{avatar($uid, 'small', true)}-->" alt="{$ratelog['username']}"></mdui-avatar>
+						<span>{$ratelog['username']}</span>
+					</a>
+					<div class="mdui-rate-detail">
+						<!--{loop $ratelog['score'] $extcredit $score}-->
+						<div class="mdui-rate-score"><strong class="<!--{if $score >= 0}-->mdui-rate-positive<!--{else}-->mdui-rate-negative<!--{/if}-->"><!--{if $score > 0}-->+<!--{/if}-->{$score} {$_G['setting']['extcredits'][$extcredit]['title']}</strong></div>
+						<!--{/loop}-->
+						<!--{if $ratelog['reason']}--><p class="mdui-rate-reason">{$ratelog['reason']}</p><!--{/if}-->
 					</div>
+				</article>
 				<!--{/loop}-->
 			</div>
 		</div>
@@ -417,9 +477,7 @@
 			<!--{if $_G['group']['raterange'] && $post['authorid']}-->
 				<mdui-button variant="text" icon="volunteer_activism" class="vt_rate" data-url="forum.php?mod=misc&action=rate&tid={$_G['tid']}&pid={$post['pid']}" href="javascript:;">打赏</mdui-button>
 			<!--{/if}-->
-			<!--{if (($_G['forum']['ismoderator'] && $_G['group']['alloweditpost'] && (!in_array($post['adminid'], array(1, 2, 3)) || $_G['adminid'] <= $post['adminid'])) || ($_G['forum']['alloweditpost'] && $_G['uid'] && ($post['authorid'] == $_G['uid'] && $_G['forum_thread']['closed'] == 0) && !(!$alloweditpost_status && $edittimelimit && TIMESTAMP - $post['dbdateline'] > $edittimelimit)))}-->
-				<mdui-button variant="text" icon="edit" href="forum.php?mod=post&action=edit&fid={$_G['fid']}&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">{lang edit}</mdui-button>
-			<!--{elseif $_G['uid'] && $post['authorid'] == $_G['uid'] && $_G['setting']['postappend']}-->
+			<!--{if !$vt_canedit && $_G['uid'] && $post['authorid'] == $_G['uid'] && $_G['setting']['postappend']}-->
 				<mdui-button variant="text" icon="add_comment" href="forum.php?mod=misc&action=postappend&tid={$post['tid']}&pid={$post['pid']}&extra={$_GET['extra']}&page={$page}">{lang postappend}</mdui-button>
 			<!--{/if}-->
 			<!--{if $_G['forum_thread']['special'] == 3 && ($_G['forum']['ismoderator'] && (!$_G['setting']['rewardexpiration'] || $_G['setting']['rewardexpiration'] > 0 && ($_G['timestamp'] - $_G['forum_thread']['dateline']) / 86400 > $_G['setting']['rewardexpiration']) || $_G['forum_thread']['authorid'] == $_G['uid']) && $post['authorid'] != $_G['forum_thread']['authorid'] && $post['first'] == 0 && $_G['uid'] != $post['authorid'] && $_G['forum_thread']['price'] > 0}-->
@@ -464,6 +522,11 @@
 	<div class="mdui-thread-pages">$multipage</div>
 	<script>
 	(function () {
+		// Discuz 手机版 common.js 的 page.converthtml() 会在 DOM ready 时把 div.pg 改写成
+		// 「page_prev / 原生 select / page_next」结构，文字走 $L('page_prev')，而手机页没有
+		// _JSLANG_，全输出成英文 key。内联脚本先于 ready 执行，这里抢先摘掉 .pg class
+		// 让它找不到目标，保住核心翻页（上一页 1 2 3 .. 20 下一页 + 页码输入框）
+		document.querySelectorAll('div.pg').forEach(function (pg) { pg.classList.remove('pg'); pg.classList.add('mdui-pg'); });
 		function goPage(page) {
 			if (!page) return;
 			var url = 'forum.php?mod=viewthread&tid={$_G['tid']}&ordertype={$ordertype}&mobile=2';
@@ -796,10 +859,31 @@
 		}).then(function (r) {
 			return r.text();
 		}).then(function (t) {
-			// 成功时返回的是 showmessage 的提示 HTML，取纯文本弹 snackbar 后刷新
+			// 成功时返回的是 showmessage 的提示 HTML，取纯文本弹 snackbar；
+		// 提示里自带跳转链接：删主题指向版块页（跟随它，否则刷回已删帖会报错），
+		// 删回帖/加亮等指向帖子页本身（留在当前帖页刷新即可）
+		var html = unwrap(t);
+		if (!html) {
+			// 没有解析出 <root> 说明服务端走了 dheader 302（如删主题直跳 forum.php），
+			// 主题已不存在，回版块页
 			dlg.open = false;
-			mduiTip(plain(unwrap(t)));
-			setTimeout(function () { location.reload(); }, 1000);
+			mduiTip('操作成功');
+			var fid = (form.action.match(/fid=(\d+)/) || [])[1];
+			setTimeout(function () { location.href = fid ? 'forum.php?mod=forumdisplay&fid=' + fid : 'forum.php'; }, 1000);
+			return;
+		}
+		dlg.open = false;
+		mduiTip(plain(html));
+		var doc = new DOMParser().parseFromString(html, 'text/html');
+		var a = doc.querySelector('a[href]');
+		var href = a ? a.getAttribute('href') : '';
+		setTimeout(function () {
+			if (href && !/mod=viewthread|thread-\d+|javascript/i.test(href)) {
+				location.href = href;
+			} else {
+				location.reload();
+			}
+		}, 1000);
 		}).catch(function () {
 			dlg.open = false;
 			mduiTip('操作失败，请重试', true);
@@ -807,12 +891,21 @@
 	}
 
 	// mdui-menu-item 的点击是内部 <a> 发出的，绑在宿主元素上收不到，
-	// 所以统一用 document 级委托拦截，靠 closest 找回菜单项
+	// 所以统一用 document 级委托；事件穿过 dropdown/menu 的 Shadow DOM 冒泡到
+	// document 时 e.target 已被重定向，需再用 composedPath() 找回真正的菜单项。
+	// 注意：管理项一律用 data-href 存地址——如果写 href，MDUI 会在 shadow 里渲染
+	// 真实 <a>，其原生导航无法被 document 级 preventDefault 拦下，会直接跳进 XML 页
 	document.addEventListener('click', function (e) {
 		var item = e.target.closest ? e.target.closest('.vt_modact') : null;
+		if (!item && e.composedPath) {
+			item = e.composedPath().find(function (node) {
+				return node && node.classList && node.classList.contains('vt_modact');
+			});
+		}
 		if (!item) return;
 		e.preventDefault();
-		var url = item.getAttribute('href');
+		var url = item.getAttribute('data-href');
+		if (!url) return;
 		fetch(url, {credentials: 'same-origin'})
 			.then(function (r) { return r.text(); })
 			.then(function (t) {
@@ -820,7 +913,7 @@
 				// repair 之类没有表单、直接返回提示文本的操作，弹提示就够了
 				html.indexOf('<form') < 0 ? (mduiTip(plain(html)), setTimeout(function () { location.reload(); }, 1000)) : fill(html, item.textContent.trim());
 			})
-			.catch(function () { location.href = url; });
+			.catch(function () { mduiTip('操作失败，请重试', true); });
 	});
 })();
 </script>
@@ -1042,6 +1135,11 @@
 			return;
 		}
 		var item = e.target.closest ? e.target.closest('.vt_magic') : null;
+		if (!item && e.composedPath) {
+			item = e.composedPath().find(function (node) {
+				return node && node.classList && node.classList.contains('vt_magic');
+			});
+		}
 		if (!item) return;
 		e.preventDefault();
 		load(item.getAttribute('data-url'), 'magic');
@@ -1164,9 +1262,15 @@
 		other.style.display = group.value === reasons[reasons.length - 1] ? '' : 'none';
 	});
 
-	// mdui-menu-item 的点击由内部 <a> 发出，绑宿主收不到，统一走 document 级委托
+	// mdui-menu-item 的点击由内部 <a> 发出，绑宿主收不到，统一走 document 级委托；
+	// 事件穿过 dropdown 的 Shadow DOM 后 e.target 已重定向，需 composedPath 兜底
 	document.addEventListener('click', function (e) {
 		var item = e.target.closest ? e.target.closest('.vt_report') : null;
+		if (!item && e.composedPath) {
+			item = e.composedPath().find(function (node) {
+				return node && node.classList && node.classList.contains('vt_report');
+			});
+		}
 		if (!item) return;
 		e.preventDefault();
 		pid = item.getAttribute('data-pid');
@@ -1340,8 +1444,8 @@ document.addEventListener('click', function(e) {
 });
 </script>
 
-<!-- 帖子图片查看器：帖子/回帖中未被链接包围的图片（外链图 + 附件图 + 签名图），点击后淡入查看 -->
-<style>
+<!-- 帖子图片查看器：帖子/回帖中未被链接包围的图片（外链图 + 附件图 + 签名图），点击后淡入查看；左右滑动切换 -->
+<style id="vt-viewer-style">
 html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 .vt-viewer { position:fixed; left:0; right:0; top:0; bottom:0; z-index:20000; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.55); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility .25s ease; -webkit-tap-highlight-color:transparent; }
 .vt-viewer.vt-open { opacity:1; visibility:visible; }
@@ -1353,10 +1457,20 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 .vt-viewer-btn .material-icons { font-size:1.5rem; }
 .vt-viewer-close { top:calc(env(safe-area-inset-top, 0px) + .75rem); left:.75rem; }
 .vt-viewer-dl { right:.75rem; bottom:calc(env(safe-area-inset-bottom, 0px) + .75rem); }
+.vt-viewer-count { position:absolute; top:calc(env(safe-area-inset-top, 0px) + .9rem); left:50%; transform:translateX(-50%); padding:.25rem .75rem; border-radius:999px; background:rgba(0,0,0,.45); color:#fff; font-size:.8125rem; line-height:1.4; white-space:nowrap; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
 </style>
 <script>
 (function () {
 	'use strict';
+
+	// —— 单例守护：PJAX 每次进帖子都会重跑本脚本，先销毁上一份实例（document 监听器 + DOM）——
+	// 否则旧监听器依然挂在本页上响应点击，多份实例叠加会导致图片重复展示、退出异常
+	if (window.__vtViewer && window.__vtViewer.destroy) {
+		try { window.__vtViewer.destroy(); } catch (e) {}
+	}
+	// <style> 标签同样会随 PJAX 换页在 #mdui_app 内累积，只保留最后一份
+	var vtStyles = document.querySelectorAll('style#vt-viewer-style');
+	for (var vsi = 0; vsi < vtStyles.length - 1; vsi++) vtStyles[vsi].remove();
 
 	// 生效范围：帖子正文、附件图列表、签名
 	var SCOPE = '.mdui-prose, .vt_imgs, .vt-sig';
@@ -1364,7 +1478,10 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 	// 跨域外链下载中转，随主题一起部署；{$_G['style']['tpldir']} 形如 ./template/MDUI
 	var IMGDL = '{$_G['style']['tpldir']}/imgdl.php';
 
-	var viewer, vimg, btnClose, btnDl, current = null;
+	var viewer, vimg, btnClose, btnDl, vCount, current = null;
+	var gallery = [], galleryIndex = -1;
+	var touchX = 0, touchY = 0, touching = false;
+	var sliding = false;
 
 	function absUrl(u) {
 		// 页面带 <base href>，必须按 baseURI 解析才与浏览器实际加载的地址一致
@@ -1445,13 +1562,83 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 			.then(function () { btnDl.disabled = false; });
 	}
 
+	// 收集本页所有可查看图片（帖子正文 + 附件图列表，不含签名图），供左右滑动切换
+	function collect() {
+		gallery = [];
+		var imgs = document.querySelectorAll('.mdui-prose img, .vt_imgs img');
+		for (var i = 0; i < imgs.length; i++) {
+			if (pick(imgs[i]) && gallery.indexOf(imgs[i]) === -1) gallery.push(imgs[i]);
+		}
+	}
+
+	function updateCount() {
+		if (!vCount) return;
+		if (gallery.length > 1) {
+			vCount.textContent = (galleryIndex + 1) + ' / ' + gallery.length;
+			vCount.style.display = 'block';
+		} else {
+			vCount.style.display = 'none';
+		}
+	}
+
+	function showAt(idx) {
+		if (idx < 0 || idx >= gallery.length) return;
+		galleryIndex = idx;
+		current = gallery[idx];
+		vimg.src = current.getAttribute('src') || '';
+		vimg.alt = current.getAttribute('alt') || '';
+		updateCount();
+	}
+
+	function step(delta) {
+		if (!gallery.length || sliding) return;
+		var n = galleryIndex + delta;
+		if (n < 0 || n > gallery.length - 1) return;
+		sliding = true;
+		// 滑动方向：左滑（delta=1）当前图向左滑出，新图从右侧滑入
+		var dir = delta > 0 ? -1 : 1;
+		vimg.style.transition = 'transform .16s ease-in, opacity .16s ease-in';
+		vimg.style.transform = 'translateX(' + (dir * 36) + 'px) scale(.92)';
+		vimg.style.opacity = '0';
+		setTimeout(function () {
+			galleryIndex = n;
+			current = gallery[n];
+			vimg.src = current.getAttribute('src') || '';
+			vimg.alt = current.getAttribute('alt') || '';
+			// 新图从反方向无过渡就位，再下一帧滑回原位
+			vimg.style.transition = 'none';
+			vimg.style.transform = 'translateX(' + (dir * -36) + 'px) scale(.94)';
+			void vimg.offsetWidth;
+			vimg.style.transition = 'transform .18s ease-out, opacity .18s ease-out';
+			vimg.style.transform = '';
+			vimg.style.opacity = '';
+			updateCount();
+			setTimeout(function () {
+				vimg.style.transition = '';
+				sliding = false;
+			}, 200);
+		}, 170);
+	}
+
 	function open(img) {
+		// 兜底清扫：任何来源（旧脚本实例、异常残留）遗留的其它查看器全部移除，
+		// 保证任何时候页面上至多只有一个查看器
+		var others = document.querySelectorAll('.vt-viewer');
+		for (var oi = 0; oi < others.length; oi++) {
+			if (others[oi] !== viewer) others[oi].remove();
+		}
+		collect();
+		galleryIndex = gallery.indexOf(img);
+		if (galleryIndex === -1) { gallery = [img]; galleryIndex = 0; }
 		current = img;
 		vimg.src = img.getAttribute('src') || '';
 		vimg.alt = img.getAttribute('alt') || '';
-		viewer.classList.add('vt-open');
+		viewer.style.display = 'flex';
+		// 下一帧再淡入，保证 display 切换后 transition 能生效
+		requestAnimationFrame(function () { viewer.classList.add('vt-open'); });
 		viewer.setAttribute('aria-hidden', 'false');
 		document.documentElement.classList.add('vt-viewer-lock');
+		updateCount();
 	}
 
 	function close() {
@@ -1459,42 +1646,76 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 		viewer.setAttribute('aria-hidden', 'true');
 		document.documentElement.classList.remove('vt-viewer-lock');
 		current = null;
+		gallery = [];
+		galleryIndex = -1;
+		// 等淡出过渡结束再真正隐藏，避免遮罩和按钮闪现在页面上
 		setTimeout(function () {
-			if (!viewer.classList.contains('vt-open')) vimg.removeAttribute('src');
+			if (!viewer.classList.contains('vt-open')) {
+				viewer.style.display = 'none';
+				vimg.removeAttribute('src');
+			}
 		}, 300);
 	}
 
 	function build() {
+		// PJAX 换页时旧页面留在 body 上的 viewer 一并清掉，避免累积
+		var stale = document.querySelectorAll('.vt-viewer');
+		for (var i = 0; i < stale.length; i++) stale[i].remove();
+		// 关键样式全部内联：viewer 的隐藏/显示不能依赖 <style> 标签——
+		// 那段样式在 #mdui_app 内，任何导致样式丢失的场景（PJAX、缓存）都会让
+		// 全屏遮罩和关闭/下载按钮漏在页面上
 		viewer = document.createElement('div');
 		viewer.className = 'vt-viewer';
 		viewer.setAttribute('aria-hidden', 'true');
+		viewer.style.cssText = 'display:none;position:fixed;inset:0;z-index:20000;align-items:center;justify-content:center;background:rgba(0,0,0,.55);opacity:1;transition:opacity .25s ease';
 
 		btnClose = document.createElement('button');
 		btnClose.type = 'button';
 		btnClose.className = 'vt-viewer-btn vt-viewer-close';
 		btnClose.setAttribute('aria-label', '关闭');
-		btnClose.innerHTML = '<i class="material-icons">close</i>';
+		btnClose.style.cssText = 'position:absolute;top:.75rem;left:.75rem;width:44px;height:44px;border:none;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;cursor:pointer';
+		btnClose.innerHTML = '<i class="material-icons" style="font-size:24px">close</i>';
 
 		vimg = document.createElement('img');
 		vimg.className = 'vt-viewer-img';
 		vimg.alt = '';
+		vimg.style.cssText = 'max-width:92%;max-height:92%;object-fit:contain';
 
 		btnDl = document.createElement('button');
 		btnDl.type = 'button';
 		btnDl.className = 'vt-viewer-btn vt-viewer-dl';
 		btnDl.setAttribute('aria-label', '下载图片');
-		btnDl.innerHTML = '<i class="material-icons">download</i>';
+		btnDl.style.cssText = 'position:absolute;right:.75rem;bottom:1.5rem;width:44px;height:44px;border:none;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;cursor:pointer';
+		btnDl.innerHTML = '<i class="material-icons" style="font-size:24px">download</i>';
+
+		vCount = document.createElement('div');
+		vCount.className = 'vt-viewer-count';
+		vCount.style.display = 'none';
 
 		viewer.appendChild(btnClose);
 		viewer.appendChild(vimg);
 		viewer.appendChild(btnDl);
+		viewer.appendChild(vCount);
 		document.body.appendChild(viewer);
 	}
 
 	build();
 
-	// 捕获阶段拦截：既接管点击，也挡掉 Discuz 自带的 zoom() 与图片外链跳转
-	document.addEventListener('click', function (e) {
+	// 防御：核心 discuzcode 可能给正文附件图输出 onclick="zoom(...)"，帖子页图片交互
+	// 统一由本查看器接管，清掉内联 zoom，防止核心 imgzoom 全屏弹层叠加出现双显
+	var zimgs = document.querySelectorAll('.mdui-prose img[onclick], .vt_imgs img[onclick], .vt-sig img[onclick]');
+	for (var zi = 0; zi < zimgs.length; zi++) {
+		if (/zoom\s*\(/.test(zimgs[zi].getAttribute('onclick') || '')) zimgs[zi].removeAttribute('onclick');
+	}
+
+	// 命名函数：destroy() 需要按引用移除监听器
+	// 注意必须挂在 window 捕获阶段：window 比 document 先触发，与注册顺序无关——
+	// mdui_pjax 在 document 捕获阶段接管 a[href]（含附件图的 from=album 包装链接），
+	// PJAX 进帖子时它的监听器注册得更早会先跑，若本监听器也放 document 上，
+	// 会出现「pjax 抢走导航 + 查看器照常打开」的双重预览。
+	// window 上 stopPropagation 可让事件完全到不了 document/pjax。
+	function onClick(e) {
+		if (e.defaultPrevented) return;   // 其它处理器已接管（也防旧实例重复打开）
 		var t = e.target;
 		if (!t || t.nodeType !== 1) return;
 
@@ -1512,7 +1733,49 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 		e.preventDefault();
 		e.stopPropagation();
 		open(img);
-	}, true);
+	}
+
+	window.addEventListener('click', onClick, true);
+
+	// 左右滑动切换图片（在查看器遮罩上监听，不影响页面本身的滚动）
+	viewer.addEventListener('touchstart', function (e) {
+		if (!e.touches.length) return;
+		touchX = e.touches[0].clientX;
+		touchY = e.touches[0].clientY;
+		touching = true;
+	}, { passive: true });
+	viewer.addEventListener('touchend', function (e) {
+		if (!touching) return;
+		touching = false;
+		var t = e.changedTouches && e.changedTouches[0];
+		if (!t) return;
+		var dx = t.clientX - touchX, dy = t.clientY - touchY;
+		// 水平位移足够且明显大于纵向才判定为切换，避免干扰点按钮/上下滚动
+		if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+	}, { passive: true });
+
+	// PJAX 离开帖子页时立即收起查看器：viewer 挂在 body 上，PJAX 只换 #mdui_app，
+	// 退到列表页后不会有新脚本实例来清理，开着的话全屏遮罩会残留在新页面上
+	function onPjaxLoad() {
+		document.documentElement.classList.remove('vt-viewer-lock');
+		if (!viewer) return;
+		viewer.classList.remove('vt-open');
+		viewer.style.display = 'none';
+		vimg.removeAttribute('src');
+		current = null;
+		gallery = [];
+		galleryIndex = -1;
+	}
+	document.addEventListener('mduipjax:load', onPjaxLoad);
+
+	// 单例销毁入口：下一个页面实例接管前调用，移除监听器与 DOM
+	function destroy() {
+		window.removeEventListener('click', onClick, true);
+		document.removeEventListener('mduipjax:load', onPjaxLoad);
+		if (viewer && viewer.parentNode) viewer.parentNode.removeChild(viewer);
+		document.documentElement.classList.remove('vt-viewer-lock');
+	}
+	window.__vtViewer = { destroy: destroy };
 })();
 </script>
 
