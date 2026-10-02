@@ -104,6 +104,152 @@
 		link.removeAttribute('onclick');
 		Function(code).call(window);
 	}, true);
+
+	// —— 原生表单控件 → MDUI 组件运行时转换 ——
+	// profile_setting() 直出的原生控件保留为隐藏数据源（表单提交、showbirthday/showdistrict 联动、
+	// show_error 回调等核心逻辑不变），MDUI 组件仅作 UI 外壳，change/input 事件双向同步。
+	(function () {
+		var list = document.getElementById('profilelist');
+		if (!list) return;
+
+		function make(tag) { return document.createElement(tag); }
+
+		function fireChange(elem) {
+			var ev = document.createEvent('HTMLEvents');
+			ev.initEvent('change', true, false);
+			elem.dispatchEvent(ev);
+		}
+
+		function rebuildSelect(ms, sel) {
+			ms.innerHTML = '';
+			for (var i = 0; i < sel.options.length; i++) {
+				var o = sel.options[i];
+				var item = make('mdui-menu-item');
+				item.setAttribute('value', o.value);
+				item.textContent = o.text;
+				ms.appendChild(item);
+			}
+			ms.value = sel.value;
+		}
+
+		function convertSelect(sel) {
+			if (sel.getAttribute('data-mduicvt')) return;
+			sel.setAttribute('data-mduicvt', '1');
+			var ms = make('mdui-select');
+			ms.setAttribute('variant', 'outlined');
+			ms.style.minWidth = '9rem';
+			if (sel.classList.contains('spacecp_privacy')) ms.classList.add('spacecp_privacy');
+			sel.parentNode.insertBefore(ms, sel);
+			sel.style.display = 'none';
+			sel._mduiCvt = ms;
+			rebuildSelect(ms, sel);
+			ms.addEventListener('change', function () {
+				sel.value = ms.value;
+				fireChange(sel);
+				// 生日年/月变化会由核心 showbirthday() 重建日的可选项，需同步重建
+				if (sel.id == 'birthyear' || sel.id == 'birthmonth') {
+					var bd = document.getElementById('birthday');
+					if (bd && bd._mduiCvt) rebuildSelect(bd._mduiCvt, bd);
+				}
+			});
+		}
+
+		function syncText(tf, src) {
+			tf.addEventListener('input', function () { src.value = tf.value; });
+			tf.addEventListener('change', function () { src.value = tf.value; });
+		}
+
+		function convertText(inp) {
+			if (inp.getAttribute('data-mduicvt')) return;
+			inp.setAttribute('data-mduicvt', '1');
+			var tf = make('mdui-text-field');
+			tf.setAttribute('variant', 'outlined');
+			if (inp.placeholder) tf.setAttribute('placeholder', inp.placeholder);
+			tf.style.width = '100%';
+			tf.value = inp.value;
+			inp.style.display = 'none';
+			inp.parentNode.insertBefore(tf, inp);
+			syncText(tf, inp);
+		}
+
+		function convertTextarea(ta) {
+			if (ta.getAttribute('data-mduicvt')) return;
+			ta.setAttribute('data-mduicvt', '1');
+			var tf = make('mdui-text-field');
+			tf.setAttribute('variant', 'outlined');
+			tf.setAttribute('textarea', '');
+			tf.setAttribute('rows', ta.getAttribute('rows') || '3');
+			tf.style.width = '100%';
+			tf.value = ta.value;
+			ta.style.display = 'none';
+			ta.parentNode.insertBefore(tf, ta);
+			syncText(tf, ta);
+		}
+
+		// checkbox/radio：原生结构为 label.lb > input + 文本，整体替换为 mdui 组件
+		function convertChoice(inp, tag) {
+			var label = inp.parentNode;
+			if (!label || label.getAttribute('data-mduicvt')) return;
+			label.setAttribute('data-mduicvt', '1');
+			var text = (label.textContent || '').replace(/^\s+|\s+$/g, '');
+			var comp = make(tag);
+			comp.setAttribute('value', inp.value);
+			if (inp.checked) comp.setAttribute('checked', '');
+			if (tag == 'mdui-radio' && inp.name) comp.setAttribute('name', 'mdcv_' + inp.name);
+			comp.textContent = text;
+			// 原生 input 移出 label（隐藏保留），避免点击组件时 label 激活行为翻转原生状态
+			inp.style.display = 'none';
+			label.parentNode.insertBefore(inp, label);
+			label.insertBefore(comp, label.firstChild);
+			comp.addEventListener('change', function () {
+				inp.checked = comp.checked;
+				if (tag == 'mdui-radio' && comp.checked && inp.name) {
+					var group = list.querySelectorAll('input[type=radio][name="' + inp.name + '"]');
+					for (var i = 0; i < group.length; i++) {
+						if (group[i] !== inp) group[i].checked = false;
+					}
+				}
+			});
+		}
+
+		function convertFile(inp) {
+			if (inp.getAttribute('data-mduicvt')) return;
+			inp.setAttribute('data-mduicvt', '1');
+			var btn = make('mdui-button');
+			btn.setAttribute('variant', 'outlined');
+			btn.setAttribute('type', 'button');
+			btn.textContent = '选择文件';
+			var name = make('span');
+			name.style.fontSize = '.875rem';
+			name.style.opacity = '.7';
+			btn.addEventListener('click', function () { inp.click(); });
+			inp.addEventListener('change', function () {
+				name.textContent = inp.files && inp.files.length ? inp.files[0].name : '';
+			});
+			inp.style.display = 'none';
+			inp.parentNode.insertBefore(btn, inp);
+			inp.parentNode.insertBefore(name, btn.nextSibling);
+		}
+
+		function convertAll(root) {
+			var arr = root.querySelectorAll('select.ps');
+			for (var i = 0; i < arr.length; i++) convertSelect(arr[i]);
+			arr = root.querySelectorAll('input.px');
+			for (var i = 0; i < arr.length; i++) convertText(arr[i]);
+			arr = root.querySelectorAll('textarea.pt');
+			for (var i = 0; i < arr.length; i++) convertTextarea(arr[i]);
+			arr = root.querySelectorAll('input.pc');
+			for (var i = 0; i < arr.length; i++) convertChoice(arr[i], 'mdui-checkbox');
+			arr = root.querySelectorAll('input.pr');
+			for (var i = 0; i < arr.length; i++) convertChoice(arr[i], 'mdui-radio');
+			arr = root.querySelectorAll('input.pf');
+			for (var i = 0; i < arr.length; i++) convertFile(arr[i]);
+		}
+
+		convertAll(list);
+		// 地区联动 AJAX（ajaxget）会向 #birthdistrictbox/#residedistrictbox 动态插入新的原生 select，观察后自动转换
+		new MutationObserver(function () { convertAll(list); }).observe(list, { childList: true, subtree: true });
+	})();
 	</script>
 <!--{/if}-->
 </div>

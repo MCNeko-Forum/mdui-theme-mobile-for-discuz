@@ -55,9 +55,22 @@
 		</mdui-card>
 	<!--{elseif $operation == 'other'}-->
 		<p style="opacity:.7">{lang you_control_other_operation}</p>
+		<!--{eval $mdui_friend = isset($fields['allowasfriend']) ? intval($fields['allowasfriend']) : 0;$mdui_follow = isset($fields['allowasfollow']) ? intval($fields['allowasfollow']) : 0;}-->
 		<mdui-card variant="filled" style="display:block;padding:1rem">
-			<!--{if helper_access::check_module('friend')}--><mdui-select name="allowasfriend" label="{lang add_friends}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$arr['allowasfriend'][0]>{lang no}</mdui-menu-item><mdui-menu-item value="1"$arr['allowasfriend'][1]>{lang yes}</mdui-menu-item></mdui-select><!--{/if}-->
-			<!--{if helper_access::check_module('follow')}--><mdui-select name="allowasfollow" label="{lang add_follow}" style="width:100%;margin-bottom:1rem"><mdui-menu-item value="0"$arr['allowasfollow'][0]>{lang no}</mdui-menu-item><mdui-menu-item value="1"$arr['allowasfollow'][1]>{lang yes}</mdui-menu-item></mdui-select><!--{/if}-->
+			<!--{if helper_access::check_module('friend')}-->
+			<div style="margin-bottom:1rem">
+				<div style="font-size:.875rem;opacity:.7;margin-bottom:.375rem">{lang add_friends}</div>
+				<mdui-radio name="allowasfriend" value="0"{if $mdui_friend == 0} checked{/if}>{lang no}</mdui-radio>
+				<mdui-radio name="allowasfriend" value="1"{if $mdui_friend == 1} checked{/if}>{lang yes}</mdui-radio>
+			</div>
+			<!--{/if}-->
+			<!--{if helper_access::check_module('follow')}-->
+			<div style="margin-bottom:1rem">
+				<div style="font-size:.875rem;opacity:.7;margin-bottom:.375rem">{lang add_follow}</div>
+				<mdui-radio name="allowasfollow" value="0"{if $mdui_follow == 0} checked{/if}>{lang no}</mdui-radio>
+				<mdui-radio name="allowasfollow" value="1"{if $mdui_follow == 1} checked{/if}>{lang yes}</mdui-radio>
+			</div>
+			<!--{/if}-->
 			<!--{hook/spacecp_privacy_other_extra}--><mdui-button type="submit" name="privacy3submit" value="true" full-width>{lang save}</mdui-button>
 		</mdui-card>
 	<!--{else}-->
