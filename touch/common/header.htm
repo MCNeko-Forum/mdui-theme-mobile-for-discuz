@@ -69,8 +69,81 @@
 	<!--{else}-->
 	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/icons/material-icons.css?{VERHASH}" type="text/css" media="all">
 	<!--{/if}-->
-	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/style.css?{VERHASH}" type="text/css" media="all">
+	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/style.css?{VERHASH}&v=2" type="text/css" media="all">
 	<script src="{STATICURL}js/mobile/jquery.min.js?{VERHASH}"></script>
+	<script type="text/javascript">
+	// Discuz X5 手机版 common.js 末尾调用了 _attachEvent，但该函数只在桌面版 common.js 中定义，这里补一个兼容实现
+	window._attachEvent = window._attachEvent || function(obj, evt, func, eventobj) {
+		eventobj = !eventobj ? obj : eventobj;
+		if(obj.addEventListener) {
+			obj.addEventListener(evt, func, false);
+		} else if(eventobj.attachEvent) {
+			eventobj.attachEvent('on' + evt, func);
+		}
+	};
+	// mobile/common.js 还用到了只在桌面版 common.js 定义的 getcookie/setcookie，一并补齐
+	window.setcookie = window.setcookie || function(cookieName, cookieValue, seconds, path, domain, secure) {
+		if (cookieValue == '' || seconds < 0) {
+			seconds = -2592000;
+		}
+		if (seconds) {
+			var expires = new Date();
+			expires.setTime(expires.getTime() + seconds * 1000);
+			domain = !domain ? cookiedomain : domain;
+			path = !path ? cookiepath : path;
+			document.cookie = cookieName + '=' + escape(cookieValue) +
+				(expires ? '; expires=' + expires.toUTCString() : '') +
+				(path ? '; path=' + path : '/') +
+				(domain ? '; domain=' + domain : '') +
+				(secure ? '; secure' : '');
+		}
+	};
+	window.getcookie = window.getcookie || function(name, nounescape) {
+		name = cookiepre + name;
+		var cookie_start = document.cookie.indexOf(name);
+		var cookie_end = document.cookie.indexOf(';', cookie_start);
+		if (cookie_start == -1) {
+			return '';
+		} else {
+			var v = document.cookie.substring(cookie_start + name.length + 1, (cookie_end > cookie_start ? cookie_end : document.cookie.length));
+			return !nounescape ? unescape(v) : v;
+		}
+	};
+	// 桌面版 common.js 才有的函数，帖子内容（img onload/thumbImg、播放器）和编辑页会用到
+	window.getID = window.getID || function(id) {
+		return !id ? null : document.getElementById(id);
+	};
+	window.detectHtml5Support = window.detectHtml5Support || function() {
+		return document.createElement("Canvas").getContext;
+	};
+	window.thumbImg = window.thumbImg || function(obj) {
+		if (!obj) return;
+		obj.onload = null;
+		var zw = obj.offsetWidth, zh = obj.offsetHeight;
+		if (zw < 2) return;
+		var fixw = 600;
+		if (zw > fixw) { zh = Math.round(zh * fixw / zw); zw = fixw; }
+		obj.width = zw;
+		obj.height = zh;
+		obj.style.maxWidth = '100%';
+	};
+	// 帖子内播放器等会调用的语言函数（依赖页面输出的 _JSLANG_）
+	// 注意：函数名用拼接写法，否则会被 Discuz 模板编译器当成模板变量吞掉
+	var _LNAME = '$' + 'L';
+	window[_LNAME] = window[_LNAME] || function(key, param) {
+		if (typeof window._JSLANG_ != 'undefined' && typeof window._JSLANG_[key] != 'undefined') {
+			var value = window._JSLANG_[key];
+			if (param instanceof Array) {
+				for (var i in param) {
+					value = value.replace('{' + (parseInt(i) + 1) + '}', param[i]);
+					value = value.replace('\\n', '\n');
+				}
+			}
+			return value;
+		}
+		return key;
+	};
+	</script>
 	<script src="{STATICURL}js/mobile/common.js?{VERHASH}" charset="{CHARSET}"></script>
 	<script type="text/javascript">
 	var seccheck_tpl = seccheck_tpl || {};
@@ -168,7 +241,7 @@
 	});
 	</script>
 	<!-- 锚点平滑滚动仅使用主题本地脚本，不随 MDUI CDN 切换。 -->
-	<script src="{$_G['style']['styleimgdir']}/anchor-scroll.js?{VERHASH}" defer></script>
+	<script src="{$_G['style']['styleimgdir']}/anchor-scroll.js?{VERHASH}&v=2" defer></script>
 	<script>mdui.setColorScheme('{if $_G['style']['mdui_color']}$_G['style']['mdui_color']{else}#2B7ACD{/if}');</script>
 	<!-- 折叠组件兼容：spoiler.js 在 head 中执行时按钮尚未渲染，改用事件委托按相邻关系开关内容，并拦截原脚本避免重复切换 -->
 	<script>
@@ -187,8 +260,8 @@
 	</script>
 	<!-- X5 头像懒加载兼容：mobile/common.js 缺少 loadAvatar()，手动把 _avt 头像的 data-src 转为 src（修复 ahome_horn 等插件头像不显示） -->
 	<script>
-	document.addEventListener('DOMContentLoaded', function() {
-		var defurl = typeof DEFAULTAVATAR != 'undefined' ? DEFAULTAVATAR : './data/avatar/noavatar.svg';
+	window.mduiFixAvatars = function() {
+	var defurl = typeof DEFAULTAVATAR != 'undefined' ? DEFAULTAVATAR : './data/avatar/noavatar.svg';
 		var avatarurl = (typeof DEFAULTAVATAR != 'undefined' && DEFAULTAVATAR.lastIndexOf('/') !== -1) ? DEFAULTAVATAR.substring(0, DEFAULTAVATAR.lastIndexOf('/') + 1) : '';
 		document.querySelectorAll('img._avt').forEach(function(img) {
 			img.onerror = function() { this.onerror = null; this.src = defurl; };
@@ -204,9 +277,12 @@
 				delete img.dataset.src;
 			}
 			img.classList.remove('_avt');
-		});
 	});
-	</script>
+};
+document.addEventListener('DOMContentLoaded', window.mduiFixAvatars);
+// PJAX 换页后新插入内容里的 _avt 头像也要处理
+document.addEventListener('mduipjax:load', window.mduiFixAvatars);
+</script>
 	<!--{if $_G['style']['mdui_addcss']}--><style>$_G['style']['mdui_addcss']</style><!--{/if}-->
 	<!--{if $_G['style']['mdui_head']}--><!--{eval $mdui_head = htmlspecialchars_decode($_G['style']['mdui_head'], ENT_QUOTES);}-->$mdui_head<!--{/if}-->
 	<!--{if $_G['style']['mdui_fonts']}-->
