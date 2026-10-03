@@ -318,10 +318,53 @@ window.mduiGet = function (url, done) {
 		<div id="mdui_extlink_url" style="margin-top:.75rem;padding:.75rem;overflow-wrap:anywhere;font-size:.875rem;font-weight:400;line-height:1.4;background:rgb(var(--mdui-color-surface-container-highest));border-radius:.75rem"></div>
 		<div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.5rem">
 			<mdui-button variant="text" onclick="document.getElementById('mdui_extlink').hidden=true">取消</mdui-button>
+			<mdui-button id="mdui_extlink_copy" variant="text">复制</mdui-button>
 			<mdui-button id="mdui_extlink_go" variant="text" target="_blank">继续访问</mdui-button>
 		</div>
 	</div>
 </div>
+<script>
+// 复制外链：clipboard API 优先，execCommand 兜底，成功后消息条提示
+(function () {
+	function mduiTip(msg) { mdui.snackbar({ message: msg }); }
+	document.addEventListener('click', function (e) {
+		var btn = (e.target.closest && e.target.closest('#mdui_extlink_copy')) ||
+			(e.composedPath && e.composedPath().some(function (n) { return n && n.id === 'mdui_extlink_copy'; }));
+		if (!btn) return;
+		var url = document.getElementById('mdui_extlink_url').textContent;
+		var done = function () {
+			document.getElementById('mdui_extlink').hidden = true;
+			mduiTip('复制链接成功');
+		};
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(url).then(done, function () { fallback(url, done); });
+		} else {
+			fallback(url, done);
+		}
+		function fallback(text, cb) {
+			var ta = document.createElement('textarea');
+			ta.value = text;
+			ta.style.position = 'fixed';
+			ta.style.opacity = '0';
+			document.body.appendChild(ta);
+			ta.select();
+			try { document.execCommand('copy'); cb(); } catch (err) {}
+			ta.remove();
+		}
+	});
+	// 图片加载失败：保留父级 <a> 让失败块仍可点开预览，用 replaceChildren 换成提示块
+	document.addEventListener('error', function (e) {
+		var img = e.target;
+		if (!img || img.tagName !== 'IMG' || img.hasAttribute('smilieid')) return;
+		var link = img.closest && img.closest('a[href]');
+		var box = document.createElement('div');
+		box.style.cssText = 'display:flex;align-items:center;justify-content:center;min-height:3rem;width:100%;font-size:.875rem;color:rgb(var(--mdui-color-error));background:rgb(var(--mdui-color-surface-container-highest));border-radius:8px';
+		box.textContent = '加载失败';
+		if (link) link.replaceChildren(box);
+		else if (img.parentNode) img.replaceWith(box);
+	}, true);
+})();
+</script>
 <style>
 #mdui_extlink[hidden] { display: none !important; }
 @keyframes mdui-extlink-pop {

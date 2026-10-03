@@ -69,7 +69,7 @@
 	<!--{else}-->
 	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/icons/material-icons.css?{VERHASH}" type="text/css" media="all">
 	<!--{/if}-->
-	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/style.css?{VERHASH}&v=3" type="text/css" media="all">
+	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/style.css?{VERHASH}&v=17" type="text/css" media="all">
 	<script src="{STATICURL}js/mobile/jquery.min.js?{VERHASH}"></script>
 	<script type="text/javascript">
 	// Discuz X5 手机版 common.js 末尾调用了 _attachEvent，但该函数只在桌面版 common.js 中定义，这里补一个兼容实现
@@ -299,6 +299,7 @@ document.addEventListener('mduipjax:load', window.mduiFixAvatars);
 	<!--{/if}-->
 </head>
 <body id="{$_G['basescript']}" class="pg_{CURMODULE}">
+
 <!--{hook/global_header_mobile}-->
 <div id="append_parent"></div>
 
@@ -311,7 +312,11 @@ document.addEventListener('mduipjax:load', window.mduiFixAvatars);
 				<span slot="description">{lang credits}: $_G['member']['credits']</span>
 			</mdui-list-item>
 		<!--{else}-->
-			<mdui-list-item href="member.php?mod=logging&action=login" icon="account_circle" rounded>{lang login}</mdui-list-item>
+			<mdui-list-item href="member.php?mod=logging&action=login" style="min-height:5.5rem" rounded>
+				<mdui-avatar slot="icon" src="./data/avatar/noavatar.svg" style="width:3rem;height:3rem"></mdui-avatar>
+				请登录
+				<span slot="description">登录 / 注册</span>
+			</mdui-list-item>
 		<!--{/if}-->
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>
 		<!--{eval
@@ -348,7 +353,7 @@ document.addEventListener('mduipjax:load', window.mduiFixAvatars);
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>
 		<!--{eval $mdui_i18n_paths = i18n('get'); $mdui_i18n_current = !empty($_G['i18n']) ? $_G['i18n'] : (!empty($_G['setting']['i18n_default']) ? $_G['setting']['i18n_default'] : 'SC_UTF8');}-->
 		<!--{if $mdui_i18n_paths}-->
-		<mdui-select label="语言" icon="translate" placement="auto" value="{$mdui_i18n_current}" required onchange="if(this.value) location.href='misc.php?mod=i18n&key='+encodeURIComponent(this.value)" style="margin:.25rem 0 .5rem;--mdui-menu-max-height:min(60vh,24rem)">
+		<mdui-select label="语言" icon="translate" placement="bottom" value="{$mdui_i18n_current}" required onchange="if(this.value) location.href='misc.php?mod=i18n&key='+encodeURIComponent(this.value)" style="margin:.25rem 0 .5rem;--mdui-menu-max-height:min(60vh,24rem)">
 			<!--{loop $mdui_i18n_paths $mdui_i18n_key $mdui_i18n_path}-->
 			<!--{if empty($_G['setting']['i18ns']) || in_array($mdui_i18n_key, (array)$_G['setting']['i18ns'])}-->
 			<mdui-menu-item value="{$mdui_i18n_key}"><!--{if $mdui_i18n_key == 'SC_UTF8'}-->简体中文<!--{elseif $mdui_i18n_key == 'TC_UTF8'}-->繁體中文<!--{elseif $mdui_i18n_key == 'EN'}-->English<!--{else}-->{$mdui_i18n_key}<!--{/if}--></mdui-menu-item>

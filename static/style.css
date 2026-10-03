@@ -33,7 +33,7 @@ a {
 .mdui-prose a {
 	color: inherit;
 	font-weight: 700;
-	text-decoration: none;
+	text-decoration: underline;
 }
 
 /* 帖子编辑记录统一使用居中的灰色提示文字。 */
@@ -114,6 +114,16 @@ mdui-top-app-bar {
 	border-radius: 8px;
 }
 
+/* 表情图带 smilieid 属性，排除上面的大图规则：不拉伸不限宽不圆角，
+   否则表情会被撑开拆行、末尾表情掉到下一行 */
+img[smilieid] {
+	max-width: none;
+	height: auto;
+	border-radius: 0;
+	line-height: 1;
+	vertical-align: middle;
+}
+
 .postmessage a,
 .poll a,
 .trade_box a,
@@ -122,7 +132,7 @@ mdui-top-app-bar {
 .activity a {
 	color: inherit;
 	font-weight: 700;
-	text-decoration: none;
+	text-decoration: underline;
 }
 
 /* 卡片型区块 */
@@ -167,6 +177,33 @@ mdui-top-app-bar {
 .mx {
 	color: rgb(var(--mdui-color-error));
 }
+
+.mdui-attachment-notice {
+	display: flex;
+	align-items: flex-start;
+	gap: .75rem;
+	margin: .75rem 0;
+	padding: .875rem 1rem;
+	border: 1px solid rgb(var(--mdui-color-outline-variant));
+	border-radius: 12px;
+	background: rgb(var(--mdui-color-surface-container));
+	color: rgb(var(--mdui-color-on-surface-variant));
+	font-size: .875rem;
+	line-height: 1.65;
+}
+.mdui-attachment-notice > .material-icons {
+	flex: 0 0 auto;
+	margin-top: 2px;
+	color: rgb(var(--mdui-color-primary));
+	font-size: 20px;
+}
+.mdui-attachment-notice a {
+	color: rgb(var(--mdui-color-primary));
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+.mdui-attachment-notice div { min-width: 0; overflow-wrap: anywhere; }
 
 .locked,
 .poll_txt {
@@ -470,8 +507,64 @@ mdui-tab[data-href] {
 	align-items: center;
 }
 
-.spacecp_privacy {
-	margin-top: .5rem;
+/* 资料项校验错误提示占满整行，换行显示在控件下方 */
+.spacecp_field > [id^=showerror_] {
+	width: 100%;
+	margin: 0;
+}
+
+/* mdui 转换控件默认 width:100% 会独占一行；flex-basis 0% + grow 让它
+   均分剩余宽度，min-width:0 解除 min-content 收缩下限（否则仍会撑满整行
+   把 privacy 挤到下一行）；mdui-select 的 9rem 内联 minWidth 不受影响。
+   order -2 让控件排在 showerror/说明文字（order 0）之前，privacy 才能
+   与输入框同行（showerror width:100% 在 DOM 里夹在两者中间会强行换行）。
+   min-width 加 !important 压过 convertSelect 的内联 minWidth:9rem，
+   生日年/月/日三个下拉才能并排同一行 */
+.spacecp_field > mdui-text-field,
+.spacecp_field > mdui-select,
+.spacecp_field > input.px,
+.spacecp_field > textarea.pt,
+.spacecp_field > select.ps {
+	flex: 1 1 0%;
+	width: auto;
+	min-width: 0;
+	order: -2;
+}
+
+.spacecp_field > mdui-select,
+.spacecp_field > select.ps {
+	min-width: 0 !important;
+}
+
+/* 出生地/居住地的多级下拉包在 p#xxdistrictbox 里（showdistrict 生成，
+   AJAX 联动会动态插入），容器本身转 flex，内部下拉均分宽度并排 */
+.spacecp_field > p[id$="districtbox"] {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem;
+	align-items: center;
+	flex: 1 1 0%;
+	min-width: 0;
+	order: -2;
+}
+
+.spacecp_field > p[id$="districtbox"] > mdui-select,
+.spacecp_field > p[id$="districtbox"] > select.ps {
+	flex: 1 1 0%;
+	width: auto;
+	min-width: 0 !important;
+}
+
+/* 公开状态下拉固定宽度紧贴输入框右侧；选择器带 .spacecp_field 前缀
+   压过上面 .spacecp_field > mdui-select 的 flex:1（否则下拉被拉满整行），
+   width 覆盖 convertSelect 的内联 minWidth:9rem，让下拉占比更小 */
+.spacecp_field > mdui-select.spacecp_privacy,
+.spacecp_field > .spacecp_privacy {
+	flex: 0 0 auto;
+	width: 6.5rem;
+	min-width: 6.5rem !important;
+	margin-left: auto;
+	order: -1;
 }
 
 /* profile_setting() 输出的表单控件类名：px pt ps pc pr pf lb */
@@ -935,11 +1028,27 @@ p.d {
 
 /* 个人空间资料页：统一承载空间菜单、资料主体和统计卡片。 */
 .mdui-space-profile { padding: 0 1rem 1rem; }
-.mdui-space-hero { display: flex; align-items: center; gap: .875rem; padding: 1.25rem 0; }
+.mdui-space-hero { display: flex; align-items: center; gap: .875rem; min-height: 7rem; padding: 1.25rem 1rem; margin: 0 -1rem; background-position: center center; background-repeat: no-repeat; background-size: cover; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.65); }
 .mdui-space-hero mdui-avatar { width: 4rem; height: 4rem; flex: 0 0 auto; }
 .mdui-space-identity { min-width: 0; }
 .mdui-space-name { font-size: 1.25rem; font-weight: 600; overflow-wrap: anywhere; }
 .mdui-space-meta { margin-top: .25rem; color: rgb(var(--mdui-color-on-surface-variant)); font-size: .8125rem; }
+/* 资料页 hero 改版：主行（头像+名字+人气/积分）竖排徽章行（性别/等级/组头衔） */
+.mdui-space-hero-stack { display: block; }
+.mdui-space-hero-stack .mdui-space-hero-main { display: flex; align-items: center; gap: .875rem; }
+.mdui-space-hstats { margin-top: .25rem; display: flex; align-items: baseline; gap: .3rem; font-size: .8125rem; flex-wrap: wrap; }
+.mdui-space-hstats b { font-size: 1.05rem; }
+.mdui-space-hstats .pipe, .mdui-space-hero-badges .pipe { opacity: .6; }
+/* hero 徽章行用独立类名，避免与认证徽章的 .mdui-space-badges 规则（下方 1066 行）冲突 */
+.mdui-space-hero-badges { margin-top: .625rem; display: flex; align-items: center; gap: .5rem; font-size: .8125rem; flex-wrap: wrap; }
+/* 性别：圆形半透明主色底 + 白色图标；等级徽章透明底白字；组头衔以等级颜色为底白字 */
+.mdui-space-gender { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: rgba(var(--mdui-color-primary), .45); color: #fff; font-size: 1.05rem; flex: 0 0 auto; }
+.mdui-space-gender-male { background: rgba(66, 133, 244, .75); }
+.mdui-space-gender-female { background: rgba(255, 105, 180, .75); }
+.mdui-space-level { display: inline-flex; align-items: center; padding: .1rem .45rem; border-radius: .5rem; background: transparent; border: 1px solid rgba(255,255,255,.5); color: #fff; font-weight: 600; }
+.mdui-space-grouptitle { display: inline-flex; align-items: center; padding: .1rem .5rem; border-radius: .5rem; color: #fff; text-shadow: none; }
+/* Discuz 的 grouptitle 自带 <font color=组色> 呈现提示，会盖过继承的白字，直接对内层强制白色 */
+.mdui-space-grouptitle font { color: #fff; }
 .mdui-space-shortcuts, .mdui-space-nav { padding: 0; margin-bottom: .75rem; }
 .mdui-space-card { display: block; box-sizing: border-box; margin-bottom: .75rem; padding: 1rem; }
 .mdui-space-credits { margin-bottom: .75rem; padding: .875rem 1rem; border-radius: .75rem; background: rgb(var(--mdui-color-surface-container)); }

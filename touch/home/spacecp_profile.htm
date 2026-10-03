@@ -29,16 +29,16 @@
 			<!--{if $value['available']}-->
 			<div id="tr_$key" class="spacecp_row">
 				<div id="th_$key" class="spacecp_label"><!--{if $value['required']}--><span class="mx">*</span><!--{/if}-->$value['title']</div>
-				<div id="td_$key" class="spacecp_field">$htmls[$key]</div>
-				<!--{if $vid}-->
+				<div id="td_$key" class="spacecp_field">$htmls[$key]<!--{if $vid}-->
 					<input type="hidden" name="privacy[$key]" value="3" />
-				<!--{else}-->
+					<!--{else}-->
 					<select name="privacy[$key]" class="ps spacecp_privacy">
 						<option value="0"{if isset($privacy[$key]) && $privacy[$key] == "0"} selected="selected"{/if}>{lang open_privacy}</option>
 						<option value="1"{if isset($privacy[$key]) && $privacy[$key] == "1"} selected="selected"{/if}>{lang friend_privacy}</option>
 						<option value="3"{if isset($privacy[$key]) && $privacy[$key] == "3"} selected="selected"{/if}>{lang secrecy}</option>
 					</select>
-				<!--{/if}-->
+					<!--{/if}-->
+				</div>
 			</div>
 			<!--{/if}-->
 			<!--{/loop}-->
@@ -81,8 +81,15 @@
 		var elem = document.getElementById('th_' + fieldid);
 		if (!elem) return;
 		elem.classList.add('rq');
-		document.getElementById('showerror_' + fieldid).innerHTML = '{lang check_date_item} ' + (typeof extrainfo == 'string' ? extrainfo : '');
-		document.getElementById(fieldid) && document.getElementById(fieldid).focus();
+		var msg = '{lang check_date_item} ' + (typeof extrainfo == 'string' ? extrainfo : '');
+		var err = document.getElementById('showerror_' + fieldid);
+		if (err) err.innerHTML = msg;
+		var field = document.getElementById(fieldid);
+		field && field.focus({ preventScroll: true });
+		// 校验失败经 iframe 回调触发，页面不会滚动，锚点滚到对应资料项并弹消息条
+		var row = document.getElementById('tr_' + fieldid) || elem;
+		row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		mdui.snackbar({ message: msg });
 	}
 	function show_success(message) {
 		mdui.snackbar({ message: message || '{lang update_date_success}' });
@@ -132,11 +139,14 @@
 			ms.value = sel.value;
 		}
 
+		// mdui-select 自带 placement 属性（映射到内部 mdui-dropdown），默认 auto
+		// 贴近屏幕底部会向上翻；设为 bottom 让面板始终向下弹出、紧贴触发器
 		function convertSelect(sel) {
 			if (sel.getAttribute('data-mduicvt')) return;
 			sel.setAttribute('data-mduicvt', '1');
 			var ms = make('mdui-select');
 			ms.setAttribute('variant', 'outlined');
+			ms.setAttribute('placement', 'bottom');
 			ms.style.minWidth = '9rem';
 			if (sel.classList.contains('spacecp_privacy')) ms.classList.add('spacecp_privacy');
 			sel.parentNode.insertBefore(ms, sel);
@@ -234,6 +244,11 @@
 		function convertAll(root) {
 			var arr = root.querySelectorAll('select.ps');
 			for (var i = 0; i < arr.length; i++) convertSelect(arr[i]);
+			// Discuz 手机版 common.js 会把 .ps.sort_sel（生日年/月/日）包进 sort-sel-wrap
+			// 并渲染选中文字壳；原生 select 被我们转换隐藏后壳里只剩裸「年/月/日」文字，
+			// 把壳一并藏掉（壳可能在 DOMContentLoaded 后才生成，靠下面的 Observer 重跑兜住）
+			arr = root.querySelectorAll('.sort-sel-wrap > select[data-mduicvt]');
+			for (var i = 0; i < arr.length; i++) arr[i].parentNode.style.display = 'none';
 			arr = root.querySelectorAll('input.px');
 			for (var i = 0; i < arr.length; i++) convertText(arr[i]);
 			arr = root.querySelectorAll('textarea.pt');

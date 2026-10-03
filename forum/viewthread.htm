@@ -291,7 +291,7 @@
 
 		<!--{if $_G['setting']['mobile']['mobilesimpletype'] == 0 && !$needhiddenreply}-->
 			<!--{if $post['attachment']}-->
-				<blockquote style="opacity:.7;font-size:.875rem">{lang attachment}: <!--{if $_G['uid']}-->{lang attach_nopermission}<!--{else}-->{lang attach_nopermission_login}<!--{/if}--></blockquote>
+				<div class="mdui-attachment-notice"><span class="material-icons" aria-hidden="true">lock</span><div>{lang attachment}: <!--{if $_G['uid']}-->{lang attach_nopermission}<!--{else}-->{lang attach_nopermission_login}<!--{/if}--></div></div>
 			<!--{else}-->
 				<!--{if $post['imagelist']}--><!--{eval $vtimgs = trim(showattach($post, 1));}--><!--{if $vtimgs}--><ul class="vt_imgs">$vtimgs</ul><!--{/if}--><!--{/if}-->
 				<!--{if $post['attachlist']}--><ul class="vt_atts">{echo showattach($post)}</ul><!--{/if}-->
