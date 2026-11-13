@@ -281,9 +281,9 @@
 							real = Math.ceil(real > 0 ? real + real * tax : real);
 							getID('replycredit_sum').innerHTML = sum > 0 ? sum : 0;
 							if (real > own) {
-								getID('replycredit').innerHTML = '<b style="color:var(--mdui-color-error)">回帖奖励积分总额过大(' + real + ')</b>';
+								getID('replycredit').innerHTML = '<b style="color:var(--mdui-color-error)">{lang mdui_replycredit_too_large_pre}' + real + ')</b>';
 							} else if (have > 0 && real < 0) {
-								getID('replycredit').innerHTML = '返还' + Math.abs(real);
+								getID('replycredit').innerHTML = '{lang mdui_replycredit_refund}' + Math.abs(real);
 							} else {
 								getID('replycredit').innerHTML = prefix + (real > 0 ? real : 0);
 							}
@@ -510,7 +510,7 @@ window.mduiInsert = function (type) {
 	var main = v(1);
 
 	if (!main) {
-		mduiTip('请输入要插入的内容');
+		mduiTip('{lang mdui_enter_insert_content}');
 		return;
 	}
 	var code;
@@ -638,7 +638,7 @@ window.mduiInsert = function (type) {
 
 		[].forEach.call(input.files, function (file) {
 			// 显示上传进度提示
-			var uploadingTip = mduiTip('正在上传 ' + file.name + '...', false, 0);
+			var uploadingTip = mduiTip('{lang mdui_uploading_pre}' + file.name + '...', false, 0);
 			
 			var progress = document.createElement('div');
 			progress.className = 'mdui-upload-progress';
@@ -672,7 +672,7 @@ window.mduiInsert = function (type) {
 					var isImg = isImage;
 					
 					// 显示上传成功提示
-					mduiTip((isImg ? '图片' : '附件') + '上传成功', false);
+					mduiTip(isImg ? '{lang mdui_image_uploaded}' : '{lang mdui_attachment_uploaded}', false);
 					
 					// 图片始终进图库；附件按返回标志判定，非图进附件列表
 					if (isImg) {
@@ -826,7 +826,7 @@ window.mduiInsert = function (type) {
 		if (!list) return;
 		if (op == 2) {
 			window.__unusedType = type;
-			unusedDlg.setAttribute('headline', type == 'img' ? '未使用的图片' : '未使用的附件');
+			unusedDlg.setAttribute('headline', type == 'img' ? '{lang mdui_unused_images}' : '{lang mdui_unused_attachments}');
 			var body = getID('mdui_unused_body');
 			body.innerHTML = list.innerHTML;
 			// 图片与附件统一样式一行一个，弹窗只是加宽展示
@@ -846,7 +846,7 @@ window.mduiInsert = function (type) {
 		}
 		var aids = [];
 		list.querySelectorAll('mdui-checkbox').forEach(function (c) { if (c.checked) aids.push(c.value); });
-		if (!aids.length) { mduiTip(op == 1 ? '请先勾选要使用的项目' : '没有可删除的项目', true); return; }
+		if (!aids.length) { mduiTip(op == 1 ? '{lang mdui_select_items_first}' : '{lang mdui_no_deletable_items}', true); return; }
 		if (op == 1) {
 			aids.forEach(function (aid) {
 				var item = getID('unused' + aid);
@@ -860,9 +860,9 @@ window.mduiInsert = function (type) {
 		}
 		// op == 0：删除，先二次确认再走后端 deleteattach（未使用附件 pid=0，只需 formhash + uid 归属校验）
 		mdui.confirm({
-			headline: '删除未使用的' + (type == 'img' ? '图片' : '附件'),
-			description: '确定要删除选中的 ' + aids.length + ' 项吗？删除后不可恢复。',
-			confirmText: '删除',
+			headline: type == 'img' ? '{lang mdui_delete_unused_image}' : '{lang mdui_delete_unused_attachment}',
+			description: '{lang mdui_delete_selected_pre}' + aids.length + '{lang mdui_delete_selected_post}',
+			confirmText: '{lang mdui_delete}',
 			cancelText: '{lang cancel}',
 			onConfirm: function () {
 				var url = 'forum.php?mod=ajax&action=deleteattach&inajax=yes&formhash={FORMHASH}' +

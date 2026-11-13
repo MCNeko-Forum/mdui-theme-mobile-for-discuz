@@ -30,7 +30,7 @@
 		e.stopPropagation();
 		if (btn.disabled) return;
 		<!--{if !$_G['uid']}-->
-		mduiTip('请先登录后再表态', true);
+		mduiTip('{lang mdui_click_login_first}', true);
 		setTimeout(function () { location.href = 'member.php?mod=logging&action=login'; }, 800);
 		return;
 		<!--{/if}-->
@@ -46,7 +46,7 @@
 				var m = String(t).match(/<!\[CDATA\[([\s\S]*)\]\]>/);
 				box.innerHTML = m ? m[1] : t;
 				var txt = ((box.querySelector('#messagetext') || box).textContent || '').replace(/\s+/g, ' ').trim();
-				mduiTip(txt || '表态失败', true);
+				mduiTip(txt || '{lang mdui_click_failed}', true);
 				btn.disabled = false;
 				return;
 			}

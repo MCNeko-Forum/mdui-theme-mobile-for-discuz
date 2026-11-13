@@ -51,7 +51,7 @@
 <!--{else}-->
 <!--{eval $mdui_compare = $group ? $group : $maingroup;}-->
 <mdui-card variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">
-	<mdui-select label="选择要对比的用户组" value="$mdui_compare[groupid]" style="width:100%">
+	<mdui-select label="{lang mdui_compare_usergroup}" value="$mdui_compare[groupid]" style="width:100%">
 		<!--{loop $_G['cache']['usergroups'] $mdui_gid $mdui_option}-->
 			<mdui-menu-item value="$mdui_gid" data-href="home.php?mod=spacecp&ac=usergroup&gid=$mdui_gid">$mdui_option[grouptitle]</mdui-menu-item>
 		<!--{/loop}-->

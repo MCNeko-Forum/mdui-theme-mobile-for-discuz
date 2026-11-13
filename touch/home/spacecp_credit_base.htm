@@ -18,7 +18,7 @@
 			<mdui-button type="submit" variant="filled" full-width>{lang memcp_credits_transfer}</mdui-button>
 		</form>
 	</mdui-card>
-	<!--{else}--><mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">积分转账暂未开启</mdui-card><!--{/if}-->
+	<!--{else}--><mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">{lang mdui_credit_transfer_disabled}</mdui-card><!--{/if}-->
 <!--{elseif $_GET['op'] == 'exchange'}-->
 	<!--{if $_G['setting']['exchangestatus'] && ($_G['setting']['extcredits'] || $_CACHE['creditsettings'])}-->
 	<mdui-card variant="filled" class="mdui-credit-exchange-card">
@@ -26,7 +26,7 @@
 		<form id="exchangeform" method="post" action="home.php?mod=spacecp&ac=credit&op=exchange">
 			<input type="hidden" name="formhash" value="{FORMHASH}"><input type="hidden" name="operation" value="exchange"><input type="hidden" name="exchangesubmit" value="true"><input type="hidden" name="outi" value="">
 			<mdui-text-field id="exchangeamount" name="exchangeamount" type="number" value="0" label="{lang memcp_credits_exchange}" required></mdui-text-field>
-			<label class="mdui-credit-field-label">兑换为</label>
+			<label class="mdui-credit-field-label">{lang mdui_exchange_to}</label>
 			<select id="tocredits" name="tocredits" class="mdui-credit-select">
 			<!--{loop $_G['setting']['extcredits'] $id $ecredits}-->
 			<!--{if $ecredits['allowexchangein'] && $ecredits['ratio']}--><option value="$id" unit="$ecredits['unit']" title="$ecredits['title']" ratio="$ecredits['ratio']">$ecredits['title']</option><!--{/if}-->
@@ -38,7 +38,7 @@
 			<!--{if $credit['allowexchangeout'] && $credit['ratio']}--><option value="$id" unit="$credit['unit']" title="$credit['title']" ratio="$credit['ratio']">$credit['title']</option><!--{/if}-->
 			<!--{/loop}-->
 			</select>
-			<mdui-text-field id="exchangedesamount" label="预计扣除" disabled></mdui-text-field>
+			<mdui-text-field id="exchangedesamount" label="{lang mdui_estimated_deduction}" disabled></mdui-text-field>
 			<mdui-text-field name="password" type="password" label="{lang transfer_login_password}" required></mdui-text-field>
 			<div class="mdui-credit-exchange-hint">{lang memcp_credits_exchange_min_balance} $_G['setting']['exchangemincredits']<span id="taxpercent"><!--{if intval($taxpercent) > 0}--> · {lang credits_tax} $taxpercent<!--{/if}--></span></div>
 			<mdui-button type="submit" variant="filled" full-width>{lang memcp_credits_exchange}</mdui-button>
@@ -47,7 +47,7 @@
 	<script>
 	(function(){var amount=document.getElementById('exchangeamount'),to=document.getElementById('tocredits'),from=document.getElementById('fromcredits_0'),result=document.getElementById('exchangedesamount');function calc(){var a=parseInt(amount.value,10)||0,t=to.options[to.selectedIndex],f=from.options[from.selectedIndex];if(!t||!f||t.value===f.value||!a){result.value='';return}var n=parseFloat(t.getAttribute('ratio'))/parseFloat(f.getAttribute('ratio'))*a*(1+$_G['setting']['creditstax']);result.value=(parseFloat(t.getAttribute('ratio'))<parseFloat(f.getAttribute('ratio'))?Math.ceil(n):Math.floor(n))}amount.addEventListener('input',calc);to.addEventListener('change',calc);from.addEventListener('change',calc);calc();})();
 	</script>
-	<!--{else}--><mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">积分兑换暂未开启</mdui-card><!--{/if}-->
+	<!--{else}--><mdui-card variant="outlined" style="display:block;padding:2rem 1rem;text-align:center;opacity:.7">{lang mdui_credit_exchange_disabled}</mdui-card><!--{/if}-->
 <!--{elseif $_GET['op'] == 'rule'}-->
 	<!--{eval $_TPL['cycletype'] = array('0' => '{lang one_time}', '1' => '{lang everyday}', '2' => '{lang the_time}', '3' => '{lang interval_minutes}', '4' => '{lang open_cycle}');}-->
 	<mdui-card variant="filled" style="display:block;padding:1rem;margin-bottom:1rem">{lang activity_award_message}</mdui-card>

@@ -29,15 +29,15 @@
 			btn.addEventListener('click', function () {
 				var input = document.getElementById('secemail');
 				var email = input ? input.value : '{$_G['member']['email']}';
-				if (!email) { if (window.mduiTip) mduiTip('请先填写邮箱'); return; }
+				if (!email) { if (window.mduiTip) mduiTip('{lang mdui_enter_email_first}'); return; }
 				fetch('misc.php?mod=secemailseccode&action=send&svctype=1&email=' + encodeURIComponent(email) + '&inajax=1', {credentials: 'same-origin'})
 					.then(function (r) { return r.text(); })
 					.then(function (t) {
 						var m = t.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
-						var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '发送失败';
-						if (window.mduiTip) mduiTip(text || '发送成功');
+						var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '{lang mdui_send_failed}';
+						if (window.mduiTip) mduiTip(text || '{lang mdui_send_success}');
 					})
-					.catch(function () { if (window.mduiTip) mduiTip('发送失败'); });
+					.catch(function () { if (window.mduiTip) mduiTip('{lang mdui_send_failed}'); });
 			});
 		})();
 		</script>

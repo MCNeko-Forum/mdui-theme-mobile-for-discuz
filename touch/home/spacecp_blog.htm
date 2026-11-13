@@ -60,10 +60,10 @@
 			<!--{loop $classarr $value}-->
 			<mdui-menu-item value="$value[classid]">$value[classname]</mdui-menu-item>
 			<!--{/loop}-->
-			<mdui-menu-item value="__new__">+ 新建个人分类</mdui-menu-item>
+			<mdui-menu-item value="__new__">+ {lang mdui_new_personal_category}</mdui-menu-item>
 		</mdui-select>
 		<input type="hidden" name="classid" id="mdui_blog_class_value" value="$blog[classid]">
-		<mdui-text-field id="mdui_blog_new_class" label="新建个人分类" hidden></mdui-text-field>
+		<mdui-text-field id="mdui_blog_new_class" label="{lang mdui_new_personal_category}" hidden></mdui-text-field>
 
 		<mdui-text-field id="mdui_blog_tag" name="tag" value="$blog[tag]" label="{lang label}"></mdui-text-field>
 		<!--{if checkperm('manageblog')}-->

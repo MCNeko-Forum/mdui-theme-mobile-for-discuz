@@ -23,16 +23,18 @@
 <!-- 发布面板：mdui 没有 bottom-sheet，用 dialog 定位到底部复用它的遮罩和动画 -->
 <!--{if $_G['uid']}-->
 <mdui-dialog id="mdui_post_sheet" close-on-esc close-on-overlay-click class="mdui-post-sheet">
-	<div style="font-size:.875rem;opacity:.6;margin-bottom:1rem">来发点什么吧...</div>
+	<div style="font-size:.875rem;opacity:.6;margin-bottom:1rem">{lang mdui_sheet_tip}</div>
 	<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem .5rem">
 		<!--{eval
 			// 只列出当前站点真正开着的入口，避免点进去撞权限提示
 			$fp_items = array();
-			$fp_items[] = array('post', '#F37D7D', 'edit', '发帖子', 'forum.php?mod=misc&action=nav');
-			if(helper_access::check_module('group')) $fp_items[] = array('group', '#9DCA06', 'groups', '逛圈子', 'forum.php?mod=group');
-			if($_G['uid'] && helper_access::check_module('doing')) $fp_items[] = array('doing', '#3EBBFD', 'chat', '写记录', 'home.php?mod=spacecp&ac=doing');
-			if($_G['uid'] && helper_access::check_module('blog')) $fp_items[] = array('blog', '#FFB300', 'article', '写日志', 'home.php?mod=spacecp&ac=blog');
-			if($_G['uid'] && helper_access::check_module('album')) $fp_items[] = array('album', '#FF9900', 'photo_camera', '传相册', 'home.php?mod=spacecp&ac=upload');
+			@include DISCUZ_ROOT.'./template/MDUI/i18n/'.(getglobal('i18n') ? getglobal('i18n') : currentlang()).'/lang_template.php';
+			$mdui_lang = $lang; unset($lang);
+			$fp_items[] = array('post', '#F37D7D', 'edit', $mdui_lang['mdui_fab_post'], 'forum.php?mod=misc&action=nav');
+			if(helper_access::check_module('group')) $fp_items[] = array('group', '#9DCA06', 'groups', $mdui_lang['mdui_fab_group'], 'forum.php?mod=group');
+			if($_G['uid'] && helper_access::check_module('doing')) $fp_items[] = array('doing', '#3EBBFD', 'chat', $mdui_lang['mdui_fab_doing'], 'home.php?mod=spacecp&ac=doing');
+			if($_G['uid'] && helper_access::check_module('blog')) $fp_items[] = array('blog', '#FFB300', 'article', $mdui_lang['mdui_fab_blog'], 'home.php?mod=spacecp&ac=blog');
+			if($_G['uid'] && helper_access::check_module('album')) $fp_items[] = array('album', '#FF9900', 'photo_camera', $mdui_lang['mdui_fab_album'], 'home.php?mod=spacecp&ac=upload');
 		}-->
 		<!--{loop $fp_items $fp_item}-->
 			<a href="{$fp_item[4]}" style="display:flex;flex-direction:column;align-items:center;gap:.4rem;text-decoration:none;color:inherit">
@@ -106,7 +108,7 @@ document.addEventListener('click', function (e) {
 })();
 // 夜间/日间/自动共用一个按钮：点击在三种模式间循环，图标和文字实时显示当前模式（侧边栏与“我的”页共用，事件委托）
 (function () {
-	var modes = {dark: ['dark_mode', '夜间'], light: ['light_mode', '日间'], auto: ['brightness_auto', '自动']};
+	var modes = {dark: ['dark_mode', '{lang mdui_theme_night}'], light: ['light_mode', '{lang mdui_theme_day}'], auto: ['brightness_auto', '{lang mdui_theme_auto}']};
 	function syncThemeItems() {
 		var cur = mdui.getTheme();
 		if (!modes[cur]) cur = 'auto';
@@ -342,13 +344,13 @@ window.mduiCopyCode = function (id, button) {
 
 <div id="mdui_extlink" hidden style="position:fixed;top:0;right:0;bottom:0;left:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.4)">
 	<div style="width:100%;max-width:20rem;padding:1.5rem;color:rgb(var(--mdui-color-on-surface));background:rgb(var(--mdui-color-surface-container-high));border-radius:1.75rem;animation:mdui-extlink-pop .2s ease">
-		<div style="font-size:1.375rem;line-height:2rem">即将离开本站</div>
-		<div style="margin-top:.5rem;color:rgb(var(--mdui-color-on-surface-variant))">即将前往以下链接，请确认是否继续访问。</div>
+		<div style="font-size:1.375rem;line-height:2rem">{lang mdui_extlink_title}</div>
+		<div style="margin-top:.5rem;color:rgb(var(--mdui-color-on-surface-variant))">{lang mdui_extlink_desc}</div>
 		<div id="mdui_extlink_url" style="margin-top:.75rem;padding:.75rem;overflow-wrap:anywhere;font-size:.875rem;font-weight:400;line-height:1.4;background:rgb(var(--mdui-color-surface-container-highest));border-radius:.75rem"></div>
 		<div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.5rem">
-			<mdui-button variant="text" onclick="document.getElementById('mdui_extlink').hidden=true">取消</mdui-button>
-			<mdui-button id="mdui_extlink_copy" variant="text">复制</mdui-button>
-			<mdui-button id="mdui_extlink_go" variant="text" target="_blank">继续访问</mdui-button>
+			<mdui-button variant="text" onclick="document.getElementById('mdui_extlink').hidden=true">{lang mdui_cancel}</mdui-button>
+			<mdui-button id="mdui_extlink_copy" variant="text">{lang mdui_copy}</mdui-button>
+			<mdui-button id="mdui_extlink_go" variant="text" target="_blank">{lang mdui_continue_visit}</mdui-button>
 		</div>
 	</div>
 </div>
@@ -363,7 +365,7 @@ window.mduiCopyCode = function (id, button) {
 		var url = document.getElementById('mdui_extlink_url').textContent;
 		var done = function () {
 			document.getElementById('mdui_extlink').hidden = true;
-			mduiTip('复制链接成功');
+			mduiTip('{lang mdui_copy_link_success}');
 		};
 		if (navigator.clipboard && navigator.clipboard.writeText) {
 			navigator.clipboard.writeText(url).then(done, function () { fallback(url, done); });
@@ -388,7 +390,7 @@ window.mduiCopyCode = function (id, button) {
 		var link = img.closest && img.closest('a[href]');
 		var box = document.createElement('div');
 		box.style.cssText = 'display:flex;align-items:center;justify-content:center;min-height:3rem;width:100%;font-size:.875rem;color:rgb(var(--mdui-color-error));background:rgb(var(--mdui-color-surface-container-highest));border-radius:8px';
-		box.textContent = '加载失败';
+		box.textContent = '{lang mdui_load_failed}';
 		if (link) link.replaceChildren(box);
 		else if (img.parentNode) img.replaceWith(box);
 	}, true);

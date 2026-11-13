@@ -52,7 +52,7 @@
 .vt_form_actions { position:sticky; top:0; z-index:2; padding:.5rem 0; background:rgb(var(--mdui-color-surface-container-high)); }
 .mdui-prose .locked, .locked { display:block !important; position:relative; box-sizing:border-box; width:100%; margin:1rem 0; padding:1rem 1rem 1rem 3.25rem; border:2px solid #d97706; border-radius:.75rem; background-color:#fff7ed !important; color:#7c2d12 !important; box-shadow:0 2px 8px rgba(124,45,18,.16); overflow:hidden; }
 .mdui-prose .locked::before, .locked::before { content:'🔒'; position:absolute; left:1rem; top:1rem; font-size:1.25rem; }
-.mdui-prose .locked::after, .locked::after { content:'隐藏内容'; display:block; margin-top:.35rem; font-size:.75rem; font-weight:700; letter-spacing:.08em; color:#b45309; }
+.mdui-prose .locked::after, .locked::after { content:'{lang mdui_hidden_content}'; display:block; margin-top:.35rem; font-size:.75rem; font-weight:700; letter-spacing:.08em; color:#b45309; }
 .mdui-prose .locked a, .locked a { color:#92400e !important; font-weight:600; }
 .vt_reply-area { display:flex; justify-content:flex-end; margin:0 1rem .75rem; }
 .vt_reply-area mdui-button { --mdui-color-primary:#6750a4; }
@@ -455,7 +455,7 @@
 				<mdui-button variant="text" icon="chat_bubble_outline" class="vt_form_dialog" data-title="{lang comments}" data-url="forum.php?mod=misc&action=comment&tid={$post['tid']}&pid={$post['pid']}&extra={$_GET['extra']}&page={$page}">{lang comments}</mdui-button>
 			<!--{/if}-->
 			<!--{if $_G['setting']['magicstatus'] && $post['invisible'] == 0}-->
-			<mdui-dropdown placement="top-start">
+			<mdui-dropdown placement="auto">
 				<mdui-button slot="trigger" variant="text" icon="auto_fix_high">{lang thread_magic}</mdui-button>
 				<mdui-menu>
 					<!--{if $post['first']}-->
@@ -539,7 +539,7 @@
 			if (!pageBox) return;
 			pageBox.querySelectorAll('select:not([data-mdui-upgraded])').forEach(function (oldSelect) {
 				var select = document.createElement('mdui-select');
-				select.setAttribute('label', '选择页码');
+				select.setAttribute('label', '{lang mdui_select_page}');
 				select.setAttribute('value', oldSelect.value);
 				select.style.cssText = 'display:inline-block;min-width:7rem;vertical-align:middle;--mdui-menu-max-height:18rem';
 				Array.prototype.forEach.call(oldSelect.options, function (option) {
@@ -604,7 +604,7 @@
 					}
 				}
 			})
-			.catch(function () { mduiTip('加载失败，请重试', true); })
+			.catch(function () { mduiTip('{lang mdui_load_failed_retry}', true); })
 			.then(function () {
 				loading = false;
 				button.loading = false;
@@ -699,7 +699,7 @@
 			ms.value = sel.value;
 			ms.style.width = '100%';
 			// 高亮色下拉的 option 是纯色块没有文字，label 提示一下选的是什么
-			if (sel.id === 'highlight_color') ms.label = '颜色';
+			if (sel.id === 'highlight_color') ms.label = '{lang mdui_color}';
 			sel.querySelectorAll('option').forEach(function (op) {
 				var mi = document.createElement('mdui-menu-item');
 				mi.value = op.value;
@@ -866,7 +866,7 @@
 			// 没有解析出 <root> 说明服务端走了 dheader 302（如删主题直跳 forum.php），
 			// 主题已不存在，回版块页
 			dlg.open = false;
-			mduiTip('操作成功');
+			mduiTip('{lang mdui_operation_success}');
 			var fid = (form.action.match(/fid=(\d+)/) || [])[1];
 			setTimeout(function () { location.href = fid ? 'forum.php?mod=forumdisplay&fid=' + fid : 'forum.php'; }, 1000);
 			return;
@@ -885,7 +885,7 @@
 		}, 1000);
 		}).catch(function () {
 			dlg.open = false;
-			mduiTip('操作失败，请重试', true);
+			mduiTip('{lang mdui_operation_failed}', true);
 		});
 	}
 
@@ -912,7 +912,7 @@
 				// repair 之类没有表单、直接返回提示文本的操作，弹提示就够了
 				html.indexOf('<form') < 0 ? (mduiTip(plain(html)), setTimeout(function () { location.reload(); }, 1000)) : fill(html, item.textContent.trim());
 			})
-			.catch(function () { mduiTip('操作失败，请重试', true); });
+			.catch(function () { mduiTip('{lang mdui_operation_failed}', true); });
 	});
 })();
 </script>
@@ -1006,7 +1006,7 @@
 				replacement.name = el.name;
 				replacement.value = el.value;
 				replacement.type = el.name === 'magicnum' || el.type === 'number' ? 'number' : 'text';
-				replacement.label = el.name === 'magicnum' ? '购买数量' : (el.placeholder || el.name || '');
+				replacement.label = el.name === 'magicnum' ? '{lang mdui_purchase_amount}' : (el.placeholder || el.name || '');
 				if (el.name === 'magicnum') replacement.min = 1;
 				if (el.tagName === 'TEXTAREA') replacement.rows = 3;
 			}
@@ -1028,7 +1028,7 @@
 	window.vtMduiify = mduify;
 	function load(url, kind) {
 		var target = kind === 'magic' ? body : document.getElementById('vt_rate_body');
-		target.innerHTML = '<div style="padding:1rem;text-align:center">正在加载…</div>';
+		target.innerHTML = '<div style="padding:1rem;text-align:center">{lang mdui_loading}</div>';
 		if (kind === 'magic') dlg.open = true;
 		fetch(url + '&infloat=yes&inajax=1&mobile=2', {credentials: 'same-origin'})
 			.then(function (r) { return r.text(); })
@@ -1036,7 +1036,7 @@
 				var doc = parseResponse(html);
 				var form = doc.querySelector('form');
 				if (!form) {
-					showResult(target, doc, '操作无法继续');
+					showResult(target, doc, '{lang mdui_cannot_continue}');
 					return;
 				}
 				var sourceDialog = doc.querySelector('mdui-dialog');
@@ -1073,20 +1073,20 @@
 					reasonSource.remove();
 				}
 			})
-			.catch(function () { target.innerHTML = '<div style="padding:1rem">页面加载失败，请重试。</div>'; });
+			.catch(function () { target.innerHTML = '<div style="padding:1rem">{lang mdui_page_load_failed_retry}</div>'; });
 	}
 	function submitForm(form) {
 		var target = form.closest('#vt_magic_body, #vt_rate_body');
 		var original = target.innerHTML;
 		var data = new FormData(form);
 		var url = form.action + (form.action.indexOf('?') === -1 ? '?' : '&') + 'inajax=1&ajaxdata=json&mobile=2';
-		target.innerHTML = '<div style="padding:1rem;text-align:center">正在提交…</div>';
+		target.innerHTML = '<div style="padding:1rem;text-align:center">{lang mdui_submitting}</div>';
 		fetch(url, {method: 'POST', body: data, credentials: 'same-origin'})
 			.then(function (r) { return r.text(); })
 			.then(function (html) {
 				var data;
 				try { data = JSON.parse(html); } catch (ignore) {}
-				var message = data && data.message ? data.message : resultText(parseResponse(html), '操作已提交');
+				var message = data && data.message ? data.message : resultText(parseResponse(html), '{lang mdui_operation_submitted}');
 				if (target === body) {
 					mduiTip(message, /^抱歉|失败|错误/.test(message));
 					dlg.open = false;
@@ -1101,10 +1101,10 @@
 			})
 			.catch(function () {
 				if (target === body) {
-					mduiTip('提交失败，请重试。', true);
+					mduiTip('{lang mdui_submit_failed_retry}', true);
 					return;
 				}
-				target.innerHTML = '<div style="padding:1rem">提交失败，请重试。</div>';
+				target.innerHTML = '<div style="padding:1rem">{lang mdui_submit_failed_retry}</div>';
 			});
 	}
 	window.vtMduiSubmit = submitForm;
@@ -1120,7 +1120,7 @@
 			var url = new URL(floor.dataset.copyUrl, location.href).href;
 			if (navigator.clipboard && window.isSecureContext) {
 				navigator.clipboard.writeText(url).then(function () {
-					mduiTip('本楼链接已复制');
+					mduiTip('{lang mdui_floor_link_copied}');
 				}).catch(function () { mduiTip(url); });
 			} else {
 				var input = document.createElement('textarea');
@@ -1129,7 +1129,7 @@
 				input.select();
 				document.execCommand('copy');
 				input.remove();
-				mduiTip('本楼链接已复制');
+				mduiTip('{lang mdui_floor_link_copied}');
 			}
 			return;
 		}
@@ -1168,7 +1168,7 @@
 		if (!item) return;
 		e.preventDefault();
 		dlg.headline = item.dataset.title || '';
-		body.innerHTML = '<div style="padding:1rem;text-align:center">正在加载…</div>';
+		body.innerHTML = '<div style="padding:1rem;text-align:center">{lang mdui_loading}</div>';
 		dlg.open = true;
 		fetch(item.dataset.url + '&infloat=yes&inajax=1&mobile=2', {credentials: 'same-origin'})
 			.then(function (r) { return r.text(); })
@@ -1183,7 +1183,7 @@
 					mduiPost(form.action, Object.fromEntries(new FormData(form)), function () { dlg.open = false; location.reload(); });
 				});
 			})
-			.catch(function () { body.innerHTML = '<div style="padding:1rem">表单加载失败，请重试。</div>'; });
+			.catch(function () { body.innerHTML = '<div style="padding:1rem">{lang mdui_form_load_failed_retry}</div>'; });
 	});
 })();
 </script>
@@ -1210,7 +1210,7 @@
 		e.preventDefault();
 		cancel.style.display = 'none';
 		submit.style.display = 'none';
-		body.innerHTML = '<div style="padding:1rem;text-align:center">正在加载打赏表单…</div>';
+		body.innerHTML = '<div style="padding:1rem;text-align:center">{lang mdui_loading}</div>';
 		dlg.open = true;
 		fetch(item.getAttribute('data-url') + '&infloat=yes&inajax=1&mobile=2', {credentials: 'same-origin'})
 			.then(function (r) { return r.text(); })
@@ -1218,19 +1218,19 @@
 				var doc = window.vtMduiParse ? window.vtMduiParse(html) : new DOMParser().parseFromString(html, 'text/html');
 				var form = doc.getElementById('rateform') || doc.querySelector('form');
 				if (!form) {
-					if (window.vtMduiShowResult) window.vtMduiShowResult(body, doc, '无法打开打赏表单');
-					else body.innerHTML = '<div style="padding:1rem">无法打开打赏表单</div>';
+					if (window.vtMduiShowResult) window.vtMduiShowResult(body, doc, '{lang mdui_cannot_continue}');
+					else body.innerHTML = '<div style="padding:1rem">{lang mdui_cannot_continue}</div>';
 					return;
 				}
 				form.removeAttribute('onsubmit');
 				var title = form.querySelector('.log_tit');
-				if (title) title.textContent = '打赏';
+				if (title) title.textContent = '{lang mdui_reward}';
 				body.innerHTML = form.outerHTML;
 				if (window.vtMduiify) window.vtMduiify(body);
 				cancel.style.display = 'inline-flex';
 				submit.style.display = 'inline-flex';
 			})
-			.catch(function () { body.innerHTML = '<div style="padding:1rem">打赏表单加载失败，请重试。</div>'; });
+			.catch(function () { body.innerHTML = '<div style="padding:1rem">{lang mdui_form_load_failed_retry}</div>'; });
 	});
 })();
 </script>
@@ -1310,7 +1310,7 @@ document.addEventListener('click', function (e) {
 	e.preventDefault();
 	mdui.confirm({
 		headline: '{lang reward_set_bestanswer}',
-		description: '您确认要把该回复选为“最佳答案”吗？',
+		description: '{lang mdui_bestanswer_confirm}',
 		confirmText: '{lang submit}',
 		cancelText: '{lang cancel}',
 		onConfirm: function () { mduiGet(btn.getAttribute('href'), function () { location.reload(); }); }
@@ -1563,7 +1563,7 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 				setTimeout(function () { URL.revokeObjectURL(ou); }, 10000);
 			})
 			.catch(function () {
-				if (window.mduiTip) mduiTip('下载失败，可长按图片保存', true);
+				if (window.mduiTip) mduiTip('{lang mdui_download_failed_longpress}', true);
 			})
 			.then(function () { btnDl.disabled = false; });
 	}
@@ -1678,7 +1678,7 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 		btnClose = document.createElement('button');
 		btnClose.type = 'button';
 		btnClose.className = 'vt-viewer-btn vt-viewer-close';
-		btnClose.setAttribute('aria-label', '关闭');
+		btnClose.setAttribute('aria-label', '{lang mdui_close}');
 		btnClose.style.cssText = 'position:absolute;top:.75rem;left:.75rem;width:44px;height:44px;border:none;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;cursor:pointer';
 		btnClose.innerHTML = '<i class="material-icons" style="font-size:24px">close</i>';
 
@@ -1690,7 +1690,7 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 		btnDl = document.createElement('button');
 		btnDl.type = 'button';
 		btnDl.className = 'vt-viewer-btn vt-viewer-dl';
-		btnDl.setAttribute('aria-label', '下载图片');
+		btnDl.setAttribute('aria-label', '{lang mdui_download_image}');
 		btnDl.style.cssText = 'position:absolute;right:.75rem;bottom:1.5rem;width:44px;height:44px;border:none;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;cursor:pointer';
 		btnDl.innerHTML = '<i class="material-icons" style="font-size:24px">download</i>';
 

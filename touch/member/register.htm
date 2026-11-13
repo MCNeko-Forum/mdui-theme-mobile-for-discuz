@@ -24,7 +24,7 @@
 				icon="mail" autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
 		<!--{else}-->
 			<!--{if empty($invite) && in_array($_G['setting']['regstatus'], array(2, 3))}-->
-				<mdui-text-field name="invitecode" label="{lang invite_code}<!--{if $_G['setting']['regstatus'] == 3}-->（非必填）<!--{/if}-->" icon="card_giftcard"
+				<mdui-text-field name="invitecode" label="{lang invite_code}<!--{if $_G['setting']['regstatus'] == 3}-->{lang mdui_optional}<!--{/if}-->" icon="card_giftcard"
 					autocomplete="off" style="margin-bottom:1rem"></mdui-text-field>
 			<!--{/if}-->
 			<mdui-text-field id="mdui_register_username" name="{$_G['setting']['reginput']['username']}" label="{lang registerinputtip}"
@@ -104,17 +104,17 @@
 		function passwordError() {
 			var value = fieldValue(password);
 			if (!value) return '';
-			if (rules.length && value.length < rules.length) return '密码太短，不得少于 ' + rules.length + ' 个字符';
+			if (rules.length && value.length < rules.length) return '{lang mdui_password_too_short_pre}' + rules.length + '{lang mdui_password_too_short_post}';
 			var missing = [];
-			if (rules.digit && !/\d/.test(value)) missing.push('数字');
-			if (rules.lower && !/[a-z]/.test(value)) missing.push('小写字母');
-			if (rules.upper && !/[A-Z]/.test(value)) missing.push('大写字母');
-			if (rules.symbol && !/[^A-Za-z0-9]/.test(value)) missing.push('特殊符号');
-			return missing.length ? '密码太弱，密码中必须包含 ' + missing.join(',') : '';
+			if (rules.digit && !/\d/.test(value)) missing.push('{lang mdui_password_rule_digit}');
+			if (rules.lower && !/[a-z]/.test(value)) missing.push('{lang mdui_password_rule_lower}');
+			if (rules.upper && !/[A-Z]/.test(value)) missing.push('{lang mdui_password_rule_upper}');
+			if (rules.symbol && !/[^A-Za-z0-9]/.test(value)) missing.push('{lang mdui_password_rule_symbol}');
+			return missing.length ? '{lang mdui_password_too_weak_pre}' + missing.join('{lang mdui_password_list_sep}') : '';
 		}
 		function checkPassword() {
 			showTip('password', passwordError());
-			if (fieldValue(password2) && fieldValue(password) !== fieldValue(password2)) showTip('password2', '两次输入的密码不一致');
+			if (fieldValue(password2) && fieldValue(password) !== fieldValue(password2)) showTip('password2', '{lang mdui_password_not_match}');
 			else if (fieldValue(password2)) showTip('password2', '');
 		}
 		function checkUsername() {
@@ -122,16 +122,16 @@
 			if (!value || value === lastUsername) return;
 			lastUsername = value;
 			if (/[<>"'()]/.test(value)) {
-				showTip('username', '用户名包含敏感字符');
+				showTip('username', '{lang mdui_username_sensitive}');
 				return;
 			}
 			var length = value.replace(/[^\x00-\xff]/g, '**').length;
 			if (length < 3) {
-				showTip('username', '用户名不得小于 3 个字符');
+				showTip('username', '{lang mdui_username_too_short}');
 				return;
 			}
 			if (length > 15) {
-				showTip('username', '用户名不得超过 15 个字符');
+				showTip('username', '{lang mdui_username_too_long}');
 				return;
 			}
 			showTip('username', '');
@@ -147,7 +147,7 @@
 			if (!value || value === lastEmail) return;
 			lastEmail = value;
 			if (/[<"]/.test(value)) {
-				showTip('email', 'Email 包含敏感字符');
+				showTip('email', '{lang mdui_email_sensitive}');
 				return;
 			}
 			showTip('email', '');
@@ -163,7 +163,7 @@
 		password.addEventListener('blur', checkPassword);
 		password2.addEventListener('input', checkPassword);
 		password2.addEventListener('blur', function () {
-			if (!fieldValue(password2)) showTip('password2', '请再次输入密码');
+			if (!fieldValue(password2)) showTip('password2', '{lang mdui_enter_password_again}');
 			else checkPassword();
 		});
 		email.addEventListener('blur', checkEmail);
@@ -176,7 +176,7 @@
 				password.focus();
 			} else if (fieldValue(password) !== fieldValue(password2)) {
 				event.preventDefault();
-				showTip('password2', fieldValue(password2) ? '两次输入的密码不一致' : '请再次输入密码');
+				showTip('password2', fieldValue(password2) ? '{lang mdui_password_not_match}' : '{lang mdui_enter_password_again}');
 				password2.focus();
 			}
 		});

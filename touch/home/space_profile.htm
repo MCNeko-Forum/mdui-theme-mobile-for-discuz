@@ -18,7 +18,7 @@
 <div class="mdui-mycenter">
 	<div class="mdui-mycenter-profile">
 		<mdui-avatar class="comiis_edit_avatar" src="<!--{avatar($space['uid'], 'middle', true)}-->" style="cursor:pointer" onclick="var f=document.getElementById('comiis_Clip_file_khnlmf');if(f)f.click();"></mdui-avatar>
-		<!--{eval $mdui_group_stars = intval($_G['cache']['usergroups'][$_G['groupid']]['stars']);$mdui_level_label = 'Lv.'.$mdui_group_stars;$mdui_uid_credits = 'UID：'.$space['uid'].'　积分：'.$space['credits'];$mdui_level_group = $mdui_level_label.'　'.$space['group']['grouptitle'];}-->
+		<!--{eval $mdui_group_stars = intval($_G['cache']['usergroups'][$_G['groupid']]['stars']);@include DISCUZ_ROOT.'./template/MDUI/i18n/'.(getglobal('i18n') ? getglobal('i18n') : currentlang()).'/lang_template.php';$mdui_level_label = 'Lv.'.$mdui_group_stars;$mdui_uid_credits = $lang['mdui_uid_label'].$space['uid'].$lang['mdui_credits_label'].$space['credits'];unset($lang);$mdui_level_group = $mdui_level_label.'　'.$space['group']['grouptitle'];}-->
 		<div class="mdui-mycenter-user">
 			<div>$space['username']</div>
 			<div>$mdui_uid_credits</div>
@@ -29,7 +29,7 @@
 	</div>
 
 	<div class="mdui-mycenter-grid">
-		<div data-href="home.php?mod=space&do=profile"><mdui-button-icon icon="home"></mdui-button-icon><span>我的空间</span></div>
+		<div data-href="home.php?mod=space&do=profile"><mdui-button-icon icon="home"></mdui-button-icon><span>{lang mdui_my_space}</span></div>
 		<!--{if helper_access::check_module('forum')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=thread&view=me"><mdui-button-icon icon="forum"></mdui-button-icon><span>{lang mythread}</span></div><!--{/if}-->
 		<!--{if helper_access::check_module('favorite')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=favorite&view=me&type=thread"><mdui-button-icon icon="star"></mdui-button-icon><span>{lang myfavorite}</span></div><!--{/if}-->
 		<!--{if helper_access::check_module('friend')}--><div data-href="home.php?mod=space&uid={$space['uid']}&do=friend"><mdui-button-icon icon="people"></mdui-button-icon><span>{lang my_friends}</span></div><!--{/if}-->
@@ -41,14 +41,14 @@
 
 	<!--{eval $mdui_visitors = $_G['uid'] ? array_column(C::t('home_visitor')->fetch_all_by_uid($_G['uid'], 0, 5), 'vuid') : array();}-->
 	<mdui-list class="mdui-mycenter-theme">
-		<mdui-list-item data-mdui-theme-cycle icon="dark_mode" rounded><span class="mdui-theme-label">夜间</span></mdui-list-item>
+		<mdui-list-item data-mdui-theme-cycle icon="dark_mode" rounded><span class="mdui-theme-label">{lang mdui_theme_night}</span></mdui-list-item>
 		<mdui-list-item icon="visibility" data-href="home.php?mod=space&do=friend&view=visitor" rounded>{lang my_visitor}<!--{if $mdui_visitors}--><div slot="end-icon" class="mdui-visitor-avatars"><!--{loop $mdui_visitors $mdui_vuid}--><mdui-avatar src="<!--{avatar($mdui_vuid, 'small', true)}-->"></mdui-avatar><!--{/loop}--></div><!--{/if}--></mdui-list-item>
 		<!--{hook/space_profile_themecolor_mobile}-->
 	</mdui-list>
 
 	<mdui-list class="mdui-mycenter-list">
 		<mdui-list-item icon="notifications" data-href="home.php?mod=space&do=notice" rounded>{lang remind}<!--{if $_G['member']['newprompt']}--><mdui-badge slot="end-icon">NEW</mdui-badge><!--{/if}--></mdui-list-item>
-		<mdui-list-item icon="link" data-href="home.php?mod=spacecp&ac=plugin&id=neko_clogin_hub:hub" rounded>第三方账号<!--{if !empty($_G['neko_clogin_hub_pending'])}--><mdui-badge slot="end-icon"></mdui-badge><!--{/if}--></mdui-list-item>
+		<mdui-list-item icon="link" data-href="home.php?mod=spacecp&ac=plugin&id=neko_clogin_hub:hub" rounded>{lang mdui_third_party_account}<!--{if !empty($_G['neko_clogin_hub_pending'])}--><mdui-badge slot="end-icon"></mdui-badge><!--{/if}--></mdui-list-item>
 		<mdui-list-item icon="badge" data-href="home.php?mod=spacecp&ac=profile" rounded>{lang setup}</mdui-list-item>
 		<mdui-list-item icon="account_balance_wallet" data-href="home.php?mod=spacecp&ac=credit&op=base" rounded>{lang credits}</mdui-list-item>
 		<!--{if $_G['setting']['inviteconfig']['buyinvitecode'] && $_G['setting']['inviteconfig']['invitecodeprice'] && payment::enable()}--><mdui-list-item icon="confirmation_number" data-href="misc.php?mod=buyinvitecode" rounded>{lang invitecode_buycode}</mdui-list-item><!--{/if}-->
@@ -153,10 +153,10 @@
 		<!--{/if}-->
 		<!--{if $_G['uid'] && $_G['setting']['friendstatus']}-->
 			<!--{eval $mdui_space_in_blacklist = C::t('home_blacklist')->count_by_uid_buid($_G['uid'], $space['uid']);}-->
-			<mdui-list-item icon="block" rounded onclick="document.getElementById('mdui_space_blacklist_$space[uid]').open=true"><!--{if $mdui_space_in_blacklist}-->移除黑名单<!--{else}-->加入黑名单<!--{/if}--></mdui-list-item>
+			<mdui-list-item icon="block" rounded onclick="document.getElementById('mdui_space_blacklist_$space[uid]').open=true"><!--{if $mdui_space_in_blacklist}-->{lang mdui_remove_blacklist}<!--{else}-->{lang mdui_add_blacklist}<!--{/if}--></mdui-list-item>
 			<mdui-dialog id="mdui_space_blacklist_$space[uid]" close-on-esc close-on-overlay-click>
-				<div slot="headline"><!--{if $mdui_space_in_blacklist}-->移除黑名单<!--{else}-->加入黑名单<!--{/if}--></div>
-				<div slot="description"><!--{if $mdui_space_in_blacklist}-->确定将 $space['username'] 移出黑名单吗？<!--{else}-->{lang blacklist_message}<!--{/if}--></div>
+				<div slot="headline"><!--{if $mdui_space_in_blacklist}-->{lang mdui_remove_blacklist}<!--{else}-->{lang mdui_add_blacklist}<!--{/if}--></div>
+				<div slot="description"><!--{if $mdui_space_in_blacklist}-->{lang mdui_remove_blacklist_confirm_pre}$space['username']{lang mdui_remove_blacklist_confirm_post}<!--{else}-->{lang blacklist_message}<!--{/if}--></div>
 				<!--{if $mdui_space_in_blacklist}-->
 				<mdui-button slot="action" variant="text" onclick="document.getElementById('mdui_space_blacklist_$space[uid]').open=false">{lang cancel}</mdui-button>
 				<mdui-button slot="action" variant="text" data-href="home.php?mod=spacecp&ac=friend&op=blacklist&subop=delete&uid=$space[uid]">{lang determine}</mdui-button>
@@ -177,7 +177,7 @@
 			<div slot="headline">{lang say_hi}</div>
 			<form method="post" action="home.php?mod=spacecp&ac=poke&op=send&uid=$space['uid']">
 				<div slot="description">
-					<mdui-radio-group name="iconid" value="3" label="选择动作">
+					<mdui-radio-group name="iconid" value="3" label="{lang mdui_select_action}">
 						<mdui-radio value="0">{lang poke_0}</mdui-radio>
 						<mdui-radio value="1">{lang poke_1}</mdui-radio>
 						<mdui-radio value="2">{lang poke_2}</mdui-radio>

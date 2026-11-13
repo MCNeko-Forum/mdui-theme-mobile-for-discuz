@@ -88,7 +88,7 @@
 	<div slot="headline">{lang say_hi}</div>
 	<form id="mdui_notice_poke_reply_form" method="post" action="home.php?mod=spacecp&ac=poke&op=reply">
 		<div slot="description">
-			<mdui-radio-group name="iconid" value="3" label="选择动作">
+			<mdui-radio-group name="iconid" value="3" label="{lang mdui_select_action}">
 				<mdui-radio value="0">{lang poke_0}</mdui-radio>
 				<mdui-radio value="1">{lang poke_1}</mdui-radio>
 				<mdui-radio value="2">{lang poke_2}</mdui-radio>
@@ -144,7 +144,7 @@ document.getElementById('mdui_notice_poke_reply_form').addEventListener('submit'
 		pokesubmit: 'true', iconid: data.get('iconid'), note: data.get('note')
 	}, function (result) {
 		document.getElementById('mdui_notice_poke_reply').open = false;
-		mduiTip((result && result.message) || '打招呼成功');
+		mduiTip((result && result.message) || '{lang mdui_poke_success}');
 		setTimeout(function () { location.reload(); }, 800);
 	});
 });

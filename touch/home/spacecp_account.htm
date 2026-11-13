@@ -12,8 +12,8 @@
 			{lang action_account_security_type_rename}: {$_G['member']['username']}
 			<span slot="description">
 				{lang action_account_security_type_rename_comment}
-				<!--{if $_G['setting']['chgusername']['max_times'] > 0}-->，已改 {echo table_common_member_username_history::t()->count_by_uid($_G['uid']);} / {$_G['setting']['chgusername']['max_times']} 次<!--{/if}-->
-				<!--{if $_G['setting']['chgusername']['credits_pay'] > 0}-->，需支付 {$_G['setting']['chgusername']['credits_pay']} {$extcredit['unit']} {$extcredit['title']}<!--{/if}-->
+				<!--{if $_G['setting']['chgusername']['max_times'] > 0}-->{lang mdui_chgusername_count_pre}{echo table_common_member_username_history::t()->count_by_uid($_G['uid']);} / {$_G['setting']['chgusername']['max_times']}{lang mdui_chgusername_count_post}<!--{/if}-->
+				<!--{if $_G['setting']['chgusername']['credits_pay'] > 0}-->{lang mdui_chgusername_pay_pre}{$_G['setting']['chgusername']['credits_pay']} {$extcredit['unit']} {$extcredit['title']}<!--{/if}-->
 			</span>
 			<span slot="end-icon">
 				<!--{if getuserprofile('extcredits'.$creditExtra) < $_G['setting']['chgusername']['credits_pay'] || ($_G['member']['credits'] < $_G['setting']['chgusername']['credits_threshold'] && !in_array($_G['member']['groupid'], (array)$_G['setting']['chgusername']['credits_unlimit_group']))}-->
@@ -174,7 +174,7 @@
 		var cancel = document.createElement('mdui-button');
 		cancel.setAttribute('type', 'button');
 		cancel.setAttribute('variant', 'tonal');
-		cancel.textContent = '取消';
+		cancel.textContent = '{lang mdui_cancel}';
 		cancel.style.flex = '1';
 		cancel.addEventListener('click', function () { dlg.open = false; });
 		row.appendChild(cancel);
@@ -210,7 +210,7 @@
 			if (!fired) {
 				var text = box.textContent.replace(/\s+/g, ' ').trim();
 				dlg.open = false;
-				tip(text || '操作失败', !text);
+				tip(text || '{lang mdui_operation_failed}', !text);
 				setTimeout(function () { location.reload(); }, text ? 1200 : 300);
 			}
 			return;
@@ -239,17 +239,17 @@
 			tip(msgDiv.textContent.trim());
 			setTimeout(function () { location.reload(); }, 1200);
 		} else {
-			tip('加载失败', true);
+			tip('{lang mdui_load_failed}', true);
 		}
 	}
 	function load(url, depth) {
-		body.innerHTML = '<div style="padding:2rem;text-align:center;opacity:.6">加载中...</div>';
+		body.innerHTML = '<div style="padding:2rem;text-align:center;opacity:.6">{lang mdui_loading_dots}</div>';
 		dlg.open = true;
 		var ctrl = new AbortController();
 		setTimeout(function () { ctrl.abort(); }, 10000);
 		fetch(clean(url), {credentials: 'same-origin', signal: ctrl.signal}).then(function (r) { return r.text(); }).then(function (t) {
 			handle(t, depth || 0);
-		}).catch(function () { dlg.open = false; tip('加载失败', true); });
+		}).catch(function () { dlg.open = false; tip('{lang mdui_load_failed}', true); });
 	}
 	document.querySelectorAll('[data-acct]').forEach(function (btn) {
 		btn.addEventListener('click', function () { load(btn.dataset.acct); });
@@ -273,7 +273,7 @@
 			credentials: 'same-origin'
 		}).then(function (r) { return r.text(); }).then(function (t) {
 			handle(t, 0);
-		}).catch(function () { tip('网络错误', true); });
+		}).catch(function () { tip('{lang mdui_network_error}', true); });
 	});
 	window.errorhandle_nekoacct = function (msg) {
 		window.nekoAcctFired && nekoAcctFired();

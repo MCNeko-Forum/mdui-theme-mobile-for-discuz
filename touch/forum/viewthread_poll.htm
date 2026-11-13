@@ -97,7 +97,7 @@
 		if (!picked) {
 			e.preventDefault();
 			e.stopPropagation();
-			mdui.snackbar({ message: '请先选择投票选项', placement: 'top' });
+			mdui.snackbar({ message: '{lang mdui_please_select_poll}', placement: 'top' });
 		}
 	});
 })();

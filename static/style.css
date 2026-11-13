@@ -1289,9 +1289,10 @@ mdui-button.mdui-reward-btn[disabled]::part(button) { background: #f9a825; color
 	.mdui-ar-cover { height: 88vw; }
 }
 
-/* 语言切换下拉：placement=auto 会按可用空间自动向上/向下展开；
+/* 所有下拉选择/下拉菜单：placement=auto 按可用空间自动向上/向下展开，
    选项过多时限制菜单高度并允许内部滚动。 */
-.mdui-i18n-select::part(menu) {
+mdui-select::part(menu),
+mdui-dropdown > mdui-menu {
 	max-height: min(60vh, 24rem);
 	overflow-y: auto;
 	overscroll-behavior: contain;

@@ -13,18 +13,18 @@
 		if (!trigger) return;
 		e.preventDefault();
 		dialog.open = true;
-		body.innerHTML = '<div style="padding:1rem;text-align:center">正在加载…</div>';
+		body.innerHTML = '<div style="padding:1rem;text-align:center">{lang mdui_loading}</div>';
 		fetch(trigger.dataset.url + '&infloat=yes&inajax=1&mobile=2', {credentials: 'same-origin'})
 			.then(function (response) { return response.text(); })
 			.then(function (html) {
 				var documentNode = new DOMParser().parseFromString(html, 'text/html'), form = documentNode.querySelector('form');
-				if (!form) { body.innerHTML = '<div style="padding:1rem">操作无法继续</div>'; return; }
+				if (!form) { body.innerHTML = '<div style="padding:1rem">{lang mdui_cannot_continue}</div>'; return; }
 				form.removeAttribute('onsubmit');
 				body.innerHTML = form.outerHTML;
 				form = body.querySelector('form');
 				// 道具 show() 会输出原生文本框、密码框和多行输入；统一替换成 MDUI 字段，并保留 name/value 供后端读取。
 				form.querySelectorAll('input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=checkbox]):not([type=radio]), textarea').forEach(function (field) {
-					var input = document.createElement('mdui-text-field'), label = field.getAttribute('placeholder') || field.name || '请输入内容';
+					var input = document.createElement('mdui-text-field'), label = field.getAttribute('placeholder') || field.name || '{lang mdui_input_content}';
 					input.name = field.name;
 					input.value = field.value;
 					input.label = label;
@@ -40,12 +40,12 @@
 					submitEvent.preventDefault();
 					mduiPost(form.action, Object.fromEntries(new FormData(form)), function (result) {
 						dialog.open = false;
-						mduiTip((result && result.message) || '操作成功');
+						mduiTip((result && result.message) || '{lang mdui_operation_success}');
 						setTimeout(function () { location.reload(); }, 1000);
 					});
 				});
 			})
-			.catch(function () { body.innerHTML = '<div style="padding:1rem">表单加载失败，请重试。</div>'; });
+			.catch(function () { body.innerHTML = '<div style="padding:1rem">{lang mdui_form_load_failed_retry}</div>'; });
 	});
 })();
 </script>

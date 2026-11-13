@@ -36,7 +36,7 @@
 		if(!window.mduiLegacyWarned) {
 			window.mduiLegacyWarned = true;
 			setTimeout(function() {
-				if(confirm('检测到您的浏览器版本较低，部分功能可能无法使用。\n建议使用最新版本的 Chrome、Safari 或 Firefox 浏览器。\n\n是否切换到简化版页面？')) {
+				if(confirm('{lang mdui_browser_old_confirm}')) {
 					document.cookie = 'mobile=no; path=/';
 					window.location.href = window.location.href.split('?')[0] + '?mobile=no';
 				}
@@ -79,7 +79,7 @@
 	<!--{eval $mdui_icon_css_attr = htmlspecialchars($mdui_icon_css, ENT_QUOTES);}-->
 	<script src="{$_G['style']['styleimgdir']}/icons/icon-font-loader.js?{VERHASH}" data-css="$mdui_icon_css_attr"></script>
 	<!--{/if}-->
-	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/style.css?{VERHASH}&v=20" type="text/css" media="all">
+	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/style.css?{VERHASH}&v=21" type="text/css" media="all">
 	<script src="{STATICURL}js/mobile/jquery.min.js?{VERHASH}"></script>
 	<script type="text/javascript">
 	// Discuz X5 手机版 common.js 末尾调用了 _attachEvent，但该函数只在桌面版 common.js 中定义，这里补一个兼容实现
@@ -324,8 +324,8 @@ document.addEventListener('mduipjax:load', window.mduiFixAvatars);
 		<!--{else}-->
 			<mdui-list-item href="member.php?mod=logging&action=login" style="min-height:5.5rem" rounded>
 				<mdui-avatar slot="icon" src="./data/avatar/noavatar.svg" style="width:3rem;height:3rem"></mdui-avatar>
-				请登录
-				<span slot="description">登录 / 注册</span>
+				{lang mdui_please_login}
+				<span slot="description">{lang mdui_login_or_register}</span>
 			</mdui-list-item>
 		<!--{/if}-->
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>
@@ -341,16 +341,18 @@ document.addEventListener('mduipjax:load', window.mduiFixAvatars);
 				$mdui_nav_items[] = $mdui_nav_parts;
 			endforeach;
 		else:
+			@include DISCUZ_ROOT.'./template/MDUI/i18n/'.(getglobal('i18n') ? getglobal('i18n') : currentlang()).'/lang_template.php';
+			$mdui_lang = $lang; unset($lang);
 			$mdui_nav_items = [
-				['首页', 'portal.php?mod=index', 'home'],
-				['论坛', 'forum.php', 'forum'],
-				['导读', 'forum.php?mod=guide&view=newthread', 'menu_book'],
-				['圈子', 'group.php?mod=index', 'groups'],
-				['日志', 'home.php?mod=space&do=blog', 'article'],
-				['记录', 'home.php?mod=space&do=doing', 'edit_note'],
-				['勋章', 'home.php?mod=medal', 'workspace_premium'],
-				['任务', 'home.php?mod=task', 'task_alt'],
-				['道具', 'home.php?mod=magic', 'auto_awesome'],
+				[$mdui_lang['mdui_nav_home'], 'portal.php?mod=index', 'home'],
+				[$mdui_lang['mdui_nav_forum'], 'forum.php', 'forum'],
+				[$mdui_lang['mdui_nav_guide'], 'forum.php?mod=guide&view=newthread', 'menu_book'],
+				[$mdui_lang['mdui_nav_group'], 'group.php?mod=index', 'groups'],
+				[$mdui_lang['mdui_nav_blog'], 'home.php?mod=space&do=blog', 'article'],
+				[$mdui_lang['mdui_nav_doing'], 'home.php?mod=space&do=doing', 'edit_note'],
+				[$mdui_lang['mdui_nav_medal'], 'home.php?mod=medal', 'workspace_premium'],
+				[$mdui_lang['mdui_nav_task'], 'home.php?mod=task', 'task_alt'],
+				[$mdui_lang['mdui_nav_magic'], 'home.php?mod=magic', 'auto_awesome'],
 			];
 		endif;
 		}-->
@@ -363,7 +365,7 @@ document.addEventListener('mduipjax:load', window.mduiFixAvatars);
 		<mdui-divider style="margin:.5rem 0"></mdui-divider>
 		<!--{eval $mdui_i18n_paths = i18n('get'); $mdui_i18n_current = !empty($_G['i18n']) ? $_G['i18n'] : (!empty($_G['setting']['i18n_default']) ? $_G['setting']['i18n_default'] : 'SC_UTF8');}-->
 		<!--{if $mdui_i18n_paths}-->
-		<mdui-select class="mdui-i18n-select" label="语言" icon="translate" placement="auto" value="{$mdui_i18n_current}" required onchange="if(this.value) location.href='misc.php?mod=i18n&key='+encodeURIComponent(this.value)+'&referer='+encodeURIComponent(location.href)" style="margin:.25rem 0 .5rem">
+		<mdui-select class="mdui-i18n-select" label="{lang mdui_language}" icon="translate" placement="auto" value="{$mdui_i18n_current}" required onchange="if(this.value) location.href='misc.php?mod=i18n&key='+encodeURIComponent(this.value)+'&referer='+encodeURIComponent(location.href)" style="margin:.25rem 0 .5rem">
 			<!--{loop $mdui_i18n_paths $mdui_i18n_key $mdui_i18n_path}-->
 			<!--{if empty($_G['setting']['i18ns']) || in_array($mdui_i18n_key, (array)$_G['setting']['i18ns'])}-->
 			<mdui-menu-item value="{$mdui_i18n_key}"><!--{if $mdui_i18n_key == 'SC_UTF8'}-->简体中文<!--{elseif $mdui_i18n_key == 'TC_UTF8'}-->繁體中文<!--{elseif $mdui_i18n_key == 'EN'}-->English<!--{else}-->{$mdui_i18n_key}<!--{/if}--></mdui-menu-item>
@@ -371,7 +373,7 @@ document.addEventListener('mduipjax:load', window.mduiFixAvatars);
 			<!--{/loop}-->
 		</mdui-select>
 		<!--{/if}-->
-		<mdui-list-item data-mdui-theme-cycle icon="dark_mode" rounded><span class="mdui-theme-label">夜间</span></mdui-list-item>
+		<mdui-list-item data-mdui-theme-cycle icon="dark_mode" rounded><span class="mdui-theme-label">{lang mdui_theme_night}</span></mdui-list-item>
 		<!--{if $_G['uid']}-->
 			<mdui-list-item href="member.php?mod=logging&action=logout&formhash={FORMHASH}" icon="logout" rounded>{lang logout}</mdui-list-item>
 		<!--{/if}-->
@@ -380,7 +382,7 @@ document.addEventListener('mduipjax:load', window.mduiFixAvatars);
 	<!--{eval $mdui_flinks = C::t('common_friendlink')->fetch_all_by_displayorder(8);}-->
 	<!--{if $mdui_flinks}-->
 	<div style="padding:.5rem .75rem 1rem;font-size:.875rem;line-height:1.8">
-		<div style="opacity:.6;margin-bottom:.25rem">友情链接</div>
+		<div style="opacity:.6;margin-bottom:.25rem">{lang mdui_friend_links}</div>
 		<!--{loop $mdui_flinks $flink}-->
 		<!--{if !empty($flink['name']) && !empty($flink['url'])}-->
 		<div><a href="{$flink['url']}" target="_blank" rel="noopener">{$flink['name']}</a></div>

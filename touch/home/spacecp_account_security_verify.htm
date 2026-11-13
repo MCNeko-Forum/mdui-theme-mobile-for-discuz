@@ -44,16 +44,16 @@
 				var visible = document.getElementById('secmobile_input');
 				var hidden = document.querySelector('input[name=secmobile]');
 				var mobile = (visible && visible.value) ? visible.value : (hidden ? hidden.value : '');
-				if (!mobile || mobile.length < 5) { if (window.mduiTip) mduiTip('请先填写手机号'); return; }
+				if (!mobile || mobile.length < 5) { if (window.mduiTip) mduiTip('{lang mdui_enter_mobile_first}'); return; }
 				var ccval = cc ? cc.value : '{$_G['member']['secmobicc']}';
 				fetch('misc.php?mod=secmobseccode&action=send&svctype=1&secmobicc=' + encodeURIComponent(ccval) + '&secmobile=' + encodeURIComponent(mobile) + '&inajax=1', {credentials: 'same-origin'})
 					.then(function (r) { return r.text(); })
 					.then(function (t) {
 						var m = t.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
-						var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '发送失败';
-						if (window.mduiTip) mduiTip(text || '发送成功');
+						var text = m ? m[1].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, '').trim() : '{lang mdui_send_failed}';
+						if (window.mduiTip) mduiTip(text || '{lang mdui_send_success}');
 					})
-					.catch(function () { if (window.mduiTip) mduiTip('发送失败'); });
+					.catch(function () { if (window.mduiTip) mduiTip('{lang mdui_send_failed}'); });
 			});
 		})();
 		</script>

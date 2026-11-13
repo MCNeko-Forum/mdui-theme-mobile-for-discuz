@@ -279,7 +279,7 @@ function renderForumList(gid) {
 	expandedItem = null;
 	var items = forumItems('fs_forum_' + gid);
 	if (!items.length) {
-		wrap.innerHTML = '<div class="fs-empty">该分区下暂无可发帖的版块</div>';
+		wrap.innerHTML = '<div class="fs-empty">{lang mdui_no_postable_forums}</div>';
 		return;
 	}
 	for (var i = 0; i < items.length; i++) {

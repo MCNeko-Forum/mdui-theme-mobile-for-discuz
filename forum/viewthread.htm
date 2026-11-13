@@ -392,7 +392,7 @@
 				<mdui-button variant="text" icon="chat_bubble_outline" class="vt_form_dialog" data-title="{lang comments}" data-url="forum.php?mod=misc&action=comment&tid={$post['tid']}&pid={$post['pid']}&extra={$_GET['extra']}&page={$page}">{lang comments}</mdui-button>
 			<!--{/if}-->
 			<!--{if $_G['setting']['magicstatus'] && $post['invisible'] == 0}-->
-			<mdui-dropdown placement="top-start">
+			<mdui-dropdown placement="auto">
 				<mdui-button slot="trigger" variant="text" icon="auto_fix_high">{lang thread_magic}</mdui-button>
 				<mdui-menu>
 					<!--{if $post['first']}-->

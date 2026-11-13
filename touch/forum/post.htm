@@ -79,17 +79,18 @@
 	<!--{if $_GET['action'] == 'newthread' && ($_G['group']['allowpostpoll'] || $_G['group']['allowpostreward'] || $_G['group']['allowpostdebate'] || $_G['group']['allowpostactivity'] || $_G['group']['allowposttrade'] || $_G['setting']['threadplugins'] || $_G['forum']['threadsorts']['types'])}-->
 		<!-- 发帖类型切换：整页跳转换 special/sortid，后端据此渲染不同的附加表单。 -->
 		<!--{eval $pt_types = array();}-->
+		<!--{eval @include DISCUZ_ROOT.'./template/MDUI/i18n/'.(getglobal('i18n') ? getglobal('i18n') : currentlang()).'/lang_template.php'; $mdui_pt_lang = $lang; unset($lang);}-->
 		<!--{eval $pt_cur = 'normal';}-->
-		<!--{if empty($_G['forum']['threadsorts']['required']) && !$_G['forum']['allowspecialonly']}--><!--{eval $pt_types[] = array('normal', '发表帖子', '');}--><!--{/if}-->
+		<!--{if empty($_G['forum']['threadsorts']['required']) && !$_G['forum']['allowspecialonly']}--><!--{eval $pt_types[] = array('normal', $mdui_pt_lang['mdui_post_normal'], '');}--><!--{/if}-->
 		<!--{loop $_G['forum']['threadsorts']['types'] $tsortid $tsortname}-->
 			<!--{eval $pt_types[] = array('sort'.$tsortid, strip_tags($tsortname), '&sortid='.$tsortid);}-->
 			<!--{if $sortid == $tsortid}--><!--{eval $pt_cur = 'sort'.$tsortid;}--><!--{/if}-->
 		<!--{/loop}-->
-		<!--{if $_G['group']['allowpostpoll']}--><!--{eval $pt_types[] = array('s1', '发投票', '&special=1');}--><!--{/if}-->
-		<!--{if $_G['group']['allowpostreward']}--><!--{eval $pt_types[] = array('s3', '发悬赏', '&special=3');}--><!--{/if}-->
-		<!--{if $_G['group']['allowpostdebate']}--><!--{eval $pt_types[] = array('s5', '发辩论', '&special=5');}--><!--{/if}-->
-		<!--{if $_G['group']['allowpostactivity']}--><!--{eval $pt_types[] = array('s4', '发起活动', '&special=4');}--><!--{/if}-->
-		<!--{if $_G['group']['allowposttrade']}--><!--{eval $pt_types[] = array('s2', '出售商品', '&special=2');}--><!--{/if}-->
+		<!--{if $_G['group']['allowpostpoll']}--><!--{eval $pt_types[] = array('s1', $mdui_pt_lang['mdui_fab_poll'], '&special=1');}--><!--{/if}-->
+		<!--{if $_G['group']['allowpostreward']}--><!--{eval $pt_types[] = array('s3', $mdui_pt_lang['mdui_fab_reward'], '&special=3');}--><!--{/if}-->
+		<!--{if $_G['group']['allowpostdebate']}--><!--{eval $pt_types[] = array('s5', $mdui_pt_lang['mdui_fab_debate'], '&special=5');}--><!--{/if}-->
+		<!--{if $_G['group']['allowpostactivity']}--><!--{eval $pt_types[] = array('s4', $mdui_pt_lang['mdui_post_activity'], '&special=4');}--><!--{/if}-->
+		<!--{if $_G['group']['allowposttrade']}--><!--{eval $pt_types[] = array('s2', $mdui_pt_lang['mdui_post_trade'], '&special=2');}--><!--{/if}-->
 		<!--{loop $_G['forum']['threadplugin'] $tpid}-->
 			<!--{if array_key_exists($tpid, $_G['setting']['threadplugins']) && is_array($_G['group']['allowthreadplugin']) && in_array($tpid, $_G['group']['allowthreadplugin'])}-->
 				<!--{eval $pt_types[] = array('p'.$tpid, $_G['setting']['threadplugins'][$tpid]['name'], '&specialextra='.$tpid);}-->
@@ -289,7 +290,7 @@ window.postInsert = function (code) {
 		return left > 0 ? left : 0;
 	}
 	function floodTip(sec) {
-		mduiTip('抱歉，您两次发表间隔少于 ' + floodCtrl + ' 秒，请稍候再发表', true);
+		mduiTip('{lang mdui_flood_pre}' + floodCtrl + '{lang mdui_flood_post}', true);
 	}
 	function parsePostResp(t) {
 		try { return JSON.parse(t); } catch (e) {}
@@ -437,14 +438,14 @@ window.postInsert = function (code) {
 	var statTimer = null;
 	function tickStat() {
 		countdown = countdown > 0 ? countdown - 1 : 30;
-		if (countdown > 0) asStat && (asStat.textContent = countdown + ' 秒后自动保存');
+		if (countdown > 0) asStat && (asStat.textContent = countdown + '{lang mdui_autosave_countdown}');
 	}
 	setInterval(tickStat, 1000);
 	tickStat();
 	function savedTip() {
 		if (!asStat) return;
 		countdown = 30;
-		asStat.textContent = '已自动保存';
+		asStat.textContent = '{lang mdui_autosaved}';
 		clearTimeout(statTimer);
 		statTimer = setTimeout(tickStat, 3000);
 	}
@@ -486,7 +487,7 @@ window.postInsert = function (code) {
 		});
 		var n = document.getElementById('mdui_rstnotice');
 		n && (n.style.display = 'none');
-		!quiet && mduiTip('已恢复上次未提交的数据');
+		!quiet && mduiTip('{lang mdui_autosave_restored}');
 	}
 	// 恢复提示条：按钮用 document 级委托（mdui 组件内部节点点击更可靠），防止点击无效
 	var rst = document.getElementById('mdui_rstnotice');
@@ -499,7 +500,7 @@ window.postInsert = function (code) {
 		} else {
 			try { localStorage.removeItem(key); } catch (e2) {}
 			rst && (rst.style.display = 'none');
-			mduiTip('已清除自动保存的数据');
+			mduiTip('{lang mdui_autosave_cleared}');
 		}
 	});
 	<!--{if !empty($_GET['cedit']) && $_GET['cedit'] == 'yes'}-->

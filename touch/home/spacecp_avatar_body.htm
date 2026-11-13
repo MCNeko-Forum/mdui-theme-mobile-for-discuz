@@ -82,7 +82,7 @@
 <script type="text/javascript">
 	var data = "{echo implode(',', $uc_avatarflash);}".split(',');
 	function reloadbyres() {
-		if (window.mduiTip) window.mduiTip('头像已上传，正在刷新');
+		if (window.mduiTip) window.mduiTip('{lang mdui_avatar_uploaded}');
 		setTimeout(function () { location.reload(true); }, 1000);
 	}
 </script>
