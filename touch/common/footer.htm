@@ -249,6 +249,35 @@ window.mduiGet = function (url, done) {
 		location.href = url;
 	});
 };
+
+// [code] 代码块的「复制代码」按钮。文案从按钮里读取，复制完成后临时替换再还原
+window.mduiCopyCode = function (id, button) {
+	var box = document.getElementById(id);
+	if (!box) return;
+	var text = Array.prototype.map.call(box.querySelectorAll('li'), function (li) {
+		return li.textContent;
+	}).join('\n');
+	var label = button && button.querySelector('.mduipc-code-copy-label');
+	var original = label ? label.textContent : '';
+	var done = function () {
+		if (!label) return;
+		label.textContent = '{lang mdui_code_copied}';
+		setTimeout(function () { label.textContent = original; }, 1400);
+};
+	var fallback = function () {
+		var input = document.createElement('textarea');
+		input.value = text;
+		input.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+		document.body.appendChild(input);
+		input.select();
+		try { document.execCommand('copy'); done(); } finally { input.remove(); }
+};
+	if (navigator.clipboard && window.isSecureContext) {
+		navigator.clipboard.writeText(text).then(done).catch(fallback);
+	} else {
+		fallback();
+	}
+};
 </script>
 
 <script>
@@ -311,7 +340,7 @@ window.mduiGet = function (url, done) {
 })();
 </script>
 
-<div id="mdui_extlink" hidden style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.4)">
+<div id="mdui_extlink" hidden style="position:fixed;top:0;right:0;bottom:0;left:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.4)">
 	<div style="width:100%;max-width:20rem;padding:1.5rem;color:rgb(var(--mdui-color-on-surface));background:rgb(var(--mdui-color-surface-container-high));border-radius:1.75rem;animation:mdui-extlink-pop .2s ease">
 		<div style="font-size:1.375rem;line-height:2rem">即将离开本站</div>
 		<div style="margin-top:.5rem;color:rgb(var(--mdui-color-on-surface-variant))">即将前往以下链接，请确认是否继续访问。</div>

@@ -55,10 +55,10 @@
 			<mdui-tab value="heat" data-href="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=heat&orderby=heats$forumdisplayadd['heat']{if $_GET['archiveid']}&archiveid={$_GET['archiveid']}{/if}">{lang order_heats}</mdui-tab>
 			<mdui-tab value="digest" data-href="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=digest&digest=1$forumdisplayadd['digest']{if $_GET['archiveid']}&archiveid={$_GET['archiveid']}{/if}">{lang digest_posts}</mdui-tab>
 		</mdui-tabs>
-		<mdui-button-icon icon="filter_list" title="筛选和排序" onclick="document.getElementById('fd_filter').open = true"></mdui-button-icon>
+		<mdui-button-icon icon="filter_list" title="{lang mdui_filter_sort}" onclick="document.getElementById('fd_filter').open = true"></mdui-button-icon>
 		<!--{if $_G['forum']['picstyle']}-->
 			<!-- 图片/列表模式切换，后端靠 forumdefstyle cookie 记住选择 -->
-			<mdui-button-icon icon="{if empty($_G['cookie']['forumdefstyle'])}view_list{else}grid_view{/if}" title="切换显示模式" href="forum.php?mod=forumdisplay&fid=$_G['fid']&forumdefstyle={if empty($_G['cookie']['forumdefstyle'])}yes{else}no{/if}"></mdui-button-icon>
+			<mdui-button-icon icon="{if empty($_G['cookie']['forumdefstyle'])}view_list{else}grid_view{/if}" title="{lang mdui_switch_view}" href="forum.php?mod=forumdisplay&fid=$_G['fid']&forumdefstyle={if empty($_G['cookie']['forumdefstyle'])}yes{else}no{/if}"></mdui-button-icon>
 		<!--{/if}-->
 	</div>
 
@@ -73,30 +73,30 @@
 		if($showactivity) $fd_specials['activity'] = lang('forum/template', 'thread_activity');
 		if($showdebate) $fd_specials['debate'] = lang('forum/template', 'thread_debate');
 	}-->
-	<mdui-dialog id="fd_filter" close-on-esc close-on-overlay-click headline="筛选和排序">
+	<mdui-dialog id="fd_filter" close-on-esc close-on-overlay-click headline="{lang mdui_filter_sort}">
 		<div id="fd_filter_form" data-fid="$_G['fid']" data-archiveid="{if $_GET['archiveid']}{$_GET['archiveid']}{/if}">
 			<!--{if empty($_G['setting']['closeforumorderby'])}-->
-				<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">排序方式</div>
+				<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">{lang mdui_sort_by}</div>
 				<mdui-radio-group data-name="orderby" value="$fd_orderby" style="margin-bottom:1.25rem">
-					<mdui-radio value="lastpost">最后回复</mdui-radio>
-					<mdui-radio value="dateline">发帖时间</mdui-radio>
-					<mdui-radio value="replies">回复数</mdui-radio>
-					<mdui-radio value="views">浏览数</mdui-radio>
+					<mdui-radio value="lastpost">{lang mdui_order_lastpost}</mdui-radio>
+					<mdui-radio value="dateline">{lang mdui_order_dateline}</mdui-radio>
+					<mdui-radio value="replies">{lang mdui_order_replies}</mdui-radio>
+					<mdui-radio value="views">{lang mdui_order_views}</mdui-radio>
 					<mdui-radio value="heats">{lang order_heats}</mdui-radio>
 					<mdui-radio value="recommends">{lang order_recommends}</mdui-radio>
 				</mdui-radio-group>
 			<!--{/if}-->
 
-			<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">发表时间</div>
+			<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">{lang mdui_time_post}</div>
 			<mdui-radio-group data-name="dateline" value="$fd_dateline" style="margin-bottom:1.25rem">
 				<mdui-radio value="">{lang all}</mdui-radio>
-				<mdui-radio value="86400">最近一天</mdui-radio>
-				<mdui-radio value="604800">最近一周</mdui-radio>
-				<mdui-radio value="2592000">最近一月</mdui-radio>
+				<mdui-radio value="86400">{lang mdui_time_day}</mdui-radio>
+				<mdui-radio value="604800">{lang mdui_time_week}</mdui-radio>
+				<mdui-radio value="2592000">{lang mdui_time_month}</mdui-radio>
 			</mdui-radio-group>
 
 			<!--{if $_G['forum']['threadtypes'] && $_G['forum']['threadtypes']['types']}-->
-				<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">主题分类</div>
+				<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">{lang mdui_thread_class}</div>
 				<mdui-select data-name="typeid" variant="outlined" value="{$_GET['typeid']}" style="margin-bottom:1.25rem">
 					<mdui-menu-item value="">{lang all}</mdui-menu-item>
 					<!--{loop $_G['forum']['threadtypes']['types'] $id $name}--><mdui-menu-item value="$id">$name</mdui-menu-item><!--{/loop}-->
@@ -104,14 +104,14 @@
 			<!--{/if}-->
 
 			<!--{if $fd_specials}-->
-				<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">主题类型</div>
+				<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">{lang mdui_thread_type}</div>
 				<mdui-radio-group data-name="specialtype" value="{$_GET['specialtype']}" style="margin-bottom:1.25rem">
 					<mdui-radio value="">{lang all}</mdui-radio>
 					<!--{loop $fd_specials $value $name}--><mdui-radio value="$value">$name</mdui-radio><!--{/loop}-->
 				</mdui-radio-group>
 			<!--{/if}-->
 
-			<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">其它条件</div>
+			<div style="font-size:.875rem;opacity:.75;margin-bottom:.5rem">{lang mdui_other_filters}</div>
 			<div style="display:flex;flex-wrap:wrap;gap:.5rem 1rem">
 				<mdui-checkbox data-name="digest" value="1" <!--{if $_GET['digest']}-->checked<!--{/if}-->>{lang digest_posts}</mdui-checkbox>
 				<!--{if !empty($_G['setting']['recommendthread']['status'])}-->
@@ -125,7 +125,7 @@
 				<mdui-button variant="outlined" icon="local_fire_department" href="forum.php?mod=forumdisplay&fid=$_G['fid']&filter=hot" full-width>{lang hot_thread}</mdui-button>
 			<!--{/if}-->
 		</div>
-		<mdui-button slot="action" variant="text" onclick="fd_filter_reset()">重置</mdui-button>
+		<mdui-button slot="action" variant="text" onclick="fd_filter_reset()">{lang mdui_reset}</mdui-button>
 		<mdui-button slot="action" variant="text" onclick="document.getElementById('fd_filter').open = false">{lang cancel}</mdui-button>
 		<mdui-button slot="action" variant="text" onclick="fd_filter_submit()">{lang submit}</mdui-button>
 	</mdui-dialog>
@@ -279,7 +279,7 @@
 						<!--{if $thread['moved']}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
 						<!--{if $thread['displayorder'] > 0}-->
 						<mdui-card variant="filled" clickable href="forum.php?mod=viewthread&tid=$thread['tid']&{if $_GET['archiveid']}archiveid={$_GET['archiveid']}&{/if}extra=$extra" style="grid-column:1/-1;display:flex;align-items:center;gap:.375rem;padding:.75rem;min-width:0">
-							<span class="mdui-tbadge mdui-tbadge-top-{$thread['displayorder']}">置顶</span>
+							<span class="mdui-tbadge mdui-tbadge-top-{$thread['displayorder']}">{lang mdui_badge_top}</span>
 							<span class="mdui-tbadges"><!--{subtemplate forum/threadlist_badges}--></span>
 							<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500" $thread['highlight']>{$thread['subject']}</span>
 						</mdui-card>
@@ -309,7 +309,7 @@
 						<!--{if $thread['moved']}--><!--{eval $thread['tid'] = $thread['closed'];}--><!--{/if}-->
 						<!--{if $thread['displayorder'] > 0}-->
 						<mdui-card variant="filled" clickable href="forum.php?mod=viewthread&tid=$thread['tid']&extra=$extra" style="display:flex;align-items:center;gap:.375rem;margin-bottom:.5rem;padding:.75rem;min-width:0">
-							<span class="mdui-tbadge mdui-tbadge-top-{$thread['displayorder']}">置顶</span>
+							<span class="mdui-tbadge mdui-tbadge-top-{$thread['displayorder']}">{lang mdui_badge_top}</span>
 							<span class="mdui-tbadges"><!--{subtemplate forum/threadlist_badges}--></span>
 							<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500" $thread['highlight']>{$thread['subject']}</span>
 						</mdui-card>
@@ -347,13 +347,16 @@
 	<!--{eval
 		// 与 post.php 的权限判断一致：组权限 × 版块 allowpostspecial，只显示真正能发的
 		// 分类信息不单列入口：发帖页 post.htm 顶部有类型切换，可就地选分类
+		$mdui_lang = array();
+		@include DISCUZ_ROOT.'./template/MDUI/i18n/'.(getglobal('i18n') ? getglobal('i18n') : currentlang()).'/lang_template.php';
+		$mdui_lang = $lang; unset($lang);
 		$nt_items = array(
-			array(0, '#F37D7D', 'edit', '发帖子', 1),
-			array(1, '#FFB300', 'bar_chart', '发投票', $_G['group']['allowpostpoll']),
-			array(2, '#FF9800', 'storefront', '发商品', $_G['group']['allowposttrade']),
-			array(3, '#7E57C2', 'redeem', '发悬赏', $_G['group']['allowpostreward']),
-			array(4, '#4CAF50', 'event', '发活动', $_G['group']['allowpostactivity']),
-			array(5, '#2196F3', 'forum', '发辩论', $_G['group']['allowpostdebate']),
+			array(0, '#F37D7D', 'edit', $mdui_lang['mdui_fab_post'], 1),
+			array(1, '#FFB300', 'bar_chart', $mdui_lang['mdui_fab_poll'], $_G['group']['allowpostpoll']),
+			array(2, '#FF9800', 'storefront', $mdui_lang['mdui_fab_trade'], $_G['group']['allowposttrade']),
+			array(3, '#7E57C2', 'redeem', $mdui_lang['mdui_fab_reward'], $_G['group']['allowpostreward']),
+			array(4, '#4CAF50', 'event', $mdui_lang['mdui_fab_activity'], $_G['group']['allowpostactivity']),
+			array(5, '#2196F3', 'forum', $mdui_lang['mdui_fab_debate'], $_G['group']['allowpostdebate']),
 		);
 	}-->
 	<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem .5rem;padding:1.25rem 1rem 1rem">

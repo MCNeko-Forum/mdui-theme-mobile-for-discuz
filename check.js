@@ -244,7 +244,7 @@ const profileSrc = existsSync(join(root, 'touch/home/spacecp_profile.htm')) ? re
 check('资料校验失败锚点滚动到对应资料项', profileSrc.includes("scrollIntoView({ behavior: 'smooth', block: 'center' })") && profileSrc.includes("getElementById('tr_' + fieldid) || elem"));
 check('资料校验失败弹消息条', profileSrc.includes('mdui.snackbar({ message: msg })'));
 check('资料下拉面板强制向下弹出', profileSrc.includes("setAttribute('placement', 'bottom')"));
-check('style.css 缓存版本已升到 v=17', header.includes('style.css?{VERHASH}&v=17'));
+check('style.css 缓存版本已升到 v=20', header.includes('style.css?{VERHASH}&v=20'));
 
 // 15. pjax 无刷新切换：容器边界、脚本、排除清单与兜底逻辑必须齐全
 check('mdui_pjax.js 存在', existsSync(join(root, 'static/mdui_pjax.js')));

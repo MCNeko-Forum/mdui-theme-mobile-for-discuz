@@ -90,7 +90,7 @@
 			<!--{if $_G['forum_thread']['typeid'] && $_G['forum']['threadtypes']['types'][$_G['forum_thread']['typeid']]}--><span style="opacity:.7">[{$_G['forum']['threadtypes']['types'][$_G['forum_thread']['typeid']]}]</span><!--{/if}-->
 			<!--{if $threadsorts && $_G['forum_thread']['sortid']}--><span style="opacity:.7">[{$_G['forum']['threadsorts']['types'][$_G['forum_thread']['sortid']]}]</span><!--{/if}-->
 			{$_G['forum_thread']['subject']}
-			<!--{if $_G['forum_thread']['closed']}--><span style="display:inline-block;margin-left:.375rem;padding:.0625rem .375rem;border:1px solid #d32f2f;border-radius:.25rem;color:#d32f2f;font-size:.75rem;font-weight:500;vertical-align:middle;line-height:1.4">关闭</span><!--{/if}-->
+			<!--{if $_G['forum_thread']['closed']}--><span style="display:inline-block;margin-left:.375rem;padding:.0625rem .375rem;border:1px solid #d32f2f;border-radius:.25rem;color:#d32f2f;font-size:.75rem;font-weight:500;vertical-align:middle;line-height:1.4">{lang mdui_badge_closed}</span><!--{/if}-->
 			<!--{if $_G['forum_thread']['displayorder'] == -2}--><span style="opacity:.6">({lang moderating})</span>
 			<!--{elseif $_G['forum_thread']['displayorder'] == -3}--><span style="opacity:.6">({lang have_ignored})</span>
 			<!--{elseif $_G['forum_thread']['displayorder'] == -4}--><span style="opacity:.6">({lang draft})</span>
@@ -140,7 +140,7 @@
 				</div>
 				<div style="font-size:.8125rem;opacity:.6">{$post['dateline']}</div>
 			</div>
-			<mdui-chip elevated class="vt_floor_link" data-copy-url="forum.php?mod=redirect&amp;goto=findpost&amp;ptid={$_G['tid']}&amp;pid={$post['pid']}" title="点击复制本楼链接" style="--mdui-comp-chip-height:24px;cursor:pointer">
+			<mdui-chip elevated class="vt_floor_link" data-copy-url="forum.php?mod=redirect&amp;goto=findpost&amp;ptid={$_G['tid']}&amp;pid={$post['pid']}" title="{lang mdui_copy_link}" style="--mdui-comp-chip-height:24px;cursor:pointer">
 					<!--{if isset($post['isstick'])}--><mdui-icon name="push_pin" style="font-size:1rem;vertical-align:middle"></mdui-icon> {lang from} {$post['number']}{$postnostick}
 					<!--{elseif $post['number'] == -1}-->{lang recommend_post}
 					<!--{else}--><!--{if !empty($postno[$post['number']])}-->{$postno[$post['number']]}<!--{else}-->{$post['number']}{$postno[0]}<!--{/if}-->
@@ -155,7 +155,7 @@
 				<mdui-menu>
 					<!--{if $post['first'] && $_G['forum']['ismoderator']}-->
 						<!--{if $_G['group']['allowdelpost']}-->
-						<mdui-menu-item icon="delete" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=delete&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_deletethread}（管理）</mdui-menu-item>
+						<mdui-menu-item icon="delete" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=delete&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_deletethread}{lang mdui_admin_tag}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowbumpthread'] && !$_G['forum_thread']['is_archived']}-->
 						<mdui-menu-item icon="swap_vert" class="vt_modact" href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=bump&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_updown}</mdui-menu-item>
@@ -326,17 +326,17 @@
 		<!--{if $_GET['from'] != 'preview' && !empty($post['ratelog'])}-->
 		<div style="margin-top:.75rem;padding:.75rem;background:rgb(var(--mdui-color-surface-container-high));border-radius:.5rem">
 			<div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;margin-bottom:.5rem">
-				<strong>打赏</strong>
-				<span style="flex:1;opacity:.7">参与人数：{echo count($post['ratelog'])}</span>
+				<strong>{lang mdui_reward}</strong>
+				<span style="flex:1;opacity:.7">{lang mdui_participants}{echo count($post['ratelog'])}</span>
 				<!--{if !empty($postlist[$post['pid']]['totalrate']) && $_G['forum']['ismoderator']}-->
-				<mdui-button variant="text" href="forum.php?mod=misc&action=removerate&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">撤销打赏</mdui-button>
+				<mdui-button variant="text" href="forum.php?mod=misc&action=removerate&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">{lang mdui_undo_reward}</mdui-button>
 				<!--{/if}-->
 			</div>
 			<div style="display:flex;align-items:center;gap:.25rem;flex-wrap:wrap">
 				<!--{loop $post['ratelog'] $uid $ratelog}-->
 					<mdui-avatar src="<!--{avatar($uid, 'small', true)}-->" title="{$ratelog['username']}" style="width:2rem;height:2rem"></mdui-avatar>
 				<!--{/loop}-->
-				<mdui-button variant="text" href="forum.php?mod=misc&action=viewratings&tid={$_G['tid']}&pid={$post['pid']}">查看全部打赏</mdui-button>
+				<mdui-button variant="text" href="forum.php?mod=misc&action=viewratings&tid={$_G['tid']}&pid={$post['pid']}">{lang mdui_view_all_rewards}</mdui-button>
 			</div>
 			<!--{eval $vt_recent_rates = array_slice($post['ratelog'], 0, 5, true);}-->
 			<div style="margin-top:.5rem;font-size:.8125rem">
@@ -411,7 +411,7 @@
 			<!--{/if}-->
 
 			<!--{if $_G['group']['raterange'] && $post['authorid']}-->
-				<mdui-button variant="text" icon="volunteer_activism" class="vt_rate" data-url="forum.php?mod=misc&action=rate&tid={$_G['tid']}&pid={$post['pid']}" href="javascript:;">打赏</mdui-button>
+				<mdui-button variant="text" icon="volunteer_activism" class="vt_rate" data-url="forum.php?mod=misc&action=rate&tid={$_G['tid']}&pid={$post['pid']}" href="javascript:;">{lang mdui_reward}</mdui-button>
 			<!--{/if}-->
 			<!--{if (($_G['forum']['ismoderator'] && $_G['group']['alloweditpost'] && (!in_array($post['adminid'], array(1, 2, 3)) || $_G['adminid'] <= $post['adminid'])) || ($_G['forum']['alloweditpost'] && $_G['uid'] && ($post['authorid'] == $_G['uid'] && $_G['forum_thread']['closed'] == 0) && !(!$alloweditpost_status && $edittimelimit && TIMESTAMP - $post['dbdateline'] > $edittimelimit)))}-->
 				<mdui-button variant="text" icon="edit" href="forum.php?mod=post&action=edit&fid={$_G['fid']}&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">{lang edit}</mdui-button>
@@ -430,7 +430,7 @@
 	<!--{if $post['first']}-->
 		<a class="vt_forum-more" href="forum.php?mod=forumdisplay&fid={$_G['fid']}">
 			<mdui-icon name="forum"></mdui-icon>
-			<span>点击查看更多<strong><!--{eval echo strip_tags($_G['forum']['name']);}--></strong>内容</span>
+			<span>{lang mdui_show_more}<strong><!--{eval echo strip_tags($_G['forum']['name']);}--></strong>{lang mdui_show_more_content}</span>
 		</a>
 			<div style="display:flex;align-items:center;padding:.5rem 1rem;font-size:.875rem;opacity:.8;flex-wrap:wrap">
 				<span>{lang all}{lang reply}<!--{if $_G['forum_thread']['allreplies']}--> {$_G['forum_thread']['allreplies']}<!--{/if}--></span>
@@ -559,7 +559,7 @@
 		<mdui-button-icon selectable icon="star_border" selected-icon="star" {if $vt_faved}selected{/if} id="vt_fav_btn" title="{lang favorite}"></mdui-button-icon>
 	<!--{/if}-->
 	<!--{if $page <= 1 && $_G['setting']['commentnumber']}-->
-		<mdui-button-icon icon="chat_bubble_outline" title="查看评论" href="#comment_{$_G['forum_firstpid']}"></mdui-button-icon>
+		<mdui-button-icon icon="chat_bubble_outline" title="{lang mdui_view_comments}" href="#comment_{$_G['forum_firstpid']}"></mdui-button-icon>
 	<!--{/if}-->
 	<!--{if $vt_show_rec}-->
 		<!-- 点赞后端不允许取消（recommend_duplicate），已赞即固定实心并禁用；徽标显示点赞数 -->
@@ -1087,10 +1087,10 @@
 })();
 </script>
 
-<mdui-dialog id="vt_rate_dlg" close-on-overlay-click close-on-esc headline="打赏" style="--mdui-dialog-max-width:min(92vw, 34rem);--mdui-dialog-max-height:calc(100dvh - 2rem)">
+<mdui-dialog id="vt_rate_dlg" close-on-overlay-click close-on-esc headline="{lang mdui_reward}" style="--mdui-dialog-max-width:min(92vw, 34rem);--mdui-dialog-max-height:calc(100dvh - 2rem)">
 	<div id="vt_rate_body" style="box-sizing:border-box;width:100%;max-width:100%"></div>
-	<mdui-button id="vt_rate_cancel" slot="action" variant="text" style="display:none">取消</mdui-button>
-	<mdui-button id="vt_rate_submit" slot="action" variant="tonal" style="display:none">确认打赏</mdui-button>
+	<mdui-button id="vt_rate_cancel" slot="action" variant="text" style="display:none">{lang mdui_cancel}</mdui-button>
+	<mdui-button id="vt_rate_submit" slot="action" variant="tonal" style="display:none">{lang mdui_confirm_reward}</mdui-button>
 </mdui-dialog>
 <script>
 (function () {

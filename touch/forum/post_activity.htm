@@ -56,7 +56,7 @@
 			<img id="activityattach_image" src="{if $activityattach['attachment']}$activityattach['url']/{if $activityattach['thumb']}{eval echo getimgthumbname($activityattach['attachment']);}{else}$activityattach['attachment']{/if}{else}{STATICURL}image/common/nophoto.gif{/if}" style="width:64px;height:64px;object-fit:cover;border-radius:.5rem">
 			<mdui-button variant="tonal" icon="image" style="position:relative;overflow:hidden">
 				{lang post_topic_image}
-				<input type="file" id="activityimg" accept="image/*" style="position:absolute;inset:0;opacity:0;font-size:0">
+				<input type="file" id="activityimg" accept="image/*" style="position:absolute;top:0;right:0;bottom:0;left:0;opacity:0;font-size:0">
 			</mdui-button>
 		</div>
 		<input type="hidden" name="activityaid" id="activityaid"{if $activityattach['attachment']} value="$activityattach['aid']"{/if}>

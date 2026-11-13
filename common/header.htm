@@ -45,18 +45,25 @@
 	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/mdui.css?{VERHASH}" type="text/css" media="all">
 	<script type="module" src="{$_G['style']['styleimgdir']}/mdui.global.js?{VERHASH}"></script>
 	<!--{/if}-->
-	<!--{if $_G['style']['mdui_icons'] == 'unpkg' || $_G['style']['mdui_icons'] == 'cdn'}-->
-	<link rel="stylesheet" href="https://unpkg.com/material-icons@1.13.14/iconfont/material-icons.css" type="text/css" media="all">
-	<!--{elseif $_G['style']['mdui_icons'] == 'jsdelivr'}-->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/material-icons@1.13.14/iconfont/material-icons.css" type="text/css" media="all">
-	<!--{elseif $_G['style']['mdui_icons'] == 'jsdmirror_com'}-->
-	<link rel="stylesheet" href="https://cdn.jsdmirror.com/npm/material-icons@1.13.14/iconfont/material-icons.css" type="text/css" media="all">
-	<!--{elseif $_G['style']['mdui_icons'] == 'jsdmirror_cn'}-->
-	<link rel="stylesheet" href="https://cdn.jsdmirror.cn/npm/material-icons@1.13.14/iconfont/material-icons.css" type="text/css" media="all">
-	<!--{elseif substr($_G['style']['mdui_icons'], 0, 8) == 'https://'}-->
-	<link rel="stylesheet" href="$_G['style']['mdui_icons']" type="text/css" media="all">
-	<!--{else}-->
+	<!-- 图标字体：本地 CSS 提供类名定义并作为兜底；外部来源由加载器引用，失败自动重试（最多 10 次），成功后不再重复请求 -->
 	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/icons/material-icons.css?{VERHASH}" type="text/css" media="all">
+	<!--{eval $mdui_icon_css = '';}-->
+	<!--{if $_G['style']['mdui_icons'] == 'unpkg' || $_G['style']['mdui_icons'] == 'cdn'}-->
+		<!--{eval $mdui_icon_css = 'https://unpkg.com/material-icons@1.13.14/iconfont/material-icons.css';}-->
+	<!--{elseif $_G['style']['mdui_icons'] == 'jsdelivr'}-->
+		<!--{eval $mdui_icon_css = 'https://cdn.jsdelivr.net/npm/material-icons@1.13.14/iconfont/material-icons.css';}-->
+	<!--{elseif $_G['style']['mdui_icons'] == 'jsdmirror_com'}-->
+		<!--{eval $mdui_icon_css = 'https://cdn.jsdmirror.com/npm/material-icons@1.13.14/iconfont/material-icons.css';}-->
+	<!--{elseif $_G['style']['mdui_icons'] == 'jsdmirror_cn'}-->
+		<!--{eval $mdui_icon_css = 'https://cdn.jsdmirror.cn/npm/material-icons@1.13.14/iconfont/material-icons.css';}-->
+	<!--{elseif substr($_G['style']['mdui_icons'], 0, 8) == 'https://'}-->
+		<!--{eval $mdui_icon_css = $_G['style']['mdui_icons'];}-->
+	<!--{elseif $_G['style']['mdui_icons'] != 'local'}-->
+		<!--{eval $mdui_icon_css = 'https://fonts.googleapis.com/icon?family=Material+Icons&display=block';}-->
+	<!--{/if}-->
+	<!--{if $mdui_icon_css}-->
+	<!--{eval $mdui_icon_css_attr = htmlspecialchars($mdui_icon_css, ENT_QUOTES);}-->
+	<script src="{$_G['style']['styleimgdir']}/icons/icon-font-loader.js?{VERHASH}" data-css="$mdui_icon_css_attr"></script>
 	<!--{/if}-->
 	<link rel="stylesheet" href="{$_G['style']['styleimgdir']}/style.css?{VERHASH}" type="text/css" media="all">
 	<script src="{STATICURL}js/mobile/jquery.min.js?{VERHASH}"></script>

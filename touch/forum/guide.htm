@@ -25,6 +25,7 @@
 	.mdui-guide-thread-meta { display:flex; flex-wrap:wrap; gap:.25rem .75rem; margin-top:.5rem; color:rgb(var(--mdui-color-on-surface-variant)); font-size:.75rem; }
 	.mdui-guide-thread-images { display:grid; grid-template-columns:repeat(3, 1fr); gap:.25rem; padding:0 .875rem .875rem; }
 	.mdui-guide-thread-images img { display:block; width:100%; aspect-ratio:1.5; border-radius:.375rem; object-fit:cover; }
+	@supports not (aspect-ratio: 1) { .mdui-guide-thread-images img { height:20vw; } }
 	.mdui-guide-empty { padding:2rem 1rem; text-align:center; color:rgb(var(--mdui-color-on-surface-variant)); }
 	.mdui-guide-my-filter { display:grid; gap:.75rem; margin-bottom:1rem; }
 	.mdui-guide-my-filter select { box-sizing:border-box; width:100%; min-height:3.5rem; padding:0 .75rem; border:1px solid rgb(var(--mdui-color-outline)); border-radius:.25rem; background:transparent; color:inherit; }
@@ -48,13 +49,13 @@
 		<form method="get" action="forum.php" class="mdui-guide-my-filter">
 			<input type="hidden" name="mod" value="guide">
 			<input type="hidden" name="view" value="my">
-			<mdui-select name="type" label="类型" value="$viewtype">
+			<mdui-select name="type" label="{lang mdui_type_label}" value="$viewtype">
 				<mdui-menu-item value="thread">{lang mypost}</mdui-menu-item>
 				<mdui-menu-item value="reply">{lang myreply}</mdui-menu-item>
 				<mdui-menu-item value="postcomment">{lang comments}</mdui-menu-item>
 			</mdui-select>
 			<!--{if $viewtype != 'postcomment'}-->
-				<mdui-select name="filter" label="状态" value="$filter">
+				<mdui-select name="filter" label="{lang mdui_status_label}" value="$filter">
 					<mdui-menu-item value="">{lang all}</mdui-menu-item>
 					<!--{loop $filter_array $filter_key $filter_name}--><mdui-menu-item value="$filter_key">$filter_name</mdui-menu-item><!--{/loop}-->
 				</mdui-select>

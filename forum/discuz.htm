@@ -13,9 +13,9 @@
 			
 			<div class="mdui-card-content">
 				<div  class="mdui-typo">
-					{lang index_today}：$todayposts | {lang index_yesterday}：$postdata[0] | {lang index_posts}：$posts | 用户：$_G['cache']['userstats']['totalmembers'] 
+					{lang index_today}：$todayposts | {lang index_yesterday}：$postdata[0] | {lang index_posts}：$posts | {lang mdui_stat_users}$_G['cache']['userstats']['totalmembers'] 
 					<!--{if $_G['cache']['userstats']['newsetuser']}-->
-						| 最近注册的新用户：<a href="home.php?mod=space&username={echo rawurlencode($_G['cache']['userstats']['newsetuser'])}" target="_blank">$_G['cache']['userstats']['newsetuser']</a>
+						| {lang mdui_stat_newest}<a href="home.php?mod=space&username={echo rawurlencode($_G['cache']['userstats']['newsetuser'])}" target="_blank">$_G['cache']['userstats']['newsetuser']</a>
 					<!--{/if}-->
 				</div>
 			</div>
@@ -217,7 +217,7 @@
 													$forum[description]
 												</div> 
 												<div class="mdui-card-primary-subtitle">
-													共有 <!--{echo dnumber($forum[threads])}--> 个帖子
+													{lang mdui_threads_pre} <!--{echo dnumber($forum[threads])}--> {lang mdui_threads_post}
 												</div> 
 											</div> 
 										</div> 
@@ -269,7 +269,7 @@
 									<!-- 卡片的按钮 --> 
 									<div class="mdui-card-actions"> 
 										<a href="$forumurl"{if $forum[redirect]} target="_blank"{/if} class="mdui-btn mdui-text-color-theme-accent mdui-ripple mdui-float-right">
-											进入板块
+											{lang mdui_enter_forum}
 											<i class="mdui-icon material-icons">chevron_right</i>
 										</a> 
 									</div> 
@@ -317,7 +317,7 @@
 													$forum[description]
 												</div> 
 												<div class="mdui-card-primary-subtitle">
-													共有 <!--{echo dnumber($forum[threads])}--> 个帖子
+													{lang mdui_threads_pre} <!--{echo dnumber($forum[threads])}--> {lang mdui_threads_post}
 												</div> 
 											</div> 
 										</div> 
@@ -369,7 +369,7 @@
 									<!-- 卡片的按钮 --> 
 									<div class="mdui-card-actions"> 
 										<a href="$forumurl"{if $forum[redirect]} target="_blank"{/if} class="mdui-btn mdui-text-color-theme-accent mdui-ripple mdui-float-right">
-											进入板块
+											{lang mdui_enter_forum}
 											<i class="mdui-icon material-icons">chevron_right</i>
 										</a> 
 									</div> 
@@ -497,7 +497,7 @@
 						</div> 
 						<!--{if $_G[uid]}-->
 						<div class="mdui-panel-item-actions">
-							<a href="home.php?mod=space&do=friend&view=online&type=member" class="mdui-btn mdui-text-color-theme-accent mdui-ripple">显示全部</a>
+							<a href="home.php?mod=space&do=friend&view=online&type=member" class="mdui-btn mdui-text-color-theme-accent mdui-ripple">{lang mdui_view_all}</a>
 						</div>
 						<!--{/if}-->
 					</div> 
@@ -510,7 +510,7 @@
 				<div class="mdui-panel" mdui-panel>
 					<div class="mdui-panel-item mdui-panel-item-open">
 						<div class="mdui-panel-item-header">
-							<div class="mdui-panel-item-title mdui-text-color-theme">友情链接</div>
+							<div class="mdui-panel-item-title mdui-text-color-theme">{lang mdui_friend_links}</div>
 							<i class="mdui-panel-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
 						</div>
 						<div class="mdui-panel-item-body">

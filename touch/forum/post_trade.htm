@@ -61,7 +61,7 @@
 			<img id="tradeattach_image" src="{if $tradeattach['attachment']}$tradeattach['url']/{if $tradeattach['thumb']}{eval echo getimgthumbname($tradeattach['attachment']);}{else}$tradeattach['attachment']{/if}{else}{STATICURL}image/common/nophoto.gif{/if}" style="width:64px;height:64px;object-fit:cover;border-radius:.5rem">
 			<mdui-button variant="tonal" icon="image" style="position:relative;overflow:hidden">
 				{lang post_trade_picture}
-				<input type="file" id="tradeimg" accept="image/*" style="position:absolute;inset:0;opacity:0;font-size:0">
+				<input type="file" id="tradeimg" accept="image/*" style="position:absolute;top:0;right:0;bottom:0;left:0;opacity:0;font-size:0">
 			</mdui-button>
 		</div>
 		<input type="hidden" name="tradeaid" id="tradeaid"{if $tradeattach['attachment']} value="$tradeattach['aid']"{/if}>

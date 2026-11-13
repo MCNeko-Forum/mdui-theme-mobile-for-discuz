@@ -21,7 +21,6 @@
 .vt_imgs, .vt_atts { list-style:none; margin:.75rem 0 0; padding:0; }
 .vt_imgs li { list-style:none; margin:.5rem 0; padding:0; max-width:100%; }
 .vt_imgs li img { display:block; width:auto; max-width:100%; height:auto; max-height:720px; object-fit:contain; }
-.vt_imgs li:has(> img:only-child)::marker { content:none; }
 .vt_imgs li img { border-radius:.35rem; }
 .vt_atts > li { list-style:none; margin:.5rem 0; padding:0; }
 /* 附件下载卡片：图标+文件名一行，元信息一行，右侧下载按钮垂直居中，整卡涟漪 */
@@ -91,7 +90,7 @@
 			<!--{if $threadsorts && $_G['forum_thread']['sortid']}--><span style="opacity:.7">[{$_G['forum']['threadsorts']['types'][$_G['forum_thread']['sortid']]}]</span><!--{/if}-->
 			{$_G['forum_thread']['subject']}
 			<!--{if $hiddenreplies}--><span class="mdui-tbadge mdui-tbadge-hidden">{lang hiddenreplies}</span><!--{/if}-->
-			<!--{if $_G['forum_thread']['closed'] > 1}--><span class="mdui-tbadge mdui-tbadge-moved">{lang thread_moved}</span><!--{elseif $_G['forum_thread']['closed']}--><span class="mdui-tbadge mdui-tbadge-lock">关闭</span><!--{/if}-->
+			<!--{if $_G['forum_thread']['closed'] > 1}--><span class="mdui-tbadge mdui-tbadge-moved">{lang thread_moved}</span><!--{elseif $_G['forum_thread']['closed']}--><span class="mdui-tbadge mdui-tbadge-lock">{lang mdui_badge_closed}</span><!--{/if}-->
 			<!--{if $_G['forum_thread']['displayorder'] == -2}--><span class="mdui-tbadge mdui-tbadge-ban">{lang moderating}</span>
 			<!--{elseif $_G['forum_thread']['displayorder'] == -3}--><span class="mdui-tbadge mdui-tbadge-ban">{lang have_ignored}</span>
 			<!--{elseif $_G['forum_thread']['displayorder'] == -4}--><span class="mdui-tbadge mdui-tbadge-ban">{lang draft}</span>
@@ -146,7 +145,7 @@
 				<div style="font-weight:500"><a href="home.php?mod=space&uid={$mdui_newpost['authorid']}" style="color:inherit;text-decoration:none">{$mdui_newpost['author']}</a></div>
 				<div style="font-size:.8125rem;opacity:.6">{$mdui_newpost['dateline_fmt']}</div>
 			</div>
-			<mdui-chip elevated class="vt_floor_link" data-copy-url="forum.php?mod=redirect&amp;goto=findpost&amp;ptid={$_G['tid']}&amp;pid={$mdui_newpid}" title="点击复制本楼链接" style="--mdui-comp-chip-height:24px;cursor:pointer">{$mdui_newpost['position']}{$postno[0]}</mdui-chip>
+			<mdui-chip elevated class="vt_floor_link" data-copy-url="forum.php?mod=redirect&amp;goto=findpost&amp;ptid={$_G['tid']}&amp;pid={$mdui_newpid}" title="{lang mdui_copy_link}" style="--mdui-comp-chip-height:24px;cursor:pointer">{$mdui_newpost['position']}{$postno[0]}</mdui-chip>
 		</div>
 		<!--{if $mdui_newpost['subject']}--><div style="font-weight:500;margin-bottom:.5rem">{$mdui_newpost['subject']}</div><!--{/if}-->
 		<div class="pct" style="overflow-wrap:break-word">{$mdui_newpost['message_fmt']}</div>
@@ -185,7 +184,7 @@
 				</div>
 				<div style="font-size:.8125rem;opacity:.6">{$post['dateline']}</div>
 			</div>
-			<mdui-chip elevated class="vt_floor_link" data-copy-url="forum.php?mod=redirect&amp;goto=findpost&amp;ptid={$_G['tid']}&amp;pid={$post['pid']}" title="点击复制本楼链接" style="--mdui-comp-chip-height:24px;cursor:pointer">
+			<mdui-chip elevated class="vt_floor_link" data-copy-url="forum.php?mod=redirect&amp;goto=findpost&amp;ptid={$_G['tid']}&amp;pid={$post['pid']}" title="{lang mdui_copy_link}" style="--mdui-comp-chip-height:24px;cursor:pointer">
 					<!--{if isset($post['isstick'])}--><mdui-icon name="push_pin" style="font-size:1rem;vertical-align:middle"></mdui-icon> {lang from} {$post['number']}{$postnostick}
 					<!--{elseif $post['number'] == -1}-->{lang recommend_post}
 					<!--{else}--><!--{if !empty($postno[$post['number']])}-->{$postno[$post['number']]}<!--{else}-->{$post['number']}{$postno[0]}<!--{/if}-->
@@ -205,7 +204,7 @@
 					<!--{/if}-->
 					<!--{if $post['first'] && $_G['forum']['ismoderator']}-->
 						<!--{if $_G['group']['allowdelpost']}-->
-						<mdui-menu-item icon="delete" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=delete&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_deletethread}（管理）</mdui-menu-item>
+						<mdui-menu-item icon="delete" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=delete&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_deletethread}{lang mdui_admin_tag}</mdui-menu-item>
 						<!--{/if}-->
 						<!--{if $_G['group']['allowbumpthread'] && !$_G['forum_thread']['is_archived']}-->
 						<mdui-menu-item icon="swap_vert" class="vt_modact" data-href="forum.php?mod=topicadmin&action=moderate&fid={$_G['fid']}&moderate[]={$_G['tid']}&operation=bump&optgroup=3&from={$_G['tid']}&mobile=2">{lang modmenu_updown}</mdui-menu-item>
@@ -382,15 +381,15 @@
 		<div style="margin-top:.75rem;padding:.75rem;background:rgb(var(--mdui-color-surface-container-high));border-radius:.5rem">
 			<div style="display:flex;flex-direction:column;align-items:center;gap:.375rem">
 				<!--{if $_G['group']['raterange'] && $post['authorid']}-->
-				<mdui-button variant="filled" class="vt_rate mdui-reward-btn" data-url="forum.php?mod=misc&action=rate&tid={$_G['tid']}&pid={$post['pid']}">赏</mdui-button>
+				<mdui-button variant="filled" class="vt_rate mdui-reward-btn" data-url="forum.php?mod=misc&action=rate&tid={$_G['tid']}&pid={$post['pid']}">{lang mdui_reward_short}</mdui-button>
 				<!--{else}-->
-				<mdui-button variant="filled" disabled class="mdui-reward-btn">赏</mdui-button>
+				<mdui-button variant="filled" disabled class="mdui-reward-btn">{lang mdui_reward_short}</mdui-button>
 				<!--{/if}-->
-				<span style="font-size:.8125rem;opacity:.7">参与人数：{echo count($post['ratelog'])}</span>
+				<span style="font-size:.8125rem;opacity:.7">{lang mdui_participants}{echo count($post['ratelog'])}</span>
 			</div>
 			<div style="display:flex;justify-content:flex-end;align-items:center;gap:.25rem;margin-top:.25rem">
 				<!--{if !empty($postlist[$post['pid']]['totalrate']) && $_G['forum']['ismoderator']}-->
-				<mdui-button variant="text" href="forum.php?mod=misc&action=removerate&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">撤销打赏</mdui-button>
+				<mdui-button variant="text" href="forum.php?mod=misc&action=removerate&tid={$_G['tid']}&pid={$post['pid']}&page={$page}">{lang mdui_undo_reward}</mdui-button>
 				<!--{/if}-->
 				<mdui-button variant="text" href="forum.php?mod=misc&action=viewratings&tid={$_G['tid']}&pid={$post['pid']}">{lang rate_view}</mdui-button>
 			</div>
@@ -475,7 +474,7 @@
 			<!--{/if}-->
 
 			<!--{if $_G['group']['raterange'] && $post['authorid']}-->
-				<mdui-button variant="text" icon="volunteer_activism" class="vt_rate" data-url="forum.php?mod=misc&action=rate&tid={$_G['tid']}&pid={$post['pid']}" href="javascript:;">打赏</mdui-button>
+				<mdui-button variant="text" icon="volunteer_activism" class="vt_rate" data-url="forum.php?mod=misc&action=rate&tid={$_G['tid']}&pid={$post['pid']}" href="javascript:;">{lang mdui_reward}</mdui-button>
 			<!--{/if}-->
 			<!--{if !$vt_canedit && $_G['uid'] && $post['authorid'] == $_G['uid'] && $_G['setting']['postappend']}-->
 				<mdui-button variant="text" icon="add_comment" href="forum.php?mod=misc&action=postappend&tid={$post['tid']}&pid={$post['pid']}&extra={$_GET['extra']}&page={$page}">{lang postappend}</mdui-button>
@@ -492,7 +491,7 @@
 	<!--{if $post['first']}-->
 		<a class="vt_forum-more" href="forum.php?mod=forumdisplay&fid={$_G['fid']}">
 			<mdui-icon name="forum"></mdui-icon>
-			<span>点击查看更多<strong><!--{eval echo strip_tags($_G['forum']['name']);}--></strong>内容</span>
+			<span>{lang mdui_show_more}<strong><!--{eval echo strip_tags($_G['forum']['name']);}--></strong>{lang mdui_show_more_content}</span>
 		</a>
 			<div style="display:flex;align-items:center;padding:.5rem 1rem;font-size:.875rem;opacity:.8;flex-wrap:wrap">
 				<span>{lang all}{lang reply}<!--{if $_G['forum_thread']['allreplies']}--> {$_G['forum_thread']['allreplies']}<!--{/if}--></span>
@@ -626,7 +625,7 @@
 		<mdui-button-icon selectable icon="star_border" selected-icon="star" {if $vt_faved}selected{/if} id="vt_fav_btn" title="{lang favorite}"></mdui-button-icon>
 	<!--{/if}-->
 	<!--{if $page <= 1 && $_G['setting']['commentnumber']}-->
-		<mdui-button-icon icon="chat_bubble_outline" title="查看评论" href="#comment_{$_G['forum_firstpid']}"></mdui-button-icon>
+		<mdui-button-icon icon="chat_bubble_outline" title="{lang mdui_view_comments}" href="#comment_{$_G['forum_firstpid']}"></mdui-button-icon>
 	<!--{/if}-->
 	<!--{if $vt_show_rec}-->
 		<!-- 点赞后端不允许取消（recommend_duplicate），已赞即固定实心并禁用；徽标显示点赞数 -->
@@ -920,7 +919,7 @@
 <!--{/if}-->
 
 <!--{if $_G['uid']}-->
-<mdui-dialog id="vt_magic_dlg" close-on-overlay-click close-on-esc style="--mdui-dialog-max-width:min(92vw, 34rem);--mdui-dialog-max-height:calc(100dvh - 2rem);contain:layout">
+<mdui-dialog id="vt_magic_dlg" close-on-overlay-click close-on-esc style="--mdui-dialog-max-width:min(92vw, 34rem);--mdui-dialog-max-height:calc(100vh - 2rem);--mdui-dialog-max-height:calc(100dvh - 2rem);contain:layout">
 	<div id="vt_magic_body" style="box-sizing:border-box;width:100%;max-width:100%"></div>
 </mdui-dialog>
 <script>
@@ -1189,10 +1188,10 @@
 })();
 </script>
 
-<mdui-dialog id="vt_rate_dlg" close-on-overlay-click close-on-esc headline="打赏" style="--mdui-dialog-max-width:min(92vw, 34rem);--mdui-dialog-max-height:calc(100dvh - 2rem)">
+<mdui-dialog id="vt_rate_dlg" close-on-overlay-click close-on-esc headline="{lang mdui_reward}" style="--mdui-dialog-max-width:min(92vw, 34rem);--mdui-dialog-max-height:calc(100vh - 2rem);--mdui-dialog-max-height:calc(100dvh - 2rem)">
 	<div id="vt_rate_body" style="box-sizing:border-box;width:100%;max-width:100%"></div>
-	<mdui-button id="vt_rate_cancel" slot="action" variant="text" style="display:none">取消</mdui-button>
-	<mdui-button id="vt_rate_submit" slot="action" variant="tonal" style="display:none">确认打赏</mdui-button>
+	<mdui-button id="vt_rate_cancel" slot="action" variant="text" style="display:none">{lang mdui_cancel}</mdui-button>
+	<mdui-button id="vt_rate_submit" slot="action" variant="tonal" style="display:none">{lang mdui_confirm_reward}</mdui-button>
 </mdui-dialog>
 <script>
 (function () {
@@ -1333,8 +1332,9 @@ document.addEventListener('click', function (e) {
 	var dlg = document.getElementById('vt_fav_dlg');
 	var desc = document.getElementById('vt_fav_desc');
 	var faved = {if $vt_faved}true{else}false{/if};
-	var favid = '{if $vt_faved}{$vt_faved['favid']}{/if}';
 	var uid = {if $_G['uid']}{$_G['uid']}{else}0{/if};
+	// 成功后 showmessage 的 data 里带 favid；失败（如收藏不存在）data 为空
+	function favOk(j) { return !!(j && j.data && j.data.favid !== undefined); }
 	btn.addEventListener('click', function () {
 		if (!uid) {
 			location.href = 'member.php?mod=logging&action=login';
@@ -1343,11 +1343,14 @@ document.addEventListener('click', function (e) {
 		// selectable 会在点击时自行切换 selected，请求发出前先还原，等结果确定再置位
 		btn.selected = faved;
 		if (faved) {
-			// 取消收藏
+			// 取消收藏：用 type+id 定位，页面内新收藏时也无需 favid
 			mduiPost(
-				'home.php?mod=spacecp&ac=favorite&op=delete&favid=' + favid + '&type=thread',
+				'home.php?mod=spacecp&ac=favorite&op=delete&type=thread&id={$_G['tid']}',
 				{deletesubmit: 'true'},
-				function () { faved = false; btn.selected = false; }
+				function (j) {
+					if (favOk(j)) { faved = false; btn.selected = false; }
+					else { btn.selected = true; }
+				}
 			);
 			return;
 		}
@@ -1364,7 +1367,10 @@ document.addEventListener('click', function (e) {
 		mduiPost(
 			'home.php?mod=spacecp&ac=favorite&type=thread&id={$_G['tid']}',
 			{favoritesubmit: 'true', description: desc.value},
-			function () { faved = true; btn.selected = true; }
+			function (j) {
+				if (favOk(j)) { faved = true; btn.selected = true; }
+				else { btn.selected = false; }
+			}
 		);
 	});
 })();
@@ -1667,7 +1673,7 @@ html.vt-viewer-lock, html.vt-viewer-lock body { overflow:hidden; }
 		viewer = document.createElement('div');
 		viewer.className = 'vt-viewer';
 		viewer.setAttribute('aria-hidden', 'true');
-		viewer.style.cssText = 'display:none;position:fixed;inset:0;z-index:20000;align-items:center;justify-content:center;background:rgba(0,0,0,.55);opacity:1;transition:opacity .25s ease';
+		viewer.style.cssText = 'display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:20000;align-items:center;justify-content:center;background:rgba(0,0,0,.55);opacity:1;transition:opacity .25s ease';
 
 		btnClose = document.createElement('button');
 		btnClose.type = 'button';

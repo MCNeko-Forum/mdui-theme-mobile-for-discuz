@@ -16,7 +16,7 @@
 			<!-- 删除按钮缩进图片内部左上角；type=button 防止误触表单提交 -->
 			<mdui-button-icon type="button" icon="cancel" class="mdui-img-del" style="position:absolute;top:3px;left:3px"></mdui-button-icon>
 			<!-- 点击图片插入正文的提示，叠在图片内部下方 -->
-			<div class="mdui-post-ins-tip">点击插入图片</div>
+			<div class="mdui-post-ins-tip">{lang mdui_ins_image_tip}</div>
 			<input type="hidden" name="attachnew[{$temp['aid']}][description]" value="">
 			<input type="hidden" name="attachnew[{$temp['aid']}][readperm]" value="">
 			<input type="hidden" name="attachnew[{$temp['aid']}][price]" value="">
@@ -50,7 +50,7 @@
 					{lang upload_attach}
 					<input type="file" id="attfiledata" multiple style="position:absolute;inset:0;opacity:0;font-size:0">
 				</mdui-button>
-				<span style="font-size:.75rem;opacity:.6">大小限制 {$maxattachsize_mb}</span>
+				<span style="font-size:.75rem;opacity:.6">{lang mdui_size_limit} {$maxattachsize_mb}</span>
 			</div>
 			<!-- 已上传附件：可填说明、权限、售价 -->
 			<div id="attlist">
@@ -104,26 +104,26 @@
 			<!--{if $isfirstpost && $_G['group']['allowhidecode']}--><mdui-tab value="ins_hide">{lang e_hide}</mdui-tab><!--{/if}-->
 
 			<mdui-tab-panel slot="panel" value="ins_url" style="padding:.75rem">
-				<mdui-text-field id="ins_url_1" variant="outlined" type="url" label="链接地址"></mdui-text-field>
-				<mdui-text-field id="ins_url_2" variant="outlined" label="显示文字（可留空）" style="margin-top:.5rem"></mdui-text-field>
+				<mdui-text-field id="ins_url_1" variant="outlined" type="url" label="{lang mdui_link_url}"></mdui-text-field>
+				<mdui-text-field id="ins_url_2" variant="outlined" label="{lang mdui_link_text}" style="margin-top:.5rem"></mdui-text-field>
 				<mdui-button full-width onclick="mduiInsert('url')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
 			</mdui-tab-panel>
 			<!--{if $_G['forum']['allowimgcode']}-->
 				<mdui-tab-panel slot="panel" value="ins_img" style="padding:.75rem">
-					<mdui-text-field id="ins_img_1" variant="outlined" type="url" label="图片地址"></mdui-text-field>
+					<mdui-text-field id="ins_img_1" variant="outlined" type="url" label="{lang mdui_img_url}"></mdui-text-field>
 					<mdui-button full-width onclick="mduiInsert('img')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
 				</mdui-tab-panel>
 			<!--{/if}-->
 			<!--{if $_G['group']['allowmediacode']}-->
 				<mdui-tab-panel slot="panel" value="ins_audio" style="padding:.75rem">
-					<mdui-text-field id="ins_audio_1" variant="outlined" type="url" label="音乐地址"></mdui-text-field>
+					<mdui-text-field id="ins_audio_1" variant="outlined" type="url" label="{lang mdui_audio_url}"></mdui-text-field>
 					<mdui-button full-width onclick="mduiInsert('audio')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
 				</mdui-tab-panel>
 				<mdui-tab-panel slot="panel" value="ins_media" style="padding:.75rem">
-					<mdui-text-field id="ins_media_1" variant="outlined" type="url" label="视频地址"></mdui-text-field>
+					<mdui-text-field id="ins_media_1" variant="outlined" type="url" label="{lang mdui_video_url}"></mdui-text-field>
 					<div style="display:flex;gap:.5rem;margin-top:.5rem">
-						<mdui-text-field id="ins_media_2" variant="outlined" type="number" label="宽" value="500"></mdui-text-field>
-						<mdui-text-field id="ins_media_3" variant="outlined" type="number" label="高" value="375"></mdui-text-field>
+						<mdui-text-field id="ins_media_2" variant="outlined" type="number" label="{lang mdui_width}" value="500"></mdui-text-field>
+						<mdui-text-field id="ins_media_3" variant="outlined" type="number" label="{lang mdui_height}" value="375"></mdui-text-field>
 					</div>
 					<mdui-button full-width onclick="mduiInsert('media')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
 				</mdui-tab-panel>
@@ -138,16 +138,16 @@
 			</mdui-tab-panel>
 			<!--{if $isfirstpost}-->
 				<mdui-tab-panel slot="panel" value="ins_free" style="padding:.75rem">
-					<mdui-text-field id="ins_free_1" variant="outlined" rows="3" label="{lang e_free}" helper="出售主题时，这部分内容对所有人免费可见"></mdui-text-field>
+					<mdui-text-field id="ins_free_1" variant="outlined" rows="3" label="{lang e_free}" helper="{lang mdui_free_helper}"></mdui-text-field>
 					<mdui-button full-width onclick="mduiInsert('free')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
 				</mdui-tab-panel>
 			<!--{/if}-->
 			<!--{if $isfirstpost && $_G['group']['allowhidecode']}-->
 				<mdui-tab-panel slot="panel" value="ins_hide" style="padding:.75rem">
 					<mdui-text-field id="ins_hide_1" variant="outlined" rows="3" label="{lang e_hide}"></mdui-text-field>
-					<mdui-checkbox id="ins_hide_4" style="margin-top:.5rem">仅积分高于下列数值时可见</mdui-checkbox>
-					<mdui-text-field id="ins_hide_2" variant="outlined" type="number" label="积分下限" style="margin-top:.5rem"></mdui-text-field>
-					<mdui-text-field id="ins_hide_3" variant="outlined" type="number" label="有效天数（可留空）" style="margin-top:.5rem"></mdui-text-field>
+					<mdui-checkbox id="ins_hide_4" style="margin-top:.5rem">{lang mdui_credit_visible}</mdui-checkbox>
+					<mdui-text-field id="ins_hide_2" variant="outlined" type="number" label="{lang mdui_credit_min}" style="margin-top:.5rem"></mdui-text-field>
+					<mdui-text-field id="ins_hide_3" variant="outlined" type="number" label="{lang mdui_valid_days}" style="margin-top:.5rem"></mdui-text-field>
 					<mdui-button full-width onclick="mduiInsert('hide')" style="margin-top:.75rem">{lang forum_post_insert}</mdui-button>
 				</mdui-tab-panel>
 			<!--{/if}-->
@@ -156,7 +156,7 @@
 <!--{/if}-->
 
 	<!-- 附加：基本属性 + 文本特性，对齐 bygsjw_sj 的「附加」页 -->
-	<mdui-tab value="fun_extra">附加</mdui-tab>
+	<mdui-tab value="fun_extra">{lang mdui_tab_extra}</mdui-tab>
 	<mdui-tab-panel slot="panel" value="fun_extra" style="padding:.75rem">
 		<div style="font-size:.8125rem;opacity:.6">{lang basic_attr}</div>
 				<!--{if $_G['group']['allowanonymous'] || ($_GET['action'] == 'edit' && $orig['anonymous'])}-->
@@ -216,7 +216,7 @@
 
 	<!--{if $_GET['action'] == 'newthread' || $_GET['action'] == 'edit' && $isfirstpost}-->
 		<!--{if $_G['group']['allowsetreadperm']}-->
-			<mdui-tab value="fun_perm">权限</mdui-tab>
+			<mdui-tab value="fun_perm">{lang mdui_tab_perm}</mdui-tab>
 			<mdui-tab-panel slot="panel" value="fun_perm" style="padding:.75rem">
 				<mdui-select name="readperm" variant="outlined" label="{lang readperm}" value="{$thread['readperm']}">
 					<mdui-menu-item value="">{lang unlimited}</mdui-menu-item>
@@ -237,7 +237,7 @@
 				<!--{/if}-->
 				<!--{eval $userextcredit = getuserprofile('extcredits'.$extcreditstype);}-->
 				<!--{if ($_GET['action'] == 'newthread' && $userextcredit > 0) || ($_GET['action'] == 'edit' && $isorigauthor && $isfirstpost)}-->
-					<mdui-tab value="fun_credit">奖励</mdui-tab>
+					<mdui-tab value="fun_credit">{lang mdui_tab_credit}</mdui-tab>
 					<mdui-tab-panel slot="panel" value="fun_credit" style="padding:.75rem">
 							<mdui-text-field id="replycredit_times" name="replycredit_times" type="number" variant="outlined" label="{lang replycredit_reward}" suffix="{lang replycredit_time}" value="{if !empty($replycredit_rule['lasttimes'])}{$replycredit_rule['lasttimes']}{else}1{/if}"></mdui-text-field>
 							<mdui-text-field id="replycredit_extcredits" name="replycredit_extcredits" type="number" variant="outlined" label="{lang replycredit_once}" suffix="{$_G['setting']['extcredits'][$extcreditstype]['unit']}{$_G['setting']['extcredits'][$extcreditstype]['title']}" helper="{lang replycredit_empty}" value="{if !empty($replycredit_rule['extcredits']) && $thread['replycredit'] > 0}{$replycredit_rule['extcredits']}{else}0{/if}" style="margin-top:.5rem"></mdui-text-field>
@@ -288,7 +288,7 @@
 			<!--{/if}-->
 
 			<!--{if ($_GET['action'] == 'newthread' && $_G['group']['allowpostrushreply'] && $special != 2) || ($_GET['action'] == 'edit' && getstatus($thread['status'], 3))}-->
-				<mdui-tab value="fun_rush">抢楼</mdui-tab>
+				<mdui-tab value="fun_rush">{lang mdui_tab_rush}</mdui-tab>
 				<mdui-tab-panel slot="panel" value="fun_rush" style="padding:.75rem" id="rushreply_box">
 						<mdui-checkbox name="rushreply" id="rushreply" value="1" <!--{if $_GET['action'] == 'edit' && getstatus($thread['status'], 3)}-->disabled checked<!--{/if}-->>{lang rushreply_change}</mdui-checkbox>
 						<mdui-text-field name="rushreplyfrom" type="datetime-local" variant="outlined" label="{lang thread_rushreply_start}" value="<!--{echo str_replace(' ', 'T', $postinfo['rush']['starttimefrom']);}-->" style="margin-top:.5rem"></mdui-text-field>
@@ -308,7 +308,7 @@
 			<!--{/if}-->
 
 			<!--{if $_G['group']['maxprice'] && !$special}-->
-				<mdui-tab value="fun_price">售价</mdui-tab>
+				<mdui-tab value="fun_price">{lang mdui_tab_price}</mdui-tab>
 				<mdui-tab-panel slot="panel" value="fun_price" style="padding:.75rem">
 					<mdui-text-field name="price" type="number" variant="outlined" label="{lang price}" suffix="{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['unit']}{$_G['setting']['extcredits'][$_G['setting']['creditstransextra'][1]]['title']}" helper="{lang post_price_comment}" value="$thread['pricedisplay']"></mdui-text-field>
 					<!--{if $_G['setting']['maxincperthread']}--><div style="font-size:.75rem;opacity:.6;margin-top:.5rem">{lang post_price_income_comment}</div><!--{/if}-->
@@ -317,14 +317,14 @@
 			<!--{/if}-->
 
 			<!--{if $_G['group']['allowposttag']}-->
-				<mdui-tab value="fun_tag">标签</mdui-tab>
+				<mdui-tab value="fun_tag">{lang mdui_tab_tag}</mdui-tab>
 				<mdui-tab-panel slot="panel" value="fun_tag" style="padding:.75rem">
 					<mdui-text-field id="tags" name="tags" variant="outlined" label="{lang post_tag}" helper="{lang posttag_comment}" value="{$postinfo['tag'] or ''}"></mdui-text-field>
 				</mdui-tab-panel>
 			<!--{/if}-->
 
 			<!--{if $_G['group']['allowsetpublishdate'] && ($_GET['action'] == 'newthread' || ($_GET['action'] == 'edit' && $isfirstpost && $thread['displayorder'] == -4))}-->
-				<mdui-tab value="fun_pubdate">定时</mdui-tab>
+				<mdui-tab value="fun_pubdate">{lang mdui_tab_pubdate}</mdui-tab>
 				<mdui-tab-panel slot="panel" value="fun_pubdate" style="padding:.75rem" id="cronpublish_box">
 					<mdui-checkbox name="cronpublish" id="cronpublish" value="true" <!--{if $cronpublish}-->checked<!--{/if}-->>{lang post_timer}</mdui-checkbox>
 					<mdui-text-field name="cronpublishdate" type="datetime-local" variant="outlined" label="{lang post_timer}" value="<!--{echo str_replace(' ', 'T', $cronpublishdate);}-->" style="margin-top:.5rem"></mdui-text-field>
@@ -675,7 +675,7 @@ window.mduiInsert = function (type) {
 							'<img src="' + POSTUPLOAD.attachurl + d[5] + '" onclick="postInsert(\'[attachimg]' + aid + '[/attachimg]\')" style="width:72px;height:72px;object-fit:cover;border-radius:.5rem">' +
 							'<button type="button" class="mdui-img-del" style="position:absolute;top:3px;left:3px;padding:0;border:0;cursor:pointer;color:#fff">' +
 							'<mdui-icon name="cancel"></mdui-icon></button>' +
-							'<div class="mdui-post-ins-tip">点击插入图片</div>';
+							'<div class="mdui-post-ins-tip">{lang mdui_ins_image_tip}</div>';
 						var imglist = getID('imglist');
 						if (imglist) {
 							imglist.appendChild(node);
@@ -770,7 +770,7 @@ window.mduiInsert = function (type) {
 				'<img src="' + escHtml(item.getAttribute('data-url')) + '" onclick="postInsert(\'[attachimg]' + aid + '[/attachimg]\')" style="width:72px;height:72px;object-fit:cover;border-radius:.5rem">' +
 				'<button type="button" class="mdui-img-del" style="position:absolute;top:3px;left:3px;padding:0;border:0;cursor:pointer;color:#fff">' +
 				'<mdui-icon name="cancel"></mdui-icon></button>' +
-				'<div class="mdui-post-ins-tip">点击插入图片</div>';
+				'<div class="mdui-post-ins-tip">{lang mdui_ins_image_tip}</div>';
 			getID('imglist').appendChild(node);
 		} else {
 			var name = item.getAttribute('data-name');

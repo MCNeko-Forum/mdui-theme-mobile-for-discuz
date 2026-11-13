@@ -58,7 +58,7 @@ var forum_optionlist = <!--{if $forum_optionlist}-->'$forum_optionlist'<!--{else
 					<!--{if !($option['unchangeable'] && $option['value'])}-->
 					<mdui-button variant="tonal" icon="image" style="position:relative;overflow:hidden;flex-shrink:0">
 						<!--{if $option['value']}-->{lang update}<!--{else}-->{lang upload}<!--{/if}-->
-						<input type="file" id="sortattach_image_{$option['identifier']}" name="sortattach_image_{$option['identifier']}" class="sortattach_button" accept="image/*" style="position:absolute;inset:0;opacity:0;font-size:0">
+						<input type="file" id="sortattach_image_{$option['identifier']}" name="sortattach_image_{$option['identifier']}" class="sortattach_button" accept="image/*" style="position:absolute;top:0;right:0;bottom:0;left:0;opacity:0;font-size:0">
 					</mdui-button>
 					<!--{/if}-->
 				</div>

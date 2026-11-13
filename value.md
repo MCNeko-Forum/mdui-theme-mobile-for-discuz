@@ -16,6 +16,7 @@
 | ---------------------- | -------------------- | --------- |
 | `mdui_color`           | MDUI 主题主色            | `#2B7ACD` |
 | `mdui_resource`        | MDUI 核心 CSS、JS 的加载来源 | `local`   |
+| `mdui_icons`           | Material Icons 图标字体来源 | `google`  |
 | `mdui_my_diy`          | “我的”页底部的静态导航模块       | 空         |
 | `mdui_nav`             | 侧边栏自定义导航（每行一条）       | 内置九项（见下文）  |
 | `mdui_addcss`          | 全站额外 CSS             | 空         |
@@ -112,7 +113,8 @@
 
 | 变量值             | 资源来源                              |
 | --------------- | --------------------------------- |
-| `local`         | 主题本地 `template/MDUI/static/icons`，默认且推荐 |
+| `google`        | Google Fonts 的 Material Icons，默认且推荐 |
+| `local`         | 主题本地 `template/MDUI/static/icons` |
 | `cdn`           | 兼容旧值，等同于 `unpkg`                  |
 | `unpkg`         | `https://unpkg.com`               |
 | `jsdelivr`      | `https://cdn.jsdelivr.net`        |
@@ -120,9 +122,24 @@
 | `jsdmirror_cn`  | `https://cdn.jsdmirror.cn`        |
 | `https://…`     | 任意以 `https://` 开头的自定义 CSS 链接      |
 
-所有外部 CDN 均固定使用 `material-icons@1.13.14` 的 `iconfont/material-icons.css`，包含与本地一致的 5 种图标字体（Filled、Outlined、Round、Sharp、Two Tone）。
+未填写（空值）时按 `google` 处理。所有外部 CDN 均固定使用 `material-icons@1.13.14` 的 `iconfont/material-icons.css`，包含与本地一致的 5 种图标字体（Filled、Outlined、Round、Sharp、Two Tone）。
+
+本地 `icons/material-icons.css` 始终加载：它负责 `.material-icons` 等类名定义，并在外部字体不可用时兜底，因此图标不会因外网不可达而消失。
+
+外部来源由 `static/icons/icon-font-loader.js` 加载：
+
+- 加载失败会自动重试，最多请求 10 次，第 10 次失败后停止并回退本地字体。
+- 加载成功后写入 `localStorage`，后续页面加载直接引用，不再重复探测与重试。
+- `google` 来源会额外探测 `fonts.gstatic.com` 的字体文件：CSS 能加载但字体文件不可用同样视为失败。
 
 ### 示例
+
+使用 Google Fonts（默认）：
+
+```text
+变量名：mdui_icons
+变量值：google
+```
 
 使用本地图标字体：
 
@@ -148,9 +165,9 @@
 ### 注意
 
 - 变量名不区分大小写，Discuz 会统一转换，但建议按本文的小写写法填写。
-- 自定义链接必须是 `https://` 开头且以 `.css` 结尾的完整地址，否则回退为本地。
+- 自定义链接必须以 `https://` 开头；除 `local` 与内置 CDN 值外，其余值都按 `google` 处理。
 - 该变量只影响图标字体，不影响 MDUI 核心资源，请与 `mdui_resource` 分开配置。
-- 生产环境优先使用 `local`；选择 CDN 前应确认客户端网络可访问对应域名。
+- 默认使用 Google Fonts，需要客户端能访问 `fonts.googleapis.com` 与 `fonts.gstatic.com`；不可达时会在重试 10 次后回退本地字体，图标不会消失。
 
 ***
 

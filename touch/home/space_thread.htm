@@ -75,7 +75,7 @@
 			<a href="forum.php?mod=viewthread&tid=$thread['tid']&extra=$extra" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:.625rem">
 				<!--{loop $threadlist_data[$thread['tid']]['attachment'] $value}-->
 				<!--{eval $attach_on++; if($attach_on > 9) break;}-->
-				<div style="position:relative"><img src="$value" style="display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px"><!--{if count($threadlist_data[$thread['tid']]['attachment']) > 9 && $attach_on == 9}--><span style="position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5);color:#fff">{echo count($threadlist_data[$thread['tid']]['attachment'])}{lang mobtu}</span><!--{/if}--></div>
+				<div style="position:relative"><img src="$value" class="mdui-ar-square" style="display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px"><!--{if count($threadlist_data[$thread['tid']]['attachment']) > 9 && $attach_on == 9}--><span style="position:absolute;top:0;right:0;bottom:0;left:0;display:grid;place-items:center;background:rgba(0,0,0,.5);color:#fff">{echo count($threadlist_data[$thread['tid']]['attachment'])}{lang mobtu}</span><!--{/if}--></div>
 				<!--{/loop}-->
 			</a>
 			<!--{/if}-->

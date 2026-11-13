@@ -12,6 +12,7 @@
 			<item id="imgdir"><![CDATA[template/MDUI/static]]></item>
 			<item id="mdui_color"><![CDATA[#2B7ACD]]></item>
 			<item id="mdui_resource"><![CDATA[local]]></item>
+			<item id="mdui_icons"><![CDATA[google]]></item>
 			<item id="mdui_my_diy"><![CDATA[]]></item>
 			<item id="mdui_nav"><![CDATA[首页|portal.php?mod=index|home
 论坛|forum.php|forum

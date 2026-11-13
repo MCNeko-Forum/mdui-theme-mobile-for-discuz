@@ -18,7 +18,7 @@
 - Discuz! X5.0
 - PHP 8.0 或更高版本
 - UTF-8 字符集
-- 支持现代 JavaScript 的移动端浏览器
+- 支持 Chrome 85+、Firefox 79+、Safari 14.1+ 的移动端浏览器
 
 ## 安装
 
@@ -38,6 +38,8 @@
 - `jsdmirror_cn`：使用 jsdmirror.cn
 
 生产环境建议优先使用本地资源，或根据站点网络环境选择稳定的 CDN。
+
+需要兼容 Chrome 85 / Firefox 79 / Safari 14.1 时请使用 `local` 模式：CDN 上的 MDUI 是官方原始构建，不包含本主题针对旧版本浏览器的兼容补丁。
 
 ## 开发
 

@@ -48,13 +48,13 @@
 		<form method="get" action="forum.php" class="mdui-guide-my-filter">
 			<input type="hidden" name="mod" value="guide">
 			<input type="hidden" name="view" value="my">
-			<mdui-select name="type" label="类型" value="$viewtype">
+			<mdui-select name="type" label="{lang mdui_type_label}" value="$viewtype">
 				<mdui-menu-item value="thread">{lang mypost}</mdui-menu-item>
 				<mdui-menu-item value="reply">{lang myreply}</mdui-menu-item>
 				<mdui-menu-item value="postcomment">{lang comments}</mdui-menu-item>
 			</mdui-select>
 			<!--{if $viewtype != 'postcomment'}-->
-				<mdui-select name="filter" label="状态" value="$filter">
+				<mdui-select name="filter" label="{lang mdui_status_label}" value="$filter">
 					<mdui-menu-item value="">{lang all}</mdui-menu-item>
 					<!--{loop $filter_array $filter_key $filter_name}--><mdui-menu-item value="$filter_key">$filter_name</mdui-menu-item><!--{/loop}-->
 				</mdui-select>
